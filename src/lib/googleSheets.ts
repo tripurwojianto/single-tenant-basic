@@ -1,0 +1,436 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { MosqueState, MosqueInfo, CashTransaction, InventoryItem, Announcement, Category, FeedbackData } from '../types';
+
+// Standard spreadsheet name
+export const SPREADSHEET_NAME = 'KasMasjid Database';
+
+/**
+ * Helper to handle fetch responses and error logging
+ */
+async function handleResponse(res: Response, errorMessage: string) {
+  if (!res.ok) {
+    const text = await res.text();
+    console.error(`Error details: ${text}`);
+    throw new Error(`${errorMessage} (Status: ${res.status}): ${text}`);
+  }
+  return res.json();
+}
+
+/**
+ * Searches the user's Google Drive for the spreadsheet
+ */
+export async function findSpreadsheet(accessToken: string): Promise<string | null> {
+  const q = `name = '${SPREADSHEET_NAME}' and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false`;
+  const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`;
+  
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const data = await handleResponse(res, 'Gagal mencari spreadsheet di Google Drive');
+  
+  if (data.files && data.files.length > 0) {
+    return data.files[0].id;
+  }
+  return null;
+}
+
+/**
+ * Creates a new spreadsheet with the required worksheets
+ */
+export async function createSpreadsheet(accessToken: string): Promise<string> {
+  const url = 'https://sheets.googleapis.com/v4/spreadsheets';
+  const body = {
+    properties: {
+      title: SPREADSHEET_NAME,
+    },
+    sheets: [
+      { properties: { title: 'MosqueInfo' } },
+      { properties: { title: 'CashIncome' } },
+      { properties: { title: 'CashExpense' } },
+      { properties: { title: 'Inventory' } },
+      { properties: { title: 'Announcements' } },
+      { properties: { title: 'Categories' } },
+      { properties: { title: 'Feedback' } },
+    ],
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await handleResponse(res, 'Gagal membuat spreadsheet baru');
+  const spreadsheetId = data.spreadsheetId;
+
+  // Now, populate initial headers and default data
+  await populateInitialData(accessToken, spreadsheetId);
+
+  return spreadsheetId;
+}
+
+/**
+ * Populates initial headers and demo data
+ */
+async function populateInitialData(accessToken: string, spreadsheetId: string) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`;
+  
+  const initialData = {
+    valueInputOption: 'USER_ENTERED',
+    data: [
+      {
+        range: 'MosqueInfo!A1:I2',
+        values: [
+          ['namaMasjid', 'logo', 'tagline', 'alamat', 'kota', 'whatsApp', 'email', 'website', 'profilSingkat'],
+          ['Masjid Raya Baiturrahman', 'https://images.unsplash.com/photo-1590076214537-1e3c7c97b744?q=80&w=150', 'Menuju Masyarakat Madani Berlandaskan Al-Qur\'an', 'Jl. Masjid Raya No. 1', 'Aceh', '081234567890', 'info@baiturrahman.or.id', 'www.baiturrahman.or.id', 'Masjid pusat kegiatan ibadah dan kajian keislaman utama di wilayah kota Banda Aceh.']
+        ]
+      },
+      {
+        range: 'CashIncome!A1:F4',
+        values: [
+          ['id', 'tanggal', 'kategori', 'deskripsi', 'nominal', 'bukti'],
+          ['inc-1', '2026-07-10', 'Infaq Jumat', 'Infaq tromol jumat pekan ke-2', '5250000', ''],
+          ['inc-2', '2026-07-12', 'Zakat', 'Zakat maal dari H. Ahmad', '2500000', ''],
+          ['inc-3', '2026-07-15', 'Waqaf', 'Sumbangan pembangunan menara', '15000000', '']
+        ]
+      },
+      {
+        range: 'CashExpense!A1:F3',
+        values: [
+          ['id', 'tanggal', 'kategori', 'deskripsi', 'nominal', 'bukti'],
+          ['exp-1', '2026-07-11', 'Operasional', 'Bisyarah Imam dan Muadzin jumat', '800000', ''],
+          ['exp-2', '2026-07-14', 'Kebersihan', 'Pembelian sabun, pewangi karpet, sapu', '350000', '']
+        ]
+      },
+      {
+        range: 'Inventory!A1:G4',
+        values: [
+          ['id', 'namaBarang', 'kategori', 'lokasi', 'jumlah', 'kondisi', 'keterangan'],
+          ['inv-1', 'Air Conditioner (AC) Daikin 2 PK', 'Elektronik', 'Ruang Utama', '4', 'Baik', 'Suhu dingin prima'],
+          ['inv-2', 'Karpet Sajadah Turki', 'Perlengkapan', 'Ruang Utama', '12', 'Baik', 'Panjang 6 meter per roll'],
+          ['inv-3', 'Sound System Mixer Yamaha 12 Ch', 'Audio', 'Ruang Operator', '1', 'Baik', 'Setting audio masjid']
+        ]
+      },
+      {
+        range: 'Announcements!A1:E4',
+        values: [
+          ['id', 'judul', 'isi', 'tanggal', 'status'],
+          ['ann-1', 'Kajian Ahad Subuh', 'Mari hadiri kajian tafsir Al-Qur\'an Ahad subuh bersama Dr. KH. Muhammad Sholeh, MA. Disediakan sarapan gratis.', '2026-07-18', 'Publish'],
+          ['ann-2', 'Penerimaan Hebat Zakat', 'Layanan UPZ Baiturrahman melayani pembayaran zakat mal, zakat fitrah, dan fidyah setiap hari pukul 08:00 - 21:00.', '2026-07-16', 'Publish'],
+          ['ann-3', 'Rencana Renovasi Tempat Wudhu', 'Akan dilakukan renovasi tempat wudhu bagian timur mulai pekan depan untuk kenyamanan jamaah sekalian.', '2026-07-15', 'Draft']
+        ]
+      },
+      {
+        range: 'Categories!A1:B9',
+        values: [
+          ['tipe', 'nama'],
+          ['Income', 'Infaq Jumat'],
+          ['Income', 'Zakat'],
+          ['Income', 'Waqaf'],
+          ['Income', 'Sponsorship'],
+          ['Expense', 'Operasional'],
+          ['Expense', 'Kebersihan'],
+          ['Expense', 'Pemeliharaan'],
+          ['Expense', 'Kegiatan Sosial']
+        ]
+      },
+      {
+        range: 'Feedback!A1:E2',
+        values: [
+          ['saran', 'bug', 'pertanyaan', 'permintaanFitur', 'tanggal'],
+          ['Sangat bermanfaat untuk masjid kami.', '', 'Apakah ada tutorial video?', 'Ekspor ke format PDF laporan keuangan bulanan', '2026-07-18']
+        ]
+      }
+    ]
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(initialData),
+  });
+  await handleResponse(res, 'Gagal menginisialisasi data spreadsheet');
+}
+
+/**
+ * Fetches all sheets data from the spreadsheet and parses into MosqueState
+ */
+export async function fetchSpreadsheetData(accessToken: string, spreadsheetId: string): Promise<MosqueState> {
+  const ranges = [
+    'MosqueInfo!A1:I2',
+    'CashIncome!A1:F1000',
+    'CashExpense!A1:F1000',
+    'Inventory!A1:G1000',
+    'Announcements!A1:E1000',
+    'Categories!A1:B200',
+    'Feedback!A1:E1000'
+  ];
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?ranges=${ranges.map(encodeURIComponent).join('&ranges=')}`;
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const data = await handleResponse(res, 'Gagal mengambil data dari Google Sheets');
+  const valueRanges = data.valueRanges || [];
+
+  // Parse MosqueInfo (1 row expected)
+  const infoValues = valueRanges[0]?.values || [];
+  let info: MosqueInfo = {
+    namaMasjid: '', logo: '', tagline: '', alamat: '', kota: '', whatsApp: '', email: '', website: '', profilSingkat: ''
+  };
+  if (infoValues.length > 1) {
+    const row = infoValues[1];
+    info = {
+      namaMasjid: row[0] || '',
+      logo: row[1] || '',
+      tagline: row[2] || '',
+      alamat: row[3] || '',
+      kota: row[4] || '',
+      whatsApp: row[5] || '',
+      email: row[6] || '',
+      website: row[7] || '',
+      profilSingkat: row[8] || '',
+    };
+  }
+
+  // Helper to parse arrays from rows with headers
+  function parseRows<T>(values: any[][], mapper: (row: any[]) => T): T[] {
+    if (!values || values.length <= 1) return [];
+    return values.slice(1).map(mapper);
+  }
+
+  // Parse CashIncome
+  const incomes = parseRows<CashTransaction>(valueRanges[1]?.values || [], (row) => ({
+    id: row[0] || '',
+    tanggal: row[1] || '',
+    kategori: row[2] || '',
+    deskripsi: row[3] || '',
+    nominal: Number(row[4] || 0),
+    bukti: row[5] || '',
+  }));
+
+  // Parse CashExpense
+  const expenses = parseRows<CashTransaction>(valueRanges[2]?.values || [], (row) => ({
+    id: row[0] || '',
+    tanggal: row[1] || '',
+    kategori: row[2] || '',
+    deskripsi: row[3] || '',
+    nominal: Number(row[4] || 0),
+    bukti: row[5] || '',
+  }));
+
+  // Parse Inventory
+  const inventory = parseRows<InventoryItem>(valueRanges[3]?.values || [], (row) => ({
+    id: row[0] || '',
+    namaBarang: row[1] || '',
+    kategori: row[2] || '',
+    lokasi: row[3] || '',
+    jumlah: Number(row[4] || 1),
+    kondisi: (row[5] as any) || 'Baik',
+    keterangan: row[6] || '',
+  }));
+
+  // Parse Announcements
+  const announcements = parseRows<Announcement>(valueRanges[4]?.values || [], (row) => ({
+    id: row[0] || '',
+    judul: row[1] || '',
+    isi: row[2] || '',
+    tanggal: row[3] || '',
+    status: (row[4] as any) || 'Draft',
+  }));
+
+  // Parse Categories
+  const categories = parseRows<Category>(valueRanges[5]?.values || [], (row) => ({
+    tipe: (row[0] as any) || 'Income',
+    nama: row[1] || '',
+  }));
+
+  // Parse Feedback
+  const feedbacks = parseRows<FeedbackData>(valueRanges[6]?.values || [], (row) => ({
+    saran: row[0] || '',
+    bug: row[1] || '',
+    pertanyaan: row[2] || '',
+    permintaanFitur: row[3] || '',
+    tanggal: row[4] || '',
+  }));
+
+  return { info, incomes, expenses, inventory, announcements, categories, feedbacks };
+}
+
+/**
+ * Saves MosqueInfo back to spreadsheet
+ */
+export async function saveMosqueInfo(accessToken: string, spreadsheetId: string, info: MosqueInfo) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/MosqueInfo!A2:I2?valueInputOption=USER_ENTERED`;
+  const body = {
+    range: 'MosqueInfo!A2:I2',
+    values: [[
+      info.namaMasjid,
+      info.logo,
+      info.tagline,
+      info.alamat,
+      info.kota,
+      info.whatsApp,
+      info.email,
+      info.website,
+      info.profilSingkat
+    ]]
+  };
+
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  await handleResponse(res, 'Gagal menyimpan profil masjid');
+}
+
+/**
+ * Overwrites a sheet from index A2 with rows of data
+ */
+async function overwriteSheet(
+  accessToken: string,
+  spreadsheetId: string,
+  sheetName: string,
+  rangeLetter: string,
+  rows: any[][]
+) {
+  // First clear the existing data range
+  const clearUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A2:${rangeLetter}1000:clear`;
+  const clearRes = await fetch(clearUrl, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  await handleResponse(clearRes, `Gagal membersihkan data sheet ${sheetName}`);
+
+  if (rows.length === 0) return;
+
+  // Then update with new rows
+  const updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A2?valueInputOption=USER_ENTERED`;
+  const body = {
+    range: `${sheetName}!A2`,
+    values: rows,
+  };
+
+  const res = await fetch(updateUrl, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  await handleResponse(res, `Gagal memperbarui data sheet ${sheetName}`);
+}
+
+/**
+ * Updates the entire CashIncome list
+ */
+export async function saveIncomes(accessToken: string, spreadsheetId: string, incomes: CashTransaction[]) {
+  const rows = incomes.map((item) => [
+    item.id || `inc-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    item.tanggal,
+    item.kategori,
+    item.deskripsi,
+    item.nominal.toString(),
+    item.bukti || '',
+  ]);
+  await overwriteSheet(accessToken, spreadsheetId, 'CashIncome', 'F', rows);
+}
+
+/**
+ * Updates the entire CashExpense list
+ */
+export async function saveExpenses(accessToken: string, spreadsheetId: string, expenses: CashTransaction[]) {
+  const rows = expenses.map((item) => [
+    item.id || `exp-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    item.tanggal,
+    item.kategori,
+    item.deskripsi,
+    item.nominal.toString(),
+    item.bukti || '',
+  ]);
+  await overwriteSheet(accessToken, spreadsheetId, 'CashExpense', 'F', rows);
+}
+
+/**
+ * Updates the entire Inventory list
+ */
+export async function saveInventory(accessToken: string, spreadsheetId: string, inventory: InventoryItem[]) {
+  const rows = inventory.map((item) => [
+    item.id || `inv-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    item.namaBarang,
+    item.kategori,
+    item.lokasi,
+    item.jumlah.toString(),
+    item.kondisi,
+    item.keterangan || '',
+  ]);
+  await overwriteSheet(accessToken, spreadsheetId, 'Inventory', 'G', rows);
+}
+
+/**
+ * Updates the entire Announcements list
+ */
+export async function saveAnnouncements(accessToken: string, spreadsheetId: string, announcements: Announcement[]) {
+  const rows = announcements.map((item) => [
+    item.id || `ann-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    item.judul,
+    item.isi,
+    item.tanggal,
+    item.status,
+  ]);
+  await overwriteSheet(accessToken, spreadsheetId, 'Announcements', 'E', rows);
+}
+
+/**
+ * Updates the entire Categories list
+ */
+export async function saveCategories(accessToken: string, spreadsheetId: string, categories: Category[]) {
+  const rows = categories.map((item) => [
+    item.tipe,
+    item.nama,
+  ]);
+  await overwriteSheet(accessToken, spreadsheetId, 'Categories', 'B', rows);
+}
+
+/**
+ * Sends feedback to the developer (stored in the spreadsheet for verification)
+ */
+export async function saveFeedback(accessToken: string, spreadsheetId: string, feedback: FeedbackData) {
+  // Append a single row
+  const appendUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Feedback!A2:append?valueInputOption=USER_ENTERED`;
+  const body = {
+    range: 'Feedback!A2',
+    majorDimension: 'ROWS',
+    values: [[
+      feedback.saran,
+      feedback.bug,
+      feedback.pertanyaan,
+      feedback.permintaanFitur,
+      feedback.tanggal
+    ]]
+  };
+
+  const res = await fetch(appendUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  await handleResponse(res, 'Gagal mengirimkan masukan');
+}
