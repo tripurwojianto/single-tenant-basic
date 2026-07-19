@@ -11,9 +11,10 @@ interface LandingPageProps {
   onStartDemo: () => void;
   onLogin: () => void;
   isLoggingIn: boolean;
+  onNavigate: (path: string) => void;
 }
 
-export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: LandingPageProps) {
+export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavigate }: LandingPageProps) {
   // Mockup tab state
   const [activeMockupTab, setActiveMockupTab] = useState<'dashboard' | 'cash' | 'inventory' | 'announcements'>('dashboard');
   
@@ -25,6 +26,44 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackEmail, setFeedbackEmail] = useState('');
   const [feedbackSuccess, setFeedbackSuccess] = useState(false);
+
+  // Blog article detail state
+  const [activeArticle, setActiveArticle] = useState<any | null>(null);
+
+  // Pre-configured rich content for articles
+  const articleDetails: { [key: string]: { title: string; category: string; readTime: string; content: string[] } } = {
+    'Panduan Deploy KasMasjid di Vercel': {
+      title: 'Panduan Deploy KasMasjid di Vercel',
+      category: 'Tutorial',
+      readTime: '5 Menit Membaca',
+      content: [
+        'Langkah 1: Hubungkan akun GitHub Anda ke platform Vercel. Platform ini menawarkan hosting awan gratis yang sangat cocok untuk aplikasi satu halaman seperti KasMasjid Basic.',
+        'Langkah 2: Import repository proyek KasMasjid Anda. Vercel akan otomatis mengenali struktur aplikasi React + Vite dan menyiapkan pengaturan build yang sesuai.',
+        'Langkah 3: Atur variabel lingkungan (Environment Variables) jika diperlukan. Pastikan semua variabel diletakkan dengan aman agar kunci rahasia tidak bocor ke browser.',
+        'Langkah 4: Klik tombol "Deploy". Proses kompilasi akan berlangsung kurang dari satu menit, dan masjid Anda akan segera memiliki domain web gratis (misalnya masjid-alikhlas.vercel.app) yang bisa langsung diakses oleh jamaah.'
+      ]
+    },
+    'Cara Implementasi Mandiri': {
+      title: 'Cara Implementasi Mandiri di Sekretariat Masjid',
+      category: 'Panduan Praktis',
+      readTime: '8 Menit Membaca',
+      content: [
+        'Mempersiapkan Sekretariat Digital: Mulailah dengan mendaftarkan satu akun Gmail khusus untuk DKM Masjid Anda (contoh: dkm.alikhlas@gmail.com). Gunakan akun ini secara khusus untuk mengelola folder Google Drive dan file Google Sheets KasMasjid Database.',
+        'Pelatihan Bendahara: Kenalkan pengurus dengan konsep pembukuan ledger digital. Berikan pelatihan singkat cara menambahkan transaksi kas masuk dan keluar secara real-time langsung melalui portal admin KasMasjid.',
+        'Konfigurasi Printer Termal: Untuk mencetak bukti donasi langsung di sekretariat, siapkan printer termal bluetooth/USB murah berukuran 58mm atau 80mm. Sistem KasMasjid Pro dapat mengirim sinyal cetak dengan layout dinamis yang rapi bagi para donatur.'
+      ]
+    },
+    'Perbedaan Basic dan Pro': {
+      title: 'Perbedaan KasMasjid Edisi Basic vs Pro',
+      category: 'Studi Produk',
+      readTime: '4 Menit Membaca',
+      content: [
+        'KasMasjid Basic (Community Edition): Sepenuhnya gratis selamanya. Menggunakan database Google Sheets pribadi Anda yang disimpan langsung di Drive Anda sendiri. Ideal untuk masjid dengan jumlah pengurus 1-2 orang dan membutuhkan laporan keuangan sederhana namun tepercaya.',
+        'KasMasjid Pro (Multi-Admin & Cloud DB): Menggunakan server cloud terdedikasi PostgreSQL untuk mendukung banyak admin sekaligus dengan hak akses teratur. Dilengkapi dengan log audit pengurus, backup harian otomatis, kunci tutup buku akuntansi, dan pengiriman notifikasi/struk via WhatsApp otomatis ke donatur.',
+        'Kapan Harus Upgrade? Jika masjid Anda menerima lebih dari 100 transaksi per minggu, memiliki tim kepengurusan DKM yang besar, atau membutuhkan pengiriman tanda terima infaq digital instan ke nomor seluler donatur untuk transparansi mutlak.'
+      ]
+    }
+  };
 
   const features = [
     {
@@ -85,7 +124,7 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
       storage: 'Google Sheets',
       price: 'Gratis Selamanya',
       cta: 'Mulai Gunakan',
-      action: onLogin,
+      path: '/onboarding',
       isPrimary: true,
       perks: [
         'Data di Google Drive Pribadi',
@@ -103,6 +142,7 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
       storage: 'Cloud Database',
       price: 'Pelajari Pro',
       cta: 'Pelajari Paket Pro',
+      path: '/pro',
       isPrimary: false,
       badge: 'PRO',
       perks: [
@@ -120,7 +160,8 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
       deployment: 'Managed Service',
       storage: 'Ecosystem Suite',
       price: 'Hubungi Kami',
-      cta: 'Daftar Membership',
+      cta: 'Hubungi Kami',
+      path: '/membership',
       isPrimary: false,
       badge: 'MEMBERSHIP',
       perks: [
@@ -138,7 +179,7 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
     {
       step: '01',
       title: 'Deployment Mandiri',
-      desc: 'Deploy mandiri secara gratis menggunakan panduan resmi repository KasMasjid Basic di Google Drive.'
+      desc: 'Deploy mandiri secara gratis menggunakan panduan resmi repository KasMasjid Basic di Github KasMasjid.'
     },
     {
       step: '02',
@@ -154,8 +195,24 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
 
   const faqs = [
     {
-      q: 'Apakah KasMasjid Basic gratis?',
-      a: 'Ya, KasMasjid Basic merupakan edisi komunitas (Community Edition) yang gratis selamanya. Anda dapat menggunakan database Google Sheets Anda sendiri tanpa perlu membayar biaya lisensi bulanan kepada kami.'
+      q: 'Apakah KasMasjid Basic benar-benar gratis?',
+      a: 'Ya. Aplikasi ini gratis digunakan selamanya untuk takmir masjid setelah di-deploy ke akun Vercel gratis milik Anda.'
+    },
+    {
+      q: 'Mengapa ada Uji Coba Gratis?',
+      a: 'Lingkungan uji coba menggunakan sumber daya milik developer, sehingga hanya disediakan untuk evaluasi sebelum Anda melakukan deployment sendiri.'
+    },
+    {
+      q: 'Mengapa saya perlu deploy ke akun sendiri?',
+      a: 'Agar aplikasi dapat digunakan dalam jangka panjang, data sepenuhnya menjadi milik Anda, dan lingkungan uji coba tetap tersedia bagi takmir lain yang ingin mencoba.'
+    },
+    {
+      q: 'Apakah saya harus bisa melakukan deployment sendiri?',
+      a: 'Tidak. Jika Anda merasa kesulitan, tersedia layanan pendampingan implementasi dengan biaya satu kali. Setelah selesai, aplikasi tetap berjalan di akun Vercel milik Anda.'
+    },
+    {
+      q: 'Apakah ada biaya berlangganan?',
+      a: 'Tidak ada biaya berlangganan untuk KasMasjid Basic. Biaya hanya dikenakan jika Anda memilih layanan pendampingan implementasi.'
     },
     {
       q: 'Data disimpan di mana?',
@@ -200,6 +257,24 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
+  const handleFeatureClick = (title: string) => {
+    if (title === 'Arus Kas Ledger') {
+      setActiveMockupTab('cash');
+      document.getElementById('screenshot-section')?.scrollIntoView({ behavior: 'smooth' });
+    } else if (title === 'Daftar Inventaris') {
+      setActiveMockupTab('inventory');
+      document.getElementById('screenshot-section')?.scrollIntoView({ behavior: 'smooth' });
+    } else if (title === 'Komposer Pengumuman') {
+      setActiveMockupTab('announcements');
+      document.getElementById('screenshot-section')?.scrollIntoView({ behavior: 'smooth' });
+    } else if (title === 'Informasi Masjid' || title === 'Ringkasan Laporan') {
+      setActiveMockupTab('dashboard');
+      document.getElementById('screenshot-section')?.scrollIntoView({ behavior: 'smooth' });
+    } else if (title === 'Kirim Feedback') {
+      setIsFeedbackModalOpen(true);
+    }
+  };
+
   const handleFeedbackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!feedbackText.trim()) return;
@@ -220,36 +295,34 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           
           {/* Logo Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#16A34A] flex items-center justify-center shadow-md shadow-emerald-100">
+          <button 
+            onClick={() => onNavigate('/')}
+            className="flex items-center gap-3 cursor-pointer group text-left border-0 bg-transparent p-0"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-[#16A34A] group-hover:bg-[#159242] flex items-center justify-center shadow-md shadow-emerald-100 transition-colors">
               <span className="font-display font-black text-base text-white">KM</span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-display font-black text-sm tracking-tight text-slate-900 leading-none">KasMasjid Basic</span>
+                <span className="font-display font-black text-sm tracking-tight text-slate-900 leading-none group-hover:text-emerald-600 transition-colors">KasMasjid Basic</span>
                 <span className="text-[8px] font-black uppercase px-1 bg-emerald-50 text-[#16A34A] border border-emerald-100 rounded">v1.2</span>
               </div>
               <span className="text-[10px] font-semibold text-slate-400 block mt-0.5">Community Edition</span>
             </div>
-          </div>
+          </button>
 
           {/* Nav Actions */}
           <div className="flex items-center gap-3">
-            <button
-              onClick={onStartDemo}
-              className="text-xs font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300 px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <Eye className="w-4 h-4 text-slate-400" />
-              👁 Coba Demo
-            </button>
-            <button
-              onClick={onLogin}
-              disabled={isLoggingIn}
-              className="px-5 py-2.5 text-xs font-extrabold text-white bg-[#16A34A] hover:bg-[#159242] rounded-xl shadow-xs hover:shadow-md hover:shadow-emerald-100 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            <a
+              href="https://wa.me/6288973641682?text=Halo%20Admin%20KasMasjid,%20saya%20ingin%20bertanya%20mengenai%20implementasi%20di%20masjid%20kami"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-2.5 text-xs font-extrabold text-white bg-[#16A34A] hover:bg-[#159242] rounded-xl shadow-xs hover:shadow-md hover:shadow-emerald-100 transition-all flex items-center gap-1.5 cursor-pointer no-underline"
+              id="header-consultation-btn"
             >
               <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
-              🟢 Mulai Gunakan
-            </button>
+              💬 Konsultasi Gratis
+            </a>
           </div>
 
         </div>
@@ -292,15 +365,15 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
             className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto"
           >
             <button
-              onClick={onLogin}
+              onClick={() => onNavigate('/onboarding')}
               disabled={isLoggingIn}
               className="w-full sm:w-auto px-8 py-4 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              {isLoggingIn ? 'Menyiapkan Hubungan...' : 'Mulai Gunakan Sekarang'}
+              Mulai Gunakan Sekarang
               <ArrowRight className="w-4 h-4 text-slate-400" />
             </button>
             <button
-              onClick={onStartDemo}
+              onClick={() => onNavigate('/demo')}
               className="w-full sm:w-auto px-8 py-4 text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               Eksplorasi Mode Demo
@@ -326,9 +399,10 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
             {features.map((feat, idx) => {
               const Icon = feat.icon;
               return (
-                <div 
+                <button 
                   key={idx} 
-                  className="bg-white p-6 rounded-3xl border border-slate-200/70 hover:border-emerald-200 transition-all hover:shadow-xs space-y-4 group relative overflow-hidden"
+                  onClick={() => handleFeatureClick(feat.title)}
+                  className="bg-white p-6 rounded-3xl border border-slate-200/70 hover:border-emerald-500 hover:shadow-md hover:-translate-y-1 transition-all space-y-4 group relative overflow-hidden text-left cursor-pointer w-full focus:outline-hidden"
                 >
                   <div className={`w-11 h-11 rounded-2xl ${feat.bgColor} flex items-center justify-center ${feat.color} shadow-xs`}>
                     <Icon className="w-5 h-5" />
@@ -337,14 +411,17 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">
                       {feat.badge}
                     </span>
-                    <h3 className="font-display font-extrabold text-base text-slate-900">
+                    <h3 className="font-display font-extrabold text-base text-slate-900 group-hover:text-emerald-600 transition-colors">
                       {feat.title}
                     </h3>
                     <p className="text-xs text-slate-500 leading-relaxed font-sans font-medium">
                       {feat.desc}
                     </p>
                   </div>
-                </div>
+                  <div className="text-[10px] font-bold text-slate-400 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pt-2 border-t border-slate-50">
+                    Saksikan Demo &rarr;
+                  </div>
+                </button>
               );
             })}
           </div>
@@ -352,7 +429,7 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
       </section>
 
       {/* Interactive Screenshot & Live Simulated UI Viewports */}
-      <section className="py-20 bg-[#F8FAFC] border-y border-slate-200/60 overflow-hidden">
+      <section id="screenshot-section" className="py-20 bg-[#F8FAFC] border-y border-slate-200/60 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           
           <div className="text-center max-w-2xl mx-auto space-y-3">
@@ -637,21 +714,16 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
                 </div>
 
                 <div className="mt-8 pt-4">
-                  {card.action ? (
-                    <button
-                      onClick={card.action}
-                      className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-2xl text-xs tracking-wide transition-all cursor-pointer shadow-sm hover:shadow"
-                    >
-                      {card.cta}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={onStartDemo}
-                      className="w-full py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-black rounded-2xl text-xs tracking-wide transition-all cursor-pointer"
-                    >
-                      {card.cta}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => onNavigate(card.path)}
+                    className={`w-full py-3 font-black rounded-2xl text-xs tracking-wide transition-all cursor-pointer shadow-xs hover:shadow-md ${
+                      card.isPrimary
+                        ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-sm'
+                        : 'bg-white hover:bg-slate-50 border border-slate-200 text-slate-700'
+                    }`}
+                  >
+                    {card.cta}
+                  </button>
                 </div>
               </div>
             ))}
@@ -767,11 +839,12 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {blogArticles.map((art, idx) => (
-              <div 
+              <button 
                 key={idx} 
-                className="bg-white p-6 rounded-[32px] border border-slate-200/80 shadow-xs flex flex-col justify-between hover:border-emerald-200 transition-colors group cursor-pointer"
+                onClick={() => setActiveArticle(articleDetails[art.title] || { title: art.title, category: art.category, readTime: art.readTime, content: [art.desc] })}
+                className="bg-white p-6 rounded-[32px] border border-slate-200/80 shadow-xs flex flex-col justify-between hover:border-emerald-500 hover:shadow-md hover:-translate-y-1 transition-all group cursor-pointer text-left w-full focus:outline-hidden"
               >
-                <div className="space-y-4 text-left">
+                <div className="space-y-4 text-left w-full">
                   <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     <span className="flex items-center gap-1 text-[#16A34A]">
                       <BookOpen className="w-3.5 h-3.5" />
@@ -786,11 +859,11 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
                     {art.desc}
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-50 flex items-center gap-1.5 text-[10px] font-bold text-slate-400 group-hover:text-[#16A34A] transition-colors">
+                <div className="mt-6 pt-4 border-t border-slate-50 flex items-center gap-1.5 text-[10px] font-bold text-slate-400 group-hover:text-[#16A34A] transition-colors w-full">
                   Baca Selengkapnya
                   <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -830,15 +903,18 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
       <footer className="bg-white border-t border-slate-200/80 py-12 text-slate-500 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
           
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#16A34A] flex items-center justify-center">
+          <button 
+            onClick={() => onNavigate('/')}
+            className="flex items-center gap-3 cursor-pointer group text-left border-0 bg-transparent p-0"
+          >
+            <div className="w-8 h-8 rounded-xl bg-[#16A34A] group-hover:bg-[#159242] flex items-center justify-center transition-colors">
               <span className="font-display font-black text-xs text-white">KM</span>
             </div>
             <div>
-              <span className="font-display font-extrabold text-sm text-slate-900 leading-none block">KasMasjid Basic</span>
+              <span className="font-display font-extrabold text-sm text-slate-900 group-hover:text-emerald-600 transition-colors leading-none block">KasMasjid Basic</span>
               <span className="text-[10px] text-slate-400 font-semibold block mt-1">Community Edition untuk Digitalisasi Administrasi Masjid.</span>
             </div>
-          </div>
+          </button>
 
           <div className="text-center md:text-right space-y-1 font-semibold text-slate-400">
             <p>&copy; 2026 KasMasjid</p>
@@ -922,6 +998,56 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn }: Landi
                 </button>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* BLOG ARTICLE READER MODAL */}
+      {activeArticle && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[999]">
+          <div className="bg-white rounded-[32px] max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-left relative overflow-hidden animate-scale-in flex flex-col max-h-[85vh]">
+            <button
+              onClick={() => setActiveArticle(null)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 cursor-pointer bg-slate-50 hover:bg-slate-100 p-1.5 rounded-full"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="space-y-4 overflow-y-auto pr-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-[10px] font-black text-[#16A34A] uppercase tracking-widest">
+                <BookOpen className="w-3.5 h-3.5" />
+                {activeArticle.category}
+              </span>
+
+              <div className="space-y-1">
+                <h3 className="font-display font-black text-xl text-slate-950 tracking-tight leading-snug">{activeArticle.title}</h3>
+                <p className="text-[10px] font-bold text-slate-400">{activeArticle.readTime}</p>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-slate-100 text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                {activeArticle.content.map((p: string, idx: number) => (
+                  <p key={idx}>{p}</p>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
+              <button
+                onClick={() => {
+                  setActiveArticle(null);
+                  onNavigate('/onboarding');
+                }}
+                className="flex-1 py-3 bg-[#16A34A] hover:bg-[#159242] text-white font-bold rounded-2xl text-xs transition-colors text-center cursor-pointer"
+              >
+                Mulai Implementasi Sekarang
+              </button>
+              <button
+                onClick={() => setActiveArticle(null)}
+                className="px-5 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 text-xs font-bold rounded-2xl transition-colors cursor-pointer"
+              >
+                Tutup Artikel
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -9,6 +9,7 @@ import {
   Box, Plus, Edit, Trash, Search, MapPin, Tag, ShieldCheck, 
   AlertCircle, ChevronRight, X, AlertTriangle, FileSpreadsheet 
 } from 'lucide-react';
+import ConfirmationModal from './ConfirmationModal';
 
 interface InventoryViewProps {
   state: MosqueState;
@@ -443,34 +444,16 @@ export default function InventoryView({
       )}
 
       {/* DELETE CONFIRM DIALOG */}
-      {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-[32px] w-full max-w-sm shadow-xl overflow-hidden p-6 text-center border border-slate-100 animate-scale-in">
-            <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-            <h3 className="font-display font-bold text-lg text-slate-900 mb-2">Konfirmasi Hapus</h3>
-            <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-              Apakah Anda yakin ingin menghapus barang inventaris ini secara permanen dari database Google Sheets? Tindakan ini tidak dapat dibatalkan.
-            </p>
-            <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                disabled={loading}
-                className="px-5 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer disabled:opacity-50"
-              >
-                {loading ? 'Menghapus...' : 'Ya, Hapus'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Konfirmasi Hapus Inventaris"
+        message="Apakah Anda yakin ingin menghapus barang inventaris ini secara permanen dari database Google Sheets? Tindakan ini tidak dapat dibatalkan."
+        confirmText="Ya, Hapus"
+        cancelText="Batal"
+        isLoading={loading}
+      />
     </div>
   );
 }
