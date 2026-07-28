@@ -27,6 +27,7 @@ async function handleResponse(res: Response, errorMessage: string) {
  * Searches the user's Google Drive for the spreadsheet
  */
 export async function findSpreadsheet(accessToken: string): Promise<string | null> {
+  console.log('[SYNC 4] findSpreadsheet dimulai');
   const q = `name = '${SPREADSHEET_NAME}' and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false`;
   const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`;
   
@@ -34,10 +35,13 @@ export async function findSpreadsheet(accessToken: string): Promise<string | nul
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   const data = await handleResponse(res, 'Gagal mencari spreadsheet di Google Drive');
+  console.log('[SYNC 5] findSpreadsheet selesai');
   
   if (data.files && data.files.length > 0) {
+    console.log('[SYNC 6] Spreadsheet ditemukan:', data.files[0].id);
     return data.files[0].id;
   }
+  console.log('[SYNC 7] Spreadsheet tidak ditemukan');
   return null;
 }
 
@@ -45,6 +49,7 @@ export async function findSpreadsheet(accessToken: string): Promise<string | nul
  * Creates a new spreadsheet with the required worksheets
  */
 export async function createSpreadsheet(accessToken: string): Promise<string> {
+  console.log('[SYNC 8] createSpreadsheet dimulai');
   const url = 'https://sheets.googleapis.com/v4/spreadsheets';
   const body = {
     properties: {
@@ -75,6 +80,7 @@ export async function createSpreadsheet(accessToken: string): Promise<string> {
   // Now, populate initial headers and default data
   await populateInitialData(accessToken, spreadsheetId);
 
+  console.log('[SYNC 9] createSpreadsheet selesai:', spreadsheetId);
   return spreadsheetId;
 }
 

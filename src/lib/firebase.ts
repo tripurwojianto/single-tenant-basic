@@ -148,7 +148,13 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
               scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
               callback: async (response: any) => {
                 if (response.error) {
-                  reject(new Error(response.error_description || response.error));
+                  if (response.error === 'popup_closed_by_user' || response.error === 'access_denied' || response.error === 'user_denied') {
+                    const cancelErr = new Error('Proses masuk dengan Google dibatalkan oleh pengguna.');
+                    (cancelErr as any).isCancelled = true;
+                    reject(cancelErr);
+                  } else {
+                    reject(new Error(response.error_description || response.error));
+                  }
                   return;
                 }
                 if (response.access_token) {
@@ -185,7 +191,9 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
                 }
               },
               error_callback: (err: any) => {
-                reject(new Error(err?.message || 'Proses otentikasi Google dibatalkan atau terganggu'));
+                const cancelErr = new Error('Proses masuk dengan Google dibatalkan atau terganggu.');
+                (cancelErr as any).isCancelled = true;
+                reject(cancelErr);
               }
             });
             tokenClient.requestAccessToken({ prompt: 'consent' });
@@ -196,16 +204,33 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
         }
 
         // Fallback to Firebase signInWithPopup
-        const result = await signInWithPopup(auth, provider);
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        if (!credential?.accessToken) {
-          throw new Error('Gagal mendapatkan token akses dari Google Sign-In');
-        }
-        cachedAccessToken = credential.accessToken;
         try {
-          localStorage.setItem(TOKEN_KEY, cachedAccessToken);
-        } catch (e) {}
-        resolve({ user: result.user, accessToken: cachedAccessToken });
+          const result = await signInWithPopup(auth, provider);
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          if (!credential?.accessToken) {
+            throw new Error('Gagal mendapatkan token akses dari Google Sign-In');
+          }
+          cachedAccessToken = credential.accessToken;
+          try {
+            localStorage.setItem(TOKEN_KEY, cachedAccessToken);
+          } catch (e) {}
+          resolve({ user: result.user, accessToken: cachedAccessToken });
+        } catch (popupErr: any) {
+          const isCancelled = 
+            popupErr?.code === 'auth/popup-closed-by-user' ||
+            popupErr?.code === 'auth/cancelled-popup-request' ||
+            popupErr?.message?.includes('popup') ||
+            popupErr?.message?.includes('closed') ||
+            popupErr?.message?.includes('cancelled');
+            
+          if (isCancelled) {
+            const cancelErr = new Error('Proses masuk dengan Google dibatalkan oleh pengguna.');
+            (cancelErr as any).isCancelled = true;
+            reject(cancelErr);
+          } else {
+            reject(popupErr);
+          }
+        }
       } catch (err) {
         reject(err);
       }
@@ -219,7 +244,9 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
 
     return await Promise.race([signInPromise, timeoutPromise]);
   } catch (error: any) {
-    console.error('Sign-in error:', error);
+    if (!error?.isCancelled) {
+      console.error('Sign-in error:', error);
+    }
     throw error;
   } finally {
     isSigningIn = false;

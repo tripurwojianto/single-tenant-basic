@@ -416,79 +416,96 @@ export default function ReportsView({ state }: ReportsViewProps) {
             width: 100% !important;
             max-width: 100% !important;
           }
+          .print-grid-3 {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 0 !important;
+          }
+          .print-grid-2 {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 2rem !important;
+          }
+          .print-table {
+            display: table !important;
+            width: 100% !important;
+          }
+          .print-hidden {
+            display: none !important;
+          }
         }
       `}</style>
 
       {/* Screen Controls (no-print) */}
-      <div className="bg-white p-6 sm:p-8 rounded-[32px] border border-slate-200/80 space-y-6 no-print">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0">
-              <FileText className="w-6 h-6" />
+      <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[32px] border border-slate-200/80 space-y-5 sm:space-y-6 no-print">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-50 text-emerald-600 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+              <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h2 className="font-display font-bold text-xl sm:text-2xl text-slate-900 leading-tight">
+              <h2 className="font-display font-bold text-lg sm:text-xl md:text-2xl text-slate-900 leading-tight">
                 Generator Laporan Kas & Aset
               </h2>
-              <p className="text-slate-500 text-sm mt-1.5">
+              <p className="text-slate-500 text-xs sm:text-sm mt-1">
                 Tinjau ringkasan neraca kas masjid dan cetak lampiran laporan fisik.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 self-start sm:self-center">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
             <button
               onClick={handleExportCSV}
-              className="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm flex items-center gap-2 shadow-sm cursor-pointer transition-colors"
+              className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 active:bg-slate-100 text-slate-700 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors"
               title="Ekspor laporan ke format CSV"
             >
-              <Download className="w-4.5 h-4.5 text-slate-500" />
-              Ekspor CSV
+              <Download className="w-4 h-4 text-slate-500" />
+              <span>Ekspor CSV</span>
             </button>
             <button
               onClick={handleExportPDF}
-              className="px-5 py-2.5 rounded-xl border border-emerald-200 hover:bg-emerald-50 text-emerald-700 font-semibold text-sm flex items-center gap-2 shadow-sm cursor-pointer transition-colors"
+              className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 rounded-xl border border-emerald-200 hover:bg-emerald-50 active:bg-emerald-100 text-emerald-700 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors"
               title="Unduh laporan formal dalam format PDF"
             >
-              <FileText className="w-4.5 h-4.5 text-emerald-600" />
-              Unduh PDF
+              <FileText className="w-4 h-4 text-emerald-600" />
+              <span>Unduh PDF</span>
             </button>
             <button
               onClick={handlePrint}
-              className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm flex items-center gap-2 shadow-sm cursor-pointer transition-colors"
+              className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors"
               title="Cetak langsung menggunakan printer fisik atau browser PDF"
             >
-              <Printer className="w-4.5 h-4.5" />
-              Cetak Laporan
+              <Printer className="w-4 h-4" />
+              <span>Cetak Laporan</span>
             </button>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-slate-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 pt-5 sm:pt-6 border-t border-slate-100">
           <div>
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Jenis Laporan</label>
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/50">
               <button
                 onClick={() => setPeriodType('daily')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  periodType === 'daily' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                className={`flex-1 py-2 min-h-[38px] text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  periodType === 'daily' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 Harian
               </button>
               <button
                 onClick={() => setPeriodType('monthly')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  periodType === 'monthly' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                className={`flex-1 py-2 min-h-[38px] text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  periodType === 'monthly' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 Bulanan
               </button>
               <button
                 onClick={() => setPeriodType('yearly')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  periodType === 'yearly' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                className={`flex-1 py-2 min-h-[38px] text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  periodType === 'yearly' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 Tahunan
@@ -503,7 +520,7 @@ export default function ReportsView({ state }: ReportsViewProps) {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                className="w-full min-h-[42px] px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               />
             </div>
           )}
@@ -515,7 +532,7 @@ export default function ReportsView({ state }: ReportsViewProps) {
                 type="month"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
+                className="w-full min-h-[42px] px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               />
             </div>
           )}
@@ -526,7 +543,7 @@ export default function ReportsView({ state }: ReportsViewProps) {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
+                className="w-full min-h-[42px] px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               >
                 <option value="2026">2026</option>
                 <option value="2027">2027</option>
@@ -538,20 +555,20 @@ export default function ReportsView({ state }: ReportsViewProps) {
       </div>
 
       {/* Categories breakdown visually on screen only (no-print) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 no-print">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 no-print">
         {/* Income Breakdown */}
-        <div className="bg-white p-6 sm:p-8 rounded-[32px] border border-slate-200/80">
-          <h3 className="font-display font-bold text-slate-900 text-sm mb-5 flex items-center gap-2">
+        <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[32px] border border-slate-200/80">
+          <h3 className="font-display font-bold text-slate-900 text-sm mb-4 sm:mb-5 flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <PieChart className="w-4 h-4" />
             </div>
             Proporsi Pemasukan Kas
           </h3>
-          <div className="space-y-4">
+          <div className="space-y-3.5 sm:space-y-4">
             {incomeBreakdownArray.length > 0 ? (
               incomeBreakdownArray.map((item, idx) => (
                 <div key={idx}>
-                  <div className="flex items-center justify-between text-xs mb-1.5">
+                  <div className="flex flex-wrap items-center justify-between text-xs gap-1 mb-1.5">
                     <span className="font-semibold text-slate-700">{item.name}</span>
                     <span className="font-mono font-bold text-slate-900">{formatRupiah(item.value)} ({item.percentage.toFixed(1)}%)</span>
                   </div>
@@ -561,24 +578,24 @@ export default function ReportsView({ state }: ReportsViewProps) {
                 </div>
               ))
             ) : (
-              <p className="text-xs text-slate-400 text-center py-8">Belum ada transaksi pemasukan pada periode ini</p>
+              <p className="text-xs text-slate-400 text-center py-6 sm:py-8">Belum ada transaksi pemasukan pada periode ini</p>
             )}
           </div>
         </div>
 
         {/* Expense Breakdown */}
-        <div className="bg-white p-6 sm:p-8 rounded-[32px] border border-slate-200/80">
-          <h3 className="font-display font-bold text-slate-900 text-sm mb-5 flex items-center gap-2">
+        <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[32px] border border-slate-200/80">
+          <h3 className="font-display font-bold text-slate-900 text-sm mb-4 sm:mb-5 flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
               <PieChart className="w-4 h-4" />
             </div>
             Proporsi Pengeluaran Kas
           </h3>
-          <div className="space-y-4">
+          <div className="space-y-3.5 sm:space-y-4">
             {expenseBreakdownArray.length > 0 ? (
               expenseBreakdownArray.map((item, idx) => (
                 <div key={idx}>
-                  <div className="flex items-center justify-between text-xs mb-1.5">
+                  <div className="flex flex-wrap items-center justify-between text-xs gap-1 mb-1.5">
                     <span className="font-semibold text-slate-700">{item.name}</span>
                     <span className="font-mono font-bold text-slate-900">{formatRupiah(item.value)} ({item.percentage.toFixed(1)}%)</span>
                   </div>
@@ -588,7 +605,7 @@ export default function ReportsView({ state }: ReportsViewProps) {
                 </div>
               ))
             ) : (
-              <p className="text-xs text-slate-400 text-center py-8">Belum ada transaksi pengeluaran pada periode ini</p>
+              <p className="text-xs text-slate-400 text-center py-6 sm:py-8">Belum ada transaksi pengeluaran pada periode ini</p>
             )}
           </div>
         </div>
@@ -597,25 +614,25 @@ export default function ReportsView({ state }: ReportsViewProps) {
       {/* REPORT PRINTABLE SHEET CARD */}
       <div 
         id="printable-report-card" 
-        className="bg-white p-8 sm:p-12 rounded-[32px] border border-slate-200 shadow-sm max-w-4xl mx-auto print-full-width"
+        className="bg-white p-4 sm:p-8 md:p-12 rounded-2xl sm:rounded-[32px] border border-slate-200 shadow-xs max-w-4xl mx-auto print-full-width"
       >
         {/* Kop Surat / Header */}
-        <div className="text-center pb-6 border-b-2 border-double border-slate-800 space-y-2">
+        <div className="text-center pb-5 sm:pb-6 border-b-2 border-double border-slate-800 space-y-1.5 sm:space-y-2">
           {state.info.logo && (
             <img 
               src={state.info.logo} 
               alt="Logo" 
-              className="w-16 h-16 mx-auto rounded-full object-cover mb-2 no-print"
+              className="w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-full object-cover mb-2 no-print"
               referrerPolicy="no-referrer"
             />
           )}
-          <h1 className="font-display font-extrabold text-2xl tracking-tight text-slate-900 uppercase">
+          <h1 className="font-display font-extrabold text-lg sm:text-2xl tracking-tight text-slate-900 uppercase">
             {state.info.namaMasjid || 'Masjid Raya Baiturrahman'}
           </h1>
           <p className="text-slate-600 text-xs font-semibold tracking-wider">
             {state.info.tagline || 'Mengabdi untuk Kemaslahatan Ummat'}
           </p>
-          <div className="text-slate-500 text-xs font-mono">
+          <div className="text-slate-500 text-[11px] sm:text-xs font-mono leading-relaxed">
             {state.info.alamat && `${state.info.alamat}, `}{state.info.kota && state.info.kota}
             {state.info.whatsApp && ` | Telp/WA: ${state.info.whatsApp}`}
             {state.info.email && ` | Email: ${state.info.email}`}
@@ -623,135 +640,211 @@ export default function ReportsView({ state }: ReportsViewProps) {
         </div>
 
         {/* Document Title */}
-        <div className="text-center py-6 space-y-1">
-          <h2 className="font-display font-bold text-lg text-slate-900 uppercase tracking-widest">
+        <div className="text-center py-4 sm:py-6 space-y-1">
+          <h2 className="font-display font-bold text-sm sm:text-lg text-slate-900 uppercase tracking-wider sm:tracking-widest">
             Laporan Realisasi Arus Kas Keuangan
           </h2>
-          <span className="text-sm font-semibold text-slate-600 font-mono">
+          <span className="text-xs sm:text-sm font-semibold text-slate-600 font-mono block">
             Periode Laporan - {getPeriodLabel()}
           </span>
         </div>
 
         {/* Balances Board */}
-        <div className="grid grid-cols-3 border border-slate-800 text-center divide-x divide-slate-800 mb-8 rounded-xl overflow-hidden bg-slate-50">
-          <div className="p-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 print-grid-3 gap-2.5 md:gap-0 border border-slate-300 md:border-slate-800 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200 md:divide-slate-800 mb-6 sm:mb-8 rounded-2xl md:rounded-xl overflow-hidden bg-slate-50/50 md:bg-slate-50 p-2 md:p-0">
+          <div className="p-3.5 sm:p-4 bg-white md:bg-transparent rounded-xl md:rounded-none border border-slate-200/80 md:border-none shadow-2xs md:shadow-none">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Total Penerimaan</span>
-            <span className="font-mono font-bold text-emerald-700 text-sm sm:text-base mt-1 block">
+            <span className="font-bold text-emerald-700 text-base sm:text-lg mt-1 block tracking-tight">
               {formatRupiah(totalIncome)}
             </span>
           </div>
-          <div className="p-4">
+          <div className="p-3.5 sm:p-4 bg-white md:bg-transparent rounded-xl md:rounded-none border border-slate-200/80 md:border-none shadow-2xs md:shadow-none">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Total Pengeluaran</span>
-            <span className="font-mono font-bold text-rose-700 text-sm sm:text-base mt-1 block">
+            <span className="font-bold text-rose-700 text-base sm:text-lg mt-1 block tracking-tight">
               {formatRupiah(totalExpense)}
             </span>
           </div>
-          <div className="p-4 bg-emerald-50">
+          <div className="p-3.5 sm:p-4 bg-emerald-50 rounded-xl md:rounded-none border border-emerald-200/80 md:border-none shadow-2xs md:shadow-none">
             <span className="text-[10px] font-bold text-emerald-900 uppercase tracking-wider block">Saldo Bersih (Net)</span>
-            <span className="font-mono font-bold text-emerald-800 text-sm sm:text-base mt-1 block">
+            <span className="font-bold text-emerald-800 text-base sm:text-lg mt-1 block tracking-tight">
               {formatRupiah(netBalance)}
             </span>
           </div>
         </div>
 
-        {/* Transactions Table */}
-        <div className="space-y-6">
+        {/* Transactions Section */}
+        <div className="space-y-6 sm:space-y-8">
+          {/* Pemasukan */}
           <div>
-            <h3 className="font-display font-bold text-xs text-slate-900 uppercase tracking-wider border-b border-slate-300 pb-1.5 mb-3">
+            <h3 className="font-display font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wider border-b border-slate-300 pb-2 mb-3">
               1. Rincian Pemasukan Kas (Penerimaan)
             </h3>
-            <table className="w-full border-collapse text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-800 font-bold text-slate-700">
-                  <th className="py-2 pr-4">Tanggal</th>
-                  <th className="py-2 px-4">Kategori</th>
-                  <th className="py-2 px-4">Deskripsi Rincian</th>
-                  <th className="py-2 pl-4 text-right">Nominal</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {filteredIncomes.length > 0 ? (
-                  filteredIncomes.map((item, i) => (
-                    <tr key={i}>
-                      <td className="py-2 pr-4 font-mono text-slate-500">{item.tanggal}</td>
-                      <td className="py-2 px-4">{item.kategori}</td>
-                      <td className="py-2 px-4 italic text-slate-600">{item.deskripsi}</td>
-                      <td className="py-2 pl-4 text-right font-mono font-semibold">{formatRupiah(item.nominal)}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="py-3 text-center text-slate-400">Tidak ada penerimaan terdaftar pada periode ini</td>
+
+            {/* Mobile Card Layout (< md, screen only) */}
+            <div className="space-y-2.5 md:hidden print-hidden">
+              {filteredIncomes.length > 0 ? (
+                filteredIncomes.map((item, i) => (
+                  <div key={i} className="p-3.5 bg-slate-50/80 border border-slate-200/90 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-semibold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                        {item.tanggal}
+                      </span>
+                      <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200/60">
+                        {item.kategori}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-800 leading-relaxed font-medium">
+                      {item.deskripsi || '-'}
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200/70">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nominal</span>
+                      <span className="font-bold text-emerald-700 text-sm">{formatRupiah(item.nominal)}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-4 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                  Tidak ada penerimaan terdaftar pada periode ini
+                </div>
+              )}
+              <div className="p-3.5 bg-emerald-50 border border-emerald-200/80 rounded-xl flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider">Total Penerimaan</span>
+                <span className="font-bold text-emerald-800 text-sm">{formatRupiah(totalIncome)}</span>
+              </div>
+            </div>
+
+            {/* Desktop & Print Table (≥ md OR print) */}
+            <div className="hidden md:block print-table overflow-x-auto">
+              <table className="w-full border-collapse text-left text-xs min-w-[500px] md:min-w-0">
+                <thead>
+                  <tr className="border-b border-slate-800 font-bold text-slate-700">
+                    <th className="py-2 pr-4">Tanggal</th>
+                    <th className="py-2 px-4">Kategori</th>
+                    <th className="py-2 px-4">Deskripsi Rincian</th>
+                    <th className="py-2 pl-4 text-right">Nominal</th>
                   </tr>
-                )}
-                <tr className="border-t border-slate-800 font-bold">
-                  <td colSpan={3} className="py-2 text-right uppercase">Total Penerimaan:</td>
-                  <td className="py-2 text-right font-mono">{formatRupiah(totalIncome)}</td>
-                </tr>
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {filteredIncomes.length > 0 ? (
+                    filteredIncomes.map((item, i) => (
+                      <tr key={i}>
+                        <td className="py-2 pr-4 font-mono text-slate-500 whitespace-nowrap">{item.tanggal}</td>
+                        <td className="py-2 px-4 whitespace-nowrap">{item.kategori}</td>
+                        <td className="py-2 px-4 italic text-slate-600">{item.deskripsi}</td>
+                        <td className="py-2 pl-4 text-right font-mono font-semibold whitespace-nowrap">{formatRupiah(item.nominal)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="py-3 text-center text-slate-400">Tidak ada penerimaan terdaftar pada periode ini</td>
+                    </tr>
+                  )}
+                  <tr className="border-t border-slate-800 font-bold">
+                    <td colSpan={3} className="py-2 text-right uppercase">Total Penerimaan:</td>
+                    <td className="py-2 text-right font-mono whitespace-nowrap">{formatRupiah(totalIncome)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div className="pt-4">
-            <h3 className="font-display font-bold text-xs text-slate-900 uppercase tracking-wider border-b border-slate-300 pb-1.5 mb-3">
+          {/* Pengeluaran */}
+          <div className="pt-2 sm:pt-4">
+            <h3 className="font-display font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wider border-b border-slate-300 pb-2 mb-3">
               2. Rincian Pengeluaran Kas (Belanja)
             </h3>
-            <table className="w-full border-collapse text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-800 font-bold text-slate-700">
-                  <th className="py-2 pr-4">Tanggal</th>
-                  <th className="py-2 px-4">Kategori</th>
-                  <th className="py-2 px-4">Deskripsi Rincian</th>
-                  <th className="py-2 pl-4 text-right">Nominal</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {filteredExpenses.length > 0 ? (
-                  filteredExpenses.map((item, i) => (
-                    <tr key={i}>
-                      <td className="py-2 pr-4 font-mono text-slate-500">{item.tanggal}</td>
-                      <td className="py-2 px-4">{item.kategori}</td>
-                      <td className="py-2 px-4 italic text-slate-600">{item.deskripsi}</td>
-                      <td className="py-2 pl-4 text-right font-mono font-semibold text-rose-700">{formatRupiah(item.nominal)}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="py-3 text-center text-slate-400">Tidak ada pengeluaran terdaftar pada periode ini</td>
+
+            {/* Mobile Card Layout (< md, screen only) */}
+            <div className="space-y-2.5 md:hidden print-hidden">
+              {filteredExpenses.length > 0 ? (
+                filteredExpenses.map((item, i) => (
+                  <div key={i} className="p-3.5 bg-slate-50/80 border border-slate-200/90 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-semibold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                        {item.tanggal}
+                      </span>
+                      <span className="text-[11px] font-semibold text-rose-800 bg-rose-50 px-2.5 py-0.5 rounded-md border border-rose-200/60">
+                        {item.kategori}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-800 leading-relaxed font-medium">
+                      {item.deskripsi || '-'}
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200/70">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nominal</span>
+                      <span className="font-bold text-rose-700 text-sm">{formatRupiah(item.nominal)}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-4 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                  Tidak ada pengeluaran terdaftar pada periode ini
+                </div>
+              )}
+              <div className="p-3.5 bg-rose-50 border border-rose-200/80 rounded-xl flex items-center justify-between">
+                <span className="text-xs font-bold text-rose-900 uppercase tracking-wider">Total Pengeluaran</span>
+                <span className="font-bold text-rose-700 text-sm">{formatRupiah(totalExpense)}</span>
+              </div>
+            </div>
+
+            {/* Desktop & Print Table (≥ md OR print) */}
+            <div className="hidden md:block print-table overflow-x-auto">
+              <table className="w-full border-collapse text-left text-xs min-w-[500px] md:min-w-0">
+                <thead>
+                  <tr className="border-b border-slate-800 font-bold text-slate-700">
+                    <th className="py-2 pr-4">Tanggal</th>
+                    <th className="py-2 px-4">Kategori</th>
+                    <th className="py-2 px-4">Deskripsi Rincian</th>
+                    <th className="py-2 pl-4 text-right">Nominal</th>
                   </tr>
-                )}
-                <tr className="border-t border-slate-800 font-bold">
-                  <td colSpan={3} className="py-2 text-right uppercase">Total Pengeluaran:</td>
-                  <td className="py-2 text-right font-mono text-rose-700">{formatRupiah(totalExpense)}</td>
-                </tr>
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {filteredExpenses.length > 0 ? (
+                    filteredExpenses.map((item, i) => (
+                      <tr key={i}>
+                        <td className="py-2 pr-4 font-mono text-slate-500 whitespace-nowrap">{item.tanggal}</td>
+                        <td className="py-2 px-4 whitespace-nowrap">{item.kategori}</td>
+                        <td className="py-2 px-4 italic text-slate-600">{item.deskripsi}</td>
+                        <td className="py-2 pl-4 text-right font-mono font-semibold text-rose-700 whitespace-nowrap">{formatRupiah(item.nominal)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="py-3 text-center text-slate-400">Tidak ada pengeluaran terdaftar pada periode ini</td>
+                    </tr>
+                  )}
+                  <tr className="border-t border-slate-800 font-bold">
+                    <td colSpan={3} className="py-2 text-right uppercase">Total Pengeluaran:</td>
+                    <td className="py-2 text-right font-mono text-rose-700 whitespace-nowrap">{formatRupiah(totalExpense)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
         {/* Kop Tanda Tangan (Signature Block) - Incredibly vital for Indonesian Mosques */}
-        <div className="mt-16 pt-12 border-t border-slate-200 grid grid-cols-2 gap-8 text-center text-xs">
-          <div className="space-y-12">
+        <div className="mt-12 sm:mt-16 pt-8 sm:pt-12 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 print-grid-2 gap-8 text-center text-xs">
+          <div className="space-y-8 sm:space-y-12">
             <div>
               <span className="block text-slate-500">Disusun oleh,</span>
               <span className="block font-bold text-slate-800 uppercase mt-0.5">Bendahara DKM</span>
             </div>
             <div className="w-36 border-b border-slate-800 mx-auto"></div>
-            <span className="block font-mono text-slate-400">(Tanda Tangan & Nama Terang)</span>
+            <span className="block text-slate-400 text-[11px] sm:text-xs">(Tanda Tangan & Nama Terang)</span>
           </div>
 
-          <div className="space-y-12">
+          <div className="space-y-8 sm:space-y-12">
             <div>
               <span className="block text-slate-500">Mengetahui & Menyetujui,</span>
               <span className="block font-bold text-slate-800 uppercase mt-0.5">Ketua Umum DKM</span>
             </div>
             <div className="w-36 border-b border-slate-800 mx-auto"></div>
-            <span className="block font-mono text-slate-400">(Stempel DKM & Nama Terang)</span>
+            <span className="block text-slate-400 text-[11px] sm:text-xs">(Stempel DKM & Nama Terang)</span>
           </div>
         </div>
 
         {/* Printable Footer notes */}
-        <div className="mt-12 text-center text-[10px] text-slate-400 font-mono uppercase tracking-wider pt-6 border-t border-dashed border-slate-100">
+        <div className="mt-8 sm:mt-12 text-center text-[10px] text-slate-400 font-mono uppercase tracking-wider pt-6 border-t border-dashed border-slate-100">
           KasMasjid Basic Community Edition | Laporan terverifikasi via Google Sheets Database.
         </div>
       </div>

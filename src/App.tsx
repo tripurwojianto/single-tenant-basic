@@ -234,7 +234,8 @@ export default function App() {
 
         if (isComplete) {
           setIsOnboarding(false);
-          handleSpreadsheetSync(cachedToken);
+          console.log('[SYNC 3] Dipanggil dari: onAuthStateChanged');
+          handleSpreadsheetSync(cachedToken, 'onAuthStateChanged');
         } else {
           setIsOnboarding(true);
           const newSession = {
@@ -266,7 +267,8 @@ export default function App() {
   }, []);
 
   // Sync / find Google Sheet
-  const handleSpreadsheetSync = async (accessToken: string) => {
+  const handleSpreadsheetSync = async (accessToken: string, callerSource: string = 'unknown') => {
+    console.log(`[SYNC 1] handleSpreadsheetSync dipanggil (Caller: ${callerSource})`);
     setIsInitializingSheet(true);
     setSheetLoadingError(null);
     try {
@@ -299,6 +301,7 @@ export default function App() {
         };
         localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
       }
+      console.log(`[SYNC 10] Sinkronisasi selesai (Caller: ${callerSource})`);
     } catch (err: any) {
       console.error(err);
       setSheetLoadingError(err.message || 'Gagal menyinkronkan database dengan Google Sheets');
@@ -311,10 +314,10 @@ export default function App() {
   const handleLogin = async () => {
     setIsLoggingIn(true);
     setLoginError(null);
-    setSheetLoadingError(null);
     try {
       const result = await googleSignIn();
       if (result) {
+        setSheetLoadingError(null);
         setUser(result.user);
         setToken(result.accessToken);
         setNeedsAuth(false);
@@ -342,18 +345,26 @@ export default function App() {
 
         if (isComplete) {
           setIsOnboarding(false);
-          await handleSpreadsheetSync(result.accessToken);
+          console.log('[SYNC 2] Dipanggil dari: handleLogin');
+          await handleSpreadsheetSync(result.accessToken, 'handleLogin');
           navigate('/');
         } else {
           setIsOnboarding(true);
-          await handleSpreadsheetSync(result.accessToken);
+          console.log('[SYNC 2] Dipanggil dari: handleLogin');
+          await handleSpreadsheetSync(result.accessToken, 'handleLogin');
           navigate('/onboarding');
         }
       }
     } catch (err: any) {
-      console.error('Login error:', err);
-      const errMsg = err?.message || 'Gagal memuat proses login. Silakan refresh halaman dan coba lagi.';
-      setLoginError(errMsg);
+      if (err?.isCancelled || err?.message?.includes('dibatalkan') || err?.message?.includes('closed') || err?.message?.includes('popup')) {
+        setLoginError('Proses masuk dengan Google dibatalkan.');
+        // If sheetLoadingError is already set (e.g. 401 session expired), leave it so user can retry anytime
+      } else {
+        console.error('Login error:', err);
+        const errMsg = err?.message || 'Gagal memuat proses login. Silakan refresh halaman dan coba lagi.';
+        setLoginError(errMsg);
+        setSheetLoadingError(errMsg);
+      }
     } finally {
       setIsLoggingIn(false);
     }
@@ -1117,7 +1128,7 @@ export default function App() {
                 <p className="text-xs text-slate-400 mt-0.5">Memeriksa struktur spreadsheet 'KasMasjid Database' di Google Drive Anda.</p>
               </div>
             </div>
-          ) : sheetLoadingError ? (
+          ) : sheetLoadingError && !(state.info?.namaMasjid || state.incomes.length > 0 || state.expenses.length > 0 || isDemoMode) ? (
             <div className="max-w-md mx-auto py-12 text-center bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
               <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
                 <AlertCircle className="w-6 h-6" />
@@ -1160,6 +1171,29 @@ export default function App() {
           ) : (
             // VIEW CONTROLLER
             <>
+              {sheetLoadingError && (
+                <div className="mb-6 p-4 bg-amber-50 border border-amber-200/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-amber-900 shadow-xs">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-bold text-sm text-amber-950">
+                        Sesi Google Sheets Kedaluwarsa (401 UNAUTHENTICATED)
+                      </h4>
+                      <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
+                        Akses token Google OAuth Anda telah berakhir. Data yang tampil saat ini menggunakan data tembolok (cache) lokal. Klik tombol untuk memperbarui token dan melanjutkan sinkronisasi.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogin}
+                    disabled={isLoggingIn}
+                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all shrink-0 flex items-center justify-center gap-2 cursor-pointer shadow-xs whitespace-nowrap"
+                  >
+                    {isLoggingIn && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    <span>Masuk Kembali dengan Google</span>
+                  </button>
+                </div>
+              )}
               {activeMenu === 'dashboard' && (
                 <DashboardView 
                   state={state} 
