@@ -451,202 +451,241 @@ export default function App() {
     }
   };
 
+  // Helper wrapper for mutation error handling (captures 401 unauthenticated errors)
+  const handleMutation = async <T,>(actionFn: () => Promise<T>): Promise<T | undefined> => {
+    try {
+      return await actionFn();
+    } catch (err: any) {
+      console.error('Mutation error:', err);
+      const errMsg = err?.message || '';
+      if (errMsg.includes('401') || errMsg.includes('UNAUTHENTICATED') || errMsg.includes('kedaluwarsa')) {
+        setSheetLoadingError(errMsg || 'Sesi Google Sheets Anda telah kedaluwarsa (401 UNAUTHENTICATED). Silakan klik \'Masuk Kembali dengan Google\' untuk memperbarui token akses.');
+      } else {
+        throw err;
+      }
+    }
+  };
+
   // --- DATA MUTATION ACTIONS ---
 
   // Update Mosque profile
   const handleSaveMosqueInfo = async (info: MosqueInfo) => {
-    if (isDemoMode) {
-      setState(prev => ({ ...prev, info }));
-      return;
-    }
-    if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-    await saveMosqueInfo(token, spreadsheetId, info);
-    setState(prev => ({ ...prev, info }));
-
-    try {
-      const sess = getSavedSession();
-      if (sess) {
-        sess.info = info;
-        localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+    return handleMutation(async () => {
+      if (isDemoMode) {
+        setState(prev => ({ ...prev, info }));
+        return;
       }
-    } catch (e) {}
+      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+      await saveMosqueInfo(token, spreadsheetId, info);
+      setState(prev => ({ ...prev, info }));
+
+      try {
+        const sess = getSavedSession();
+        if (sess) {
+          sess.info = info;
+          localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+        }
+      } catch (e) {}
+    });
   };
 
   // Add category
   const handleAddCategory = async (category: Category) => {
-    const updatedCategories = [...state.categories, category];
-    if (isDemoMode) {
+    return handleMutation(async () => {
+      const updatedCategories = [...state.categories, category];
+      if (isDemoMode) {
+        setState(prev => ({ ...prev, categories: updatedCategories }));
+        return;
+      }
+      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+      await saveCategories(token, spreadsheetId, updatedCategories);
       setState(prev => ({ ...prev, categories: updatedCategories }));
-      return;
-    }
-    if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-    await saveCategories(token, spreadsheetId, updatedCategories);
-    setState(prev => ({ ...prev, categories: updatedCategories }));
+    });
   };
 
   // Add Cash Transaction
   const handleAddTransaction = async (tipe: 'Income' | 'Expense', data: Omit<CashTransaction, 'id'>) => {
-    const newTx: CashTransaction = {
-      id: `${tipe.toLowerCase()}-${Date.now()}`,
-      ...data
-    };
+    return handleMutation(async () => {
+      const newTx: CashTransaction = {
+        id: `${tipe.toLowerCase()}-${Date.now()}`,
+        ...data
+      };
 
-    if (tipe === 'Income') {
-      const updated = [...state.incomes, newTx];
-      if (isDemoMode) {
+      if (tipe === 'Income') {
+        const updated = [...state.incomes, newTx];
+        if (isDemoMode) {
+          setState(prev => ({ ...prev, incomes: updated }));
+          return;
+        }
+        if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+        await saveIncomes(token, spreadsheetId, updated);
         setState(prev => ({ ...prev, incomes: updated }));
-        return;
-      }
-      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-      await saveIncomes(token, spreadsheetId, updated);
-      setState(prev => ({ ...prev, incomes: updated }));
-    } else {
-      const updated = [...state.expenses, newTx];
-      if (isDemoMode) {
+      } else {
+        const updated = [...state.expenses, newTx];
+        if (isDemoMode) {
+          setState(prev => ({ ...prev, expenses: updated }));
+          return;
+        }
+        if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+        await saveExpenses(token, spreadsheetId, updated);
         setState(prev => ({ ...prev, expenses: updated }));
-        return;
       }
-      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-      await saveExpenses(token, spreadsheetId, updated);
-      setState(prev => ({ ...prev, expenses: updated }));
-    }
+    });
   };
 
   // Edit Cash Transaction
   const handleEditTransaction = async (tipe: 'Income' | 'Expense', id: string, data: Omit<CashTransaction, 'id'>) => {
-    if (tipe === 'Income') {
-      const updated = state.incomes.map(item => item.id === id ? { id, ...data } : item);
-      if (isDemoMode) {
+    return handleMutation(async () => {
+      if (tipe === 'Income') {
+        const updated = state.incomes.map(item => item.id === id ? { id, ...data } : item);
+        if (isDemoMode) {
+          setState(prev => ({ ...prev, incomes: updated }));
+          return;
+        }
+        if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+        await saveIncomes(token, spreadsheetId, updated);
         setState(prev => ({ ...prev, incomes: updated }));
-        return;
-      }
-      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-      await saveIncomes(token, spreadsheetId, updated);
-      setState(prev => ({ ...prev, incomes: updated }));
-    } else {
-      const updated = state.expenses.map(item => item.id === id ? { id, ...data } : item);
-      if (isDemoMode) {
+      } else {
+        const updated = state.expenses.map(item => item.id === id ? { id, ...data } : item);
+        if (isDemoMode) {
+          setState(prev => ({ ...prev, expenses: updated }));
+          return;
+        }
+        if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+        await saveExpenses(token, spreadsheetId, updated);
         setState(prev => ({ ...prev, expenses: updated }));
-        return;
       }
-      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-      await saveExpenses(token, spreadsheetId, updated);
-      setState(prev => ({ ...prev, expenses: updated }));
-    }
+    });
   };
 
   // Delete Cash Transaction
   const handleDeleteTransaction = async (tipe: 'Income' | 'Expense', id: string) => {
-    if (tipe === 'Income') {
-      const updated = state.incomes.filter(item => item.id !== id);
-      if (isDemoMode) {
+    return handleMutation(async () => {
+      if (tipe === 'Income') {
+        const updated = state.incomes.filter(item => item.id !== id);
+        if (isDemoMode) {
+          setState(prev => ({ ...prev, incomes: updated }));
+          return;
+        }
+        if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+        await saveIncomes(token, spreadsheetId, updated);
         setState(prev => ({ ...prev, incomes: updated }));
-        return;
-      }
-      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-      await saveIncomes(token, spreadsheetId, updated);
-      setState(prev => ({ ...prev, incomes: updated }));
-    } else {
-      const updated = state.expenses.filter(item => item.id !== id);
-      if (isDemoMode) {
+      } else {
+        const updated = state.expenses.filter(item => item.id !== id);
+        if (isDemoMode) {
+          setState(prev => ({ ...prev, expenses: updated }));
+          return;
+        }
+        if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+        await saveExpenses(token, spreadsheetId, updated);
         setState(prev => ({ ...prev, expenses: updated }));
-        return;
       }
-      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-      await saveExpenses(token, spreadsheetId, updated);
-      setState(prev => ({ ...prev, expenses: updated }));
-    }
+    });
   };
 
   // Add Inventory
   const handleAddInventory = async (item: Omit<InventoryItem, 'id'>) => {
-    const newItem: InventoryItem = {
-      id: `inv-${Date.now()}`,
-      ...item
-    };
-    const updated = [...state.inventory, newItem];
-    if (isDemoMode) {
+    return handleMutation(async () => {
+      const newItem: InventoryItem = {
+        id: `inv-${Date.now()}`,
+        ...item
+      };
+      const updated = [...state.inventory, newItem];
+      if (isDemoMode) {
+        setState(prev => ({ ...prev, inventory: updated }));
+        return;
+      }
+      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+      await saveInventory(token, spreadsheetId, updated);
       setState(prev => ({ ...prev, inventory: updated }));
-      return;
-    }
-    if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-    await saveInventory(token, spreadsheetId, updated);
-    setState(prev => ({ ...prev, inventory: updated }));
+    });
   };
 
   // Edit Inventory
   const handleEditInventory = async (id: string, item: Omit<InventoryItem, 'id'>) => {
-    const updated = state.inventory.map(old => old.id === id ? { id, ...item } : old);
-    if (isDemoMode) {
+    return handleMutation(async () => {
+      const updated = state.inventory.map(old => old.id === id ? { id, ...item } : old);
+      if (isDemoMode) {
+        setState(prev => ({ ...prev, inventory: updated }));
+        return;
+      }
+      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+      await saveInventory(token, spreadsheetId, updated);
       setState(prev => ({ ...prev, inventory: updated }));
-      return;
-    }
-    if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-    await saveInventory(token, spreadsheetId, updated);
-    setState(prev => ({ ...prev, inventory: updated }));
+    });
   };
 
   // Delete Inventory
   const handleDeleteInventory = async (id: string) => {
-    const updated = state.inventory.filter(old => old.id !== id);
-    if (isDemoMode) {
+    return handleMutation(async () => {
+      const updated = state.inventory.filter(old => old.id !== id);
+      if (isDemoMode) {
+        setState(prev => ({ ...prev, inventory: updated }));
+        return;
+      }
+      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+      await saveInventory(token, spreadsheetId, updated);
       setState(prev => ({ ...prev, inventory: updated }));
-      return;
-    }
-    if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-    await saveInventory(token, spreadsheetId, updated);
-    setState(prev => ({ ...prev, inventory: updated }));
+    });
   };
 
   // Add Announcement
   const handleAddAnnouncement = async (ann: Omit<Announcement, 'id'>) => {
-    const newAnn: Announcement = {
-      id: `ann-${Date.now()}`,
-      ...ann
-    };
-    const updated = [...state.announcements, newAnn];
-    if (isDemoMode) {
+    return handleMutation(async () => {
+      const newAnn: Announcement = {
+        id: `ann-${Date.now()}`,
+        ...ann
+      };
+      const updated = [...state.announcements, newAnn];
+      if (isDemoMode) {
+        setState(prev => ({ ...prev, announcements: updated }));
+        return;
+      }
+      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+      await saveAnnouncements(token, spreadsheetId, updated);
       setState(prev => ({ ...prev, announcements: updated }));
-      return;
-    }
-    if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-    await saveAnnouncements(token, spreadsheetId, updated);
-    setState(prev => ({ ...prev, announcements: updated }));
+    });
   };
 
   // Edit Announcement
   const handleEditAnnouncement = async (id: string, ann: Omit<Announcement, 'id'>) => {
-    const updated = state.announcements.map(old => old.id === id ? { id, ...ann } : old);
-    if (isDemoMode) {
+    return handleMutation(async () => {
+      const updated = state.announcements.map(old => old.id === id ? { id, ...ann } : old);
+      if (isDemoMode) {
+        setState(prev => ({ ...prev, announcements: updated }));
+        return;
+      }
+      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+      await saveAnnouncements(token, spreadsheetId, updated);
       setState(prev => ({ ...prev, announcements: updated }));
-      return;
-    }
-    if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-    await saveAnnouncements(token, spreadsheetId, updated);
-    setState(prev => ({ ...prev, announcements: updated }));
+    });
   };
 
   // Delete Announcement
   const handleDeleteAnnouncement = async (id: string) => {
-    const updated = state.announcements.filter(old => old.id !== id);
-    if (isDemoMode) {
+    return handleMutation(async () => {
+      const updated = state.announcements.filter(old => old.id !== id);
+      if (isDemoMode) {
+        setState(prev => ({ ...prev, announcements: updated }));
+        return;
+      }
+      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+      await saveAnnouncements(token, spreadsheetId, updated);
       setState(prev => ({ ...prev, announcements: updated }));
-      return;
-    }
-    if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-    await saveAnnouncements(token, spreadsheetId, updated);
-    setState(prev => ({ ...prev, announcements: updated }));
+    });
   };
 
   // Send Feedback
   const handleSendFeedback = async (feedback: FeedbackData) => {
-    if (isDemoMode) {
+    return handleMutation(async () => {
+      if (isDemoMode) {
+        setState(prev => ({ ...prev, feedbacks: [...prev.feedbacks, feedback] }));
+        return;
+      }
+      if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
+      await saveFeedback(token, spreadsheetId, feedback);
       setState(prev => ({ ...prev, feedbacks: [...prev.feedbacks, feedback] }));
-      return;
-    }
-    if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-    await saveFeedback(token, spreadsheetId, feedback);
-    setState(prev => ({ ...prev, feedbacks: [...prev.feedbacks, feedback] }));
+    });
   };
 
   // --- RENDERING ROUTER ---
