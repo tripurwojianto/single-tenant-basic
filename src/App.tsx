@@ -6,8 +6,28 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { MosqueState, MosqueInfo, CashTransaction, InventoryItem, Announcement, Category, FeedbackData } from './types';
-import { initAuth, googleSignIn, logout, setAccessToken } from './lib/firebase';
-import { findSpreadsheet, createSpreadsheet, fetchSpreadsheetData, saveMosqueInfo, saveIncomes, saveExpenses, saveInventory, saveAnnouncements, saveCategories, saveFeedback } from './lib/googleSheets';
+import { initAuth, googleSignIn, logout, setAccessToken, getMasterRegistryIdFromFirestore, saveMasterRegistryIdToFirestore, isGsiAvailable, ensureGsiLoaded } from './lib/firebase';
+import { 
+  findSpreadsheet, 
+  createSpreadsheet, 
+  fetchSpreadsheetData, 
+  saveMosqueInfo, 
+  saveIncomes, 
+  saveExpenses, 
+  saveInventory, 
+  saveAnnouncements, 
+  saveCategories, 
+  saveFeedback,
+  findMasterRegistry,
+  createMasterRegistry,
+  fetchMasterRegistryRows,
+  registerTenantInMasterRegistry,
+  updateTenantInMasterRegistry,
+  TenantRegistry
+} from './lib/googleSheets';
+import { getActiveBrand, BrandConfig } from './brandConfig';
+import DeveloperDashboard from './components/DeveloperDashboard';
+import TrialExpired from './components/TrialExpired';
 import { INITIAL_MOCK_DATA } from './data/mockData';
 
 // Views
@@ -33,14 +53,53 @@ import {
   BookOpen, CheckCircle2, ShieldCheck
 } from 'lucide-react';
 
+const SESSION_KEY = 'kasmasjid_session';
+const CACHED_DATA_KEY = 'kasmasjid_cached_data';
+
+const getSavedSession = () => {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.isLoggedIn) {
+        const onboarded = parsed.user?.uid ? localStorage.getItem(`kasmasjid_onboarded_${parsed.user.uid}`) : null;
+        if (parsed.isOnboardingComplete === undefined) {
+          parsed.isOnboardingComplete = (onboarded === 'true' || !!parsed.info?.namaMasjid);
+        }
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to parse saved session:', e);
+  }
+  return null;
+};
+
 export default function App() {
+  const brand = getActiveBrand();
+  const initialSession = React.useMemo(() => getSavedSession(), []);
+
   // Auth state
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [needsAuth, setNeedsAuth] = useState(true);
+  const [user, setUser] = useState<User | any>(() => initialSession?.user || null);
+  const [token, setToken] = useState<string | null>(() => initialSession?.token || localStorage.getItem('kasmasjid_google_access_token') || null);
+  const [needsAuth, setNeedsAuth] = useState<boolean>(() => !initialSession || !initialSession.isLoggedIn);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isAuthScriptReady, setIsAuthScriptReady] = useState<boolean>(() => isGsiAvailable());
   const [isDemoMode, setIsDemoMode] = useState(false);
-  const [isOnboarding, setIsOnboarding] = useState(false);
+  const [isOnboarding, setIsOnboarding] = useState<boolean>(() => {
+    if (initialSession && initialSession.isLoggedIn) {
+      return !initialSession.isOnboardingComplete;
+    }
+    return false;
+  });
+
+  // Ensure Google Identity Services script is initialized
+  useEffect(() => {
+    ensureGsiLoaded().then((ready) => {
+      setIsAuthScriptReady(ready);
+    });
+  }, []);
 
   // Path-based routing state
   const [path, setPath] = useState(window.location.pathname);
@@ -75,18 +134,43 @@ export default function App() {
   }, [path]);
 
   // App data state
-  const [state, setState] = useState<MosqueState>({
-    info: { namaMasjid: '', logo: '', tagline: '', alamat: '', kota: '', whatsApp: '', email: '', website: '', profilSingkat: '' },
-    incomes: [],
-    expenses: [],
-    inventory: [],
-    announcements: [],
-    categories: [],
-    feedbacks: []
+  const [state, setState] = useState<MosqueState>(() => {
+    if (initialSession?.info && initialSession.info.namaMasjid) {
+      let cachedData = null;
+      try {
+        const rawData = localStorage.getItem(CACHED_DATA_KEY);
+        if (rawData) cachedData = JSON.parse(rawData);
+      } catch (e) {}
+
+      if (cachedData) {
+        return {
+          ...cachedData,
+          info: { ...cachedData.info, ...initialSession.info }
+        };
+      }
+      return {
+        info: initialSession.info,
+        incomes: [],
+        expenses: [],
+        inventory: [],
+        announcements: [],
+        categories: [],
+        feedbacks: []
+      };
+    }
+    return {
+      info: { namaMasjid: '', logo: '', tagline: '', alamat: '', kota: '', whatsApp: '', email: '', website: '', profilSingkat: '' },
+      incomes: [],
+      expenses: [],
+      inventory: [],
+      announcements: [],
+      categories: [],
+      feedbacks: []
+    };
   });
 
   // Spreadsheet state
-  const [spreadsheetId, setSpreadsheetId] = useState<string | null>(null);
+  const [spreadsheetId, setSpreadsheetId] = useState<string | null>(() => initialSession?.spreadsheetId || null);
   const [isInitializingSheet, setIsInitializingSheet] = useState(false);
   const [sheetLoadingError, setSheetLoadingError] = useState<string | null>(null);
 
@@ -122,21 +206,61 @@ export default function App() {
     setIsBannerDismissed(true);
   };
 
+  // Sync state to localStorage cache when data updates
+  useEffect(() => {
+    if (!isDemoMode && state.info?.namaMasjid) {
+      try {
+        localStorage.setItem(CACHED_DATA_KEY, JSON.stringify(state));
+        const currentSess = getSavedSession();
+        if (currentSess) {
+          currentSess.info = state.info;
+          localStorage.setItem(SESSION_KEY, JSON.stringify(currentSess));
+        }
+      } catch (e) {}
+    }
+  }, [state, isDemoMode]);
+
   // Initial Auth listener on app mount
   useEffect(() => {
     initAuth(
-      (currentUser, cachedToken) => {
+      async (currentUser, cachedToken) => {
         setUser(currentUser);
         setToken(cachedToken);
         setNeedsAuth(false);
-        handleSpreadsheetSync(cachedToken);
-        const onboarded = localStorage.getItem(`kasmasjid_onboarded_${currentUser.uid}`);
-        if (onboarded !== 'true') {
+
+        const currentSess = getSavedSession();
+        const onboarded = currentUser?.uid ? localStorage.getItem(`kasmasjid_onboarded_${currentUser.uid}`) : null;
+        const isComplete = currentSess?.isOnboardingComplete || onboarded === 'true' || !!currentSess?.info?.namaMasjid;
+
+        if (isComplete) {
+          setIsOnboarding(false);
+          handleSpreadsheetSync(cachedToken);
+        } else {
           setIsOnboarding(true);
+          const newSession = {
+            isLoggedIn: true,
+            user: {
+              uid: currentUser.uid,
+              email: currentUser.email,
+              displayName: currentUser.displayName,
+              photoURL: currentUser.photoURL,
+            },
+            token: cachedToken,
+            spreadsheetId: currentSess?.spreadsheetId || null,
+            info: currentSess?.info || null,
+            isOnboardingComplete: false,
+            lastLoginTimestamp: Date.now()
+          };
+          localStorage.setItem(SESSION_KEY, JSON.stringify(newSession));
         }
       },
       () => {
-        setNeedsAuth(true);
+        const currentSess = getSavedSession();
+        if (!currentSess || !currentSess.isLoggedIn) {
+          setNeedsAuth(true);
+        } else {
+          setNeedsAuth(false);
+        }
       }
     );
   }, []);
@@ -146,7 +270,7 @@ export default function App() {
     setIsInitializingSheet(true);
     setSheetLoadingError(null);
     try {
-      let sheetId = await findSpreadsheet(accessToken);
+      let sheetId = spreadsheetId || (await findSpreadsheet(accessToken));
       if (!sheetId) {
         // Automatic creation
         sheetId = await createSpreadsheet(accessToken);
@@ -156,6 +280,25 @@ export default function App() {
       // Load data
       const data = await fetchSpreadsheetData(accessToken, sheetId);
       setState(data);
+
+      try {
+        localStorage.setItem(CACHED_DATA_KEY, JSON.stringify(data));
+      } catch (e) {}
+
+      // Save updated session
+      const sess = getSavedSession();
+      if (sess) {
+        const isComplete = sess.isOnboardingComplete || !!data.info?.namaMasjid;
+        const updated = {
+          ...sess,
+          token: accessToken,
+          spreadsheetId: sheetId,
+          info: data.info?.namaMasjid ? data.info : sess.info,
+          isOnboardingComplete: isComplete,
+          lastLoginTimestamp: Date.now()
+        };
+        localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
+      }
     } catch (err: any) {
       console.error(err);
       setSheetLoadingError(err.message || 'Gagal menyinkronkan database dengan Google Sheets');
@@ -167,6 +310,7 @@ export default function App() {
   // Google Login click
   const handleLogin = async () => {
     setIsLoggingIn(true);
+    setLoginError(null);
     setSheetLoadingError(null);
     try {
       const result = await googleSignIn();
@@ -175,12 +319,41 @@ export default function App() {
         setToken(result.accessToken);
         setNeedsAuth(false);
         setIsDemoMode(false);
-        setIsOnboarding(true);
-        await handleSpreadsheetSync(result.accessToken);
+
+        const onboarded = localStorage.getItem(`kasmasjid_onboarded_${result.user.uid}`);
+        const currentSess = getSavedSession();
+        const isComplete = currentSess?.isOnboardingComplete || onboarded === 'true' || !!currentSess?.info?.namaMasjid;
+
+        const newSession = {
+          isLoggedIn: true,
+          user: {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL,
+          },
+          token: result.accessToken,
+          spreadsheetId: currentSess?.spreadsheetId || null,
+          info: currentSess?.info || null,
+          isOnboardingComplete: isComplete,
+          lastLoginTimestamp: Date.now()
+        };
+        localStorage.setItem(SESSION_KEY, JSON.stringify(newSession));
+
+        if (isComplete) {
+          setIsOnboarding(false);
+          await handleSpreadsheetSync(result.accessToken);
+          navigate('/');
+        } else {
+          setIsOnboarding(true);
+          await handleSpreadsheetSync(result.accessToken);
+          navigate('/onboarding');
+        }
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      alert('Login Gagal: ' + (err.message || 'Periksa koneksi internet Anda'));
+      const errMsg = err?.message || 'Gagal memuat proses login. Silakan refresh halaman dan coba lagi.';
+      setLoginError(errMsg);
     } finally {
       setIsLoggingIn(false);
     }
@@ -204,10 +377,19 @@ export default function App() {
     if (!confirmLogout) return;
 
     try {
+      // Clear persistent session storage
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(CACHED_DATA_KEY);
+      localStorage.removeItem('kasmasjid_google_access_token');
+      if (user?.uid) {
+        localStorage.removeItem(`kasmasjid_onboarding_draft_${user.uid}`);
+      }
+
       await logout();
       setUser(null);
       setToken(null);
       setSpreadsheetId(null);
+      setIsOnboarding(false);
       setNeedsAuth(true);
       navigate('/');
     } catch (err) {
@@ -217,6 +399,12 @@ export default function App() {
 
   const handleCancelOnboarding = async () => {
     try {
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(CACHED_DATA_KEY);
+      localStorage.removeItem('kasmasjid_google_access_token');
+      if (user?.uid) {
+        localStorage.removeItem(`kasmasjid_onboarding_draft_${user.uid}`);
+      }
       await logout();
     } catch (err) {
       console.error('Logout during onboarding cancel failed:', err);
@@ -234,7 +422,26 @@ export default function App() {
       await handleSaveMosqueInfo(info);
       if (user) {
         localStorage.setItem(`kasmasjid_onboarded_${user.uid}`, 'true');
+        localStorage.removeItem(`kasmasjid_onboarding_draft_${user.uid}`);
       }
+
+      const currentSess = getSavedSession();
+      const completedSession = {
+        isLoggedIn: true,
+        user: user ? {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        } : (currentSess?.user || null),
+        token: token || currentSess?.token || '',
+        spreadsheetId: spreadsheetId || currentSess?.spreadsheetId || null,
+        info: info,
+        isOnboardingComplete: true,
+        lastLoginTimestamp: Date.now()
+      };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(completedSession));
+
       setIsOnboarding(false);
       navigate('/');
     } catch (err) {
@@ -255,6 +462,14 @@ export default function App() {
     if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
     await saveMosqueInfo(token, spreadsheetId, info);
     setState(prev => ({ ...prev, info }));
+
+    try {
+      const sess = getSavedSession();
+      if (sess) {
+        sess.info = info;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+      }
+    } catch (e) {}
   };
 
   // Add category
@@ -451,6 +666,7 @@ export default function App() {
       return (
         <OnboardingWizard
           user={user}
+          brand={brand}
           onComplete={handleOnboardingComplete}
           onCancel={handleCancelOnboarding}
           syncSpreadsheet={() => handleSpreadsheetSync(token!)}
@@ -481,13 +697,43 @@ export default function App() {
                   Masuk menggunakan akun Google pengurus masjid Anda untuk mengaktifkan sinkronisasi otomatis Google Sheets.
                 </p>
               </div>
+
+              {loginError && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-left space-y-2">
+                  <div className="flex items-start gap-2.5">
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-red-700 font-medium leading-relaxed">{loginError}</p>
+                  </div>
+                  <button
+                    onClick={handleLogin}
+                    className="text-xs font-bold text-red-700 hover:text-red-800 underline cursor-pointer pl-6"
+                  >
+                    Coba Lagi
+                  </button>
+                </div>
+              )}
+
               <button
                 onClick={handleLogin}
-                disabled={isLoggingIn}
+                disabled={isLoggingIn || !isAuthScriptReady}
                 className="w-full py-3.5 bg-[#16A34A] hover:bg-[#159242] text-white font-bold rounded-2xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-100 disabled:opacity-50"
               >
-                <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
-                {isLoggingIn ? 'Menghubungkan Akun...' : 'Masuk dengan Google'}
+                {isLoggingIn ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>Menghubungkan Akun...</span>
+                  </>
+                ) : !isAuthScriptReady ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>Memuat Google Auth...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
+                    <span>Masuk dengan Google</span>
+                  </>
+                )}
               </button>
             </div>
           </main>
@@ -514,6 +760,7 @@ export default function App() {
     return (
       <OnboardingWizard
         user={user}
+        brand={brand}
         onComplete={handleOnboardingComplete}
         onCancel={handleCancelOnboarding}
         syncSpreadsheet={() => handleSpreadsheetSync(token!)}
@@ -718,7 +965,7 @@ export default function App() {
           </div>
 
           {/* Mode Badge & Google Sheets Link */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {isDemoMode ? (
               <div className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
                 <Info className="w-3.5 h-3.5 text-amber-600" />
@@ -745,6 +992,17 @@ export default function App() {
                   <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span> Disconnected
                 </span>
               </div>
+            )}
+
+            {!isDemoMode && (
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-200/80 ml-2"
+                title="Keluar dari Sesi"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Keluar</span>
+              </button>
             )}
           </div>
         </header>
@@ -826,20 +1084,39 @@ export default function App() {
                 <AlertCircle className="w-6 h-6" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-display font-bold text-lg text-slate-900">Sinkronisasi Database Gagal</h3>
+                <h3 className="font-display font-bold text-lg text-slate-900">
+                  {sheetLoadingError.includes('401') || sheetLoadingError.includes('UNAUTHENTICATED') || sheetLoadingError.includes('kedaluwarsa')
+                    ? 'Sesi Google Telah Kedaluwarsa'
+                    : 'Sinkronisasi Database Gagal'}
+                </h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Gagal menghubungi Google Drive API. Hal ini biasanya terjadi karena token akses Google telah kedaluwarsa atau izin Drive ditarik.
+                  {sheetLoadingError.includes('401') || sheetLoadingError.includes('UNAUTHENTICATED') || sheetLoadingError.includes('kedaluwarsa')
+                    ? 'Akses token Google OAuth Anda telah berakhir. Silakan masuk kembali dengan Google untuk melanjutkan sinkronisasi Google Sheets.'
+                    : 'Gagal menghubungi Google Drive API. Hal ini biasanya terjadi karena token akses Google telah kedaluwarsa atau izin Drive ditarik.'}
                 </p>
                 <div className="p-3 bg-slate-50 rounded-xl text-left border border-slate-100 font-mono text-[10px] text-slate-600 overflow-x-auto max-h-24">
                   {sheetLoadingError}
                 </div>
               </div>
-              <button
-                onClick={() => handleSpreadsheetSync(token!)}
-                className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm transition-all cursor-pointer shadow-sm"
-              >
-                Coba Sinkron Ulang
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={handleLogin}
+                  disabled={isLoggingIn}
+                  className="w-full py-3 bg-[#16A34A] hover:bg-[#159242] text-white font-bold rounded-xl text-xs transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2"
+                >
+                  {isLoggingIn ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : null}
+                  <span>Masuk Kembali dengan Google</span>
+                </button>
+                {token && (
+                  <button
+                    onClick={() => handleSpreadsheetSync(token)}
+                    disabled={isInitializingSheet}
+                    className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl text-xs transition-all cursor-pointer"
+                  >
+                    Coba Ulang Sinkronisasi Token Saat Ini
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             // VIEW CONTROLLER

@@ -1,12 +1,19 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState } from 'react';
 import { 
   Building, MapPin, Phone, Mail, ArrowRight, ArrowLeft, 
   Sparkles, CheckCircle2, ShieldCheck, HelpCircle, Laptop,
   Users, HeartHandshake, Loader2
 } from 'lucide-react';
+import { BrandConfig, getActiveBrand } from '../brandConfig';
 
 interface OnboardingWizardProps {
   user: any;
+  brand?: BrandConfig;
   onComplete: (info: {
     namaMasjid: string;
     logo: string;
@@ -26,26 +33,57 @@ interface OnboardingWizardProps {
 
 export default function OnboardingWizard({ 
   user, 
+  brand = getActiveBrand(),
   onComplete, 
   onCancel,
   syncSpreadsheet,
   isSyncing,
   syncError
 }: OnboardingWizardProps) {
-  const [step, setStep] = useState(1);
-  const [deploymentMode, setDeploymentMode] = useState<'MANDIRI' | 'PENDAMPINGAN' | 'MEMBERSHIP' | null>(null);
+  const draftKey = user?.uid ? `kasmasjid_onboarding_draft_${user.uid}` : 'kasmasjid_onboarding_draft';
+  const draft = React.useMemo(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return null;
+  }, [draftKey]);
+
+  const [step, setStep] = useState<number>(draft?.step || 1);
+  const [deploymentMode, setDeploymentMode] = useState<'MANDIRI' | 'PENDAMPINGAN' | 'MEMBERSHIP' | null>(draft?.deploymentMode || null);
   
-  // Mosque Info state
-  const [namaMasjid, setNamaMasjid] = useState('');
-  const [alamat, setAlamat] = useState('');
-  const [kota, setKota] = useState('');
-  const [whatsApp, setWhatsApp] = useState('');
-  const [email, setEmail] = useState(user?.email || '');
-  const [tagline, setTagline] = useState('');
-  const [logo, setLogo] = useState('');
-  const [profilSingkat, setProfilSingkat] = useState('');
+  // Dynamic fields state (generic field namaMasjid corresponds to organization name)
+  const [namaMasjid, setNamaMasjid] = useState(draft?.namaMasjid || '');
+  const [alamat, setAlamat] = useState(draft?.alamat || '');
+  const [kota, setKota] = useState(draft?.kota || '');
+  const [whatsApp, setWhatsApp] = useState(draft?.whatsApp || '');
+  const [email, setEmail] = useState(draft?.email || user?.email || '');
+  const [tagline, setTagline] = useState(draft?.tagline || '');
+  const [logo, setLogo] = useState(draft?.logo || '');
+  const [profilSingkat, setProfilSingkat] = useState(draft?.profilSingkat || '');
 
   const [hasTriggeredSync, setHasTriggeredSync] = useState(false);
+
+  // Auto-save draft on step or field change
+  React.useEffect(() => {
+    try {
+      const dataToSave = {
+        step,
+        deploymentMode,
+        namaMasjid,
+        alamat,
+        kota,
+        whatsApp,
+        email,
+        tagline,
+        logo,
+        profilSingkat
+      };
+      localStorage.setItem(draftKey, JSON.stringify(dataToSave));
+    } catch (e) {
+      console.error('Error saving onboarding draft:', e);
+    }
+  }, [draftKey, step, deploymentMode, namaMasjid, alamat, kota, whatsApp, email, tagline, logo, profilSingkat]);
 
   const handleNextStep = async () => {
     if (step === 1) {
@@ -56,7 +94,7 @@ export default function OnboardingWizard({
       setStep(2);
     } else if (step === 2) {
       if (!namaMasjid.trim()) {
-        alert('Nama Masjid wajib diisi.');
+        alert(`${brand.orgLabel} wajib diisi.`);
         return;
       }
       setStep(3);
@@ -81,35 +119,40 @@ export default function OnboardingWizard({
   };
 
   const handleFinish = () => {
+    try {
+      localStorage.removeItem(draftKey);
+    } catch (e) {}
     onComplete({
       namaMasjid,
       logo: logo || 'https://images.unsplash.com/photo-1590075865003-e48277faa558?auto=format&fit=crop&q=80&w=200',
-      tagline: tagline || 'Masjid Ramah Jamaah & Akuntabel',
-      alamat: alamat || 'Jl. Raya Masjid No. 1',
+      tagline: tagline || `Ramah Pengguna & Akuntabel`,
+      alamat: alamat || 'Jl. Raya No. 1',
       kota: kota || 'Bandung',
       whatsApp: whatsApp || '081234567890',
       email: email || user?.email || '',
       website: '',
-      profilSingkat: profilSingkat || 'Pusat ibadah dan pembinaan umat.'
+      profilSingkat: profilSingkat || `Sistem administrasi dan transparansi kas digital.`
     }, deploymentMode || 'MANDIRI');
   };
 
+  const shortCode = brand.id === 'masjid' ? 'KM' : brand.id === 'sekolah' ? 'SH' : brand.id === 'warga' ? 'WH' : 'KH';
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans selection:bg-emerald-100">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans selection:bg-emerald-100" id="onboarding-wizard-root">
       {/* Mini header */}
       <header className="h-16 border-b border-slate-200/80 bg-white flex items-center justify-between px-6 sm:px-8 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#16A34A] flex items-center justify-center">
-            <span className="font-display font-black text-sm text-white">KM</span>
+          <div className={`w-9 h-9 rounded-xl ${brand.accentBgClass} flex items-center justify-center`}>
+            <span className="font-display font-black text-sm text-white">{shortCode}</span>
           </div>
           <div>
-            <span className="font-display font-extrabold text-sm text-slate-900 leading-none block">KasMasjid Basic</span>
+            <span className="font-display font-extrabold text-sm text-slate-900 leading-none block">{brand.appName}</span>
             <span className="text-[10px] text-slate-400 font-bold block mt-0.5">Wizard Onboarding</span>
           </div>
         </div>
         <button 
           onClick={onCancel}
-          className="text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors"
+          className="text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
         >
           Keluar Onboarding
         </button>
@@ -120,16 +163,16 @@ export default function OnboardingWizard({
         <div className="max-w-xl mx-auto px-4 flex items-center justify-between">
           {[
             { n: 1, label: 'Deployment' },
-            { n: 2, label: 'Profil Masjid' },
+            { n: 2, label: `Profil ${brand.orgLabel}` },
             { n: 3, label: 'Koneksi Sheets' },
             { n: 4, label: 'Selesai' }
           ].map((s) => (
             <div key={s.n} className="flex items-center gap-2">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all ${
                 step === s.n 
-                  ? 'bg-[#16A34A] text-white ring-4 ring-emerald-50' 
+                  ? `${brand.accentBgClass} text-white ring-4 ring-slate-100` 
                   : step > s.n 
-                    ? 'bg-emerald-100 text-emerald-800'
+                    ? 'bg-slate-100 text-slate-800'
                     : 'bg-slate-100 text-slate-400'
               }`}>
                 {step > s.n ? '✓' : s.n}
@@ -150,7 +193,7 @@ export default function OnboardingWizard({
           {step === 1 && (
             <div className="space-y-6 animate-fade-in">
               <div className="space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-[10px] font-black text-[#16A34A] uppercase tracking-wider">
+                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${brand.accentBadgeClass} border text-[10px] font-black uppercase tracking-wider`}>
                   <Sparkles className="w-3.5 h-3.5" />
                   Langkah Pertama
                 </div>
@@ -158,7 +201,7 @@ export default function OnboardingWizard({
                   Pilih Model Implementasi
                 </h2>
                 <p className="text-xs text-slate-500 leading-relaxed font-sans">
-                  Tentukan bagaimana Anda ingin mengoperasikan KasMasjid Basic untuk tempat ibadah Anda. Semua model mendukung integrasi penuh Google Sheets.
+                  {brand.onboardingIntro}
                 </p>
               </div>
 
@@ -170,13 +213,13 @@ export default function OnboardingWizard({
                     desc: 'Deploy sendiri menggunakan panduan resmi github secara gratis. Direkomendasikan jika Anda memiliki keahlian teknis dasar.',
                     badge: 'Gratis Selamanya',
                     icon: Laptop,
-                    iconColor: 'text-[#16A34A]',
-                    bgColor: 'hover:border-emerald-300'
+                    iconColor: brand.accentTextClass,
+                    bgColor: `hover:border-slate-300`
                   },
                   {
                     id: 'PENDAMPINGAN',
                     title: 'Pendampingan Developer',
-                    desc: 'Tim developer KasMasjid membantu deployment & penyiapan spreadsheet DKM Anda hingga siap digunakan 100%.',
+                    desc: `Tim developer membantu deployment & penyiapan spreadsheet ${brand.orgLabel} Anda hingga siap digunakan 100%.`,
                     badge: 'Donasi Sukarela',
                     icon: Users,
                     iconColor: 'text-indigo-600',
@@ -200,7 +243,7 @@ export default function OnboardingWizard({
                       onClick={() => setDeploymentMode(option.id as any)}
                       className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex gap-4 ${
                         isSelected 
-                          ? 'bg-slate-50 border-[#16A34A] shadow-xs' 
+                          ? `bg-slate-50 border-slate-900 shadow-xs` 
                           : 'border-slate-100 bg-white ' + option.bgColor
                       }`}
                     >
@@ -213,7 +256,7 @@ export default function OnboardingWizard({
                             {option.title}
                           </h4>
                           <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                            isSelected ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'
+                            isSelected ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'
                           }`}>
                             {option.badge}
                           </span>
@@ -229,12 +272,12 @@ export default function OnboardingWizard({
             </div>
           )}
 
-          {/* STEP 2: MOSQUE PROFILE INFO */}
+          {/* STEP 2: PROFILE INFO */}
           {step === 2 && (
             <div className="space-y-6 animate-fade-in">
               <div className="space-y-1">
                 <h2 className="font-display font-black text-2xl text-slate-900 tracking-tight">
-                  Lengkapi Profil Masjid
+                  Lengkapi Profil {brand.orgLabel}
                 </h2>
                 <p className="text-xs text-slate-500 font-sans">
                   Informasi ini akan menjadi kop laporan keuangan dan dipasang di widget informasi utama.
@@ -244,79 +287,79 @@ export default function OnboardingWizard({
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5 text-left">
                   <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                    <Building className="w-3.5 h-3.5 text-[#16A34A]" /> Nama Masjid <span className="text-rose-500">*</span>
+                    <Building className={`w-3.5 h-3.5 ${brand.accentTextClass}`} /> {brand.orgLabel} <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={namaMasjid}
                     onChange={(e) => setNamaMasjid(e.target.value)}
-                    placeholder="Contoh: Masjid Al-Ikhlas"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-[#16A34A] transition-all outline-hidden font-medium text-slate-800"
+                    placeholder={brand.orgPlaceholder}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-slate-500/20 focus:border-slate-800 transition-all outline-hidden font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5 text-left">
                   <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-[#16A34A]" /> Kota / Kabupaten
+                    <MapPin className={`w-3.5 h-3.5 ${brand.accentTextClass}`} /> Kota / Kabupaten
                   </label>
                   <input
                     type="text"
                     value={kota}
                     onChange={(e) => setKota(e.target.value)}
                     placeholder="Contoh: Bandung"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-[#16A34A] transition-all outline-hidden font-medium text-slate-800"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-slate-500/20 focus:border-slate-800 transition-all outline-hidden font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5 text-left sm:col-span-2">
                   <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-[#16A34A]" /> Alamat Lengkap
+                    <MapPin className={`w-3.5 h-3.5 ${brand.accentTextClass}`} /> Alamat Lengkap
                   </label>
                   <input
                     type="text"
                     value={alamat}
                     onChange={(e) => setAlamat(e.target.value)}
                     placeholder="Contoh: Jl. Merdeka No. 45"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-[#16A34A] transition-all outline-hidden font-medium text-slate-800"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-slate-500/20 focus:border-slate-800 transition-all outline-hidden font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5 text-left">
                   <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                    <Phone className="w-3.5 h-3.5 text-[#16A34A]" /> WhatsApp Humas
+                    <Phone className={`w-3.5 h-3.5 ${brand.accentTextClass}`} /> WhatsApp {brand.ownerLabel.split('/')[0].trim()}
                   </label>
                   <input
                     type="text"
                     value={whatsApp}
                     onChange={(e) => setWhatsApp(e.target.value)}
                     placeholder="Contoh: 081234567890"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-[#16A34A] transition-all outline-hidden font-medium text-slate-800"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-slate-500/20 focus:border-slate-800 transition-all outline-hidden font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5 text-left">
                   <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                    <Mail className="w-3.5 h-3.5 text-[#16A34A]" /> Email Kontak
+                    <Mail className={`w-3.5 h-3.5 ${brand.accentTextClass}`} /> Email Kontak
                   </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Contoh: info@alikhlas.or.id"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-[#16A34A] transition-all outline-hidden font-medium text-slate-800"
+                    placeholder="Contoh: info@domain.org"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-slate-500/20 focus:border-slate-800 transition-all outline-hidden font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5 text-left sm:col-span-2">
                   <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
-                    Slogan / Tagline Masjid
+                    Slogan / Tagline {brand.orgLabel}
                   </label>
                   <input
                     type="text"
                     value={tagline}
                     onChange={(e) => setTagline(e.target.value)}
-                    placeholder="Contoh: Membina Umat, Menebar Manfaat"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-[#16A34A] transition-all outline-hidden font-medium text-slate-800"
+                    placeholder="Contoh: Akuntabel, Transparan, Membawa Manfaat"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-slate-500/20 focus:border-slate-800 transition-all outline-hidden font-medium text-slate-800"
                   />
                 </div>
               </div>
@@ -329,7 +372,7 @@ export default function OnboardingWizard({
               <div className="max-w-md mx-auto space-y-4">
                 {isSyncing ? (
                   <div className="space-y-4">
-                    <div className="w-16 h-16 bg-emerald-50 text-[#16A34A] rounded-full flex items-center justify-center mx-auto animate-pulse">
+                    <div className="w-16 h-16 bg-slate-50 text-slate-900 rounded-full flex items-center justify-center mx-auto animate-pulse">
                       <Loader2 className="w-8 h-8 animate-spin" />
                     </div>
                     <div className="space-y-2">
@@ -337,11 +380,11 @@ export default function OnboardingWizard({
                         Menyiapkan Berkas Spreadsheet...
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed font-sans">
-                        Sistem sedang memverifikasi dan merancang tab database otomatis pada Google Drive Anda dengan nama berkas <strong className="text-slate-800 font-semibold font-mono">"KasMasjid Database"</strong>.
+                        Sistem sedang memverifikasi dan merancang tab database otomatis pada Google Drive Anda dengan nama berkas <strong className="text-slate-800 font-semibold font-mono">"{brand.databaseName}"</strong>.
                       </p>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 max-w-xs mx-auto overflow-hidden">
-                      <div className="bg-[#16A34A] h-1.5 rounded-full animate-progress-bar"></div>
+                      <div className="bg-slate-900 h-1.5 rounded-full animate-progress-bar"></div>
                     </div>
                   </div>
                 ) : syncError ? (
@@ -369,18 +412,18 @@ export default function OnboardingWizard({
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-                      <CheckCircle2 className="w-8 h-8 text-[#16A34A]" />
+                    <div className="w-16 h-16 bg-slate-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                      <CheckCircle2 className={`w-8 h-8 ${brand.accentTextClass}`} />
                     </div>
                     <div className="space-y-1">
                       <h3 className="font-display font-black text-xl text-slate-900">
                         Google Sheets Terkoneksi!
                       </h3>
-                      <p className="text-xs text-[#16A34A] font-semibold leading-relaxed font-sans">
-                        Database KasMasjid berhasil diinisialisasi secara real-time.
+                      <p className={`text-xs ${brand.accentTextClass} font-semibold leading-relaxed font-sans`}>
+                        Database {brand.appName} berhasil diinisialisasi secara real-time.
                       </p>
                       <p className="text-xs text-slate-500 leading-relaxed font-sans pt-1">
-                        Pencatatan saldo, donatur, inventaris, dan publikasi pengumuman sekarang tersimpan aman di cloud Google Drive pribadi DKM.
+                        Pencatatan saldo, iuran, inventaris, dan publikasi pengumuman sekarang tersimpan aman di cloud Google Drive pribadi Anda.
                       </p>
                     </div>
                     <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between text-left">
@@ -388,10 +431,10 @@ export default function OnboardingWizard({
                         <Building className="w-5 h-5 text-slate-400" />
                         <div>
                           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-none">Database Google Drive</span>
-                          <span className="text-xs font-bold text-slate-700 font-mono">KasMasjid Database</span>
+                          <span className="text-xs font-bold text-slate-700 font-mono">{brand.databaseName}</span>
                         </div>
                       </div>
-                      <span className="text-[10px] font-bold text-[#16A34A] bg-emerald-100 px-2 py-0.5 rounded-md">
+                      <span className={`text-[10px] font-bold ${brand.accentTextClass} bg-slate-100 px-2 py-0.5 rounded-md`}>
                         AKTIF
                       </span>
                     </div>
@@ -405,7 +448,7 @@ export default function OnboardingWizard({
           {step === 4 && (
             <div className="space-y-6 text-center py-6 animate-fade-in">
               <div className="max-w-md mx-auto space-y-4">
-                <div className="w-20 h-20 bg-emerald-50 text-[#16A34A] rounded-full flex items-center justify-center mx-auto animate-bounce">
+                <div className={`w-20 h-20 bg-slate-50 ${brand.accentTextClass} rounded-full flex items-center justify-center mx-auto animate-bounce`}>
                   <Sparkles className="w-10 h-10" />
                 </div>
                 <div className="space-y-2">
@@ -413,13 +456,13 @@ export default function OnboardingWizard({
                     Selesai & Siap Digunakan!
                   </h3>
                   <p className="text-xs text-slate-600 leading-relaxed font-sans">
-                    Alhamdulillah, proses digitalisasi administrasi untuk <strong>{namaMasjid || 'Masjid Anda'}</strong> telah rampung. Akun Anda telah siap mengakses Dasbor utama.
+                    Alhamdulillah, proses digitalisasi administrasi untuk <strong>{namaMasjid || brand.orgLabel}</strong> telah rampung. Akun Anda telah siap mengakses Dasbor utama.
                   </p>
                 </div>
 
-                <div className="p-4 bg-emerald-50/50 border border-emerald-100/60 rounded-2xl text-left space-y-2.5">
-                  <div className="text-xs font-bold text-[#16A34A] flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-[#16A34A]" />
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-left space-y-2.5">
+                  <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <CheckCircle2 className={`w-4 h-4 ${brand.accentTextClass}`} />
                     Status Layanan Anda:
                   </div>
                   <ul className="text-[11px] text-slate-600 space-y-1 font-medium pl-5 list-disc leading-relaxed">
@@ -450,7 +493,7 @@ export default function OnboardingWizard({
               <button
                 onClick={handleNextStep}
                 disabled={step === 3 && (isSyncing || !!syncError)}
-                className="px-6 py-2.5 rounded-xl bg-[#16A34A] hover:bg-[#159242] active:bg-emerald-800 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40"
+                className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40"
               >
                 Lanjutkan
                 <ArrowRight className="w-4 h-4" />
@@ -458,7 +501,7 @@ export default function OnboardingWizard({
             ) : (
               <button
                 onClick={handleFinish}
-                className="w-full sm:w-auto px-8 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 active:bg-black text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-slate-200 hover:-translate-y-0.5"
+                className="w-full sm:w-auto px-8 py-3 rounded-2xl bg-slate-950 hover:bg-slate-800 active:bg-black text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-slate-200 hover:-translate-y-0.5"
               >
                 Masuk ke Dashboard Utama →
               </button>

@@ -15,6 +15,9 @@ async function handleResponse(res: Response, errorMessage: string) {
   if (!res.ok) {
     const text = await res.text();
     console.error(`Error details: ${text}`);
+    if (res.status === 401) {
+      throw new Error(`Sesi Google Sheets Anda telah kedaluwarsa (401 UNAUTHENTICATED). Silakan klik 'Masuk Kembali dengan Google' untuk memperbarui token akses.`);
+    }
     throw new Error(`${errorMessage} (Status: ${res.status}): ${text}`);
   }
   return res.json();
@@ -433,4 +436,240 @@ export async function saveFeedback(accessToken: string, spreadsheetId: string, f
     body: JSON.stringify(body),
   });
   await handleResponse(res, 'Gagal mengirimkan masukan');
+}
+
+/**
+ * Searches the user's Google Drive for the master registry spreadsheet
+ */
+export async function findMasterRegistry(accessToken: string, masterRegistryName: string): Promise<string | null> {
+  const q = `name = '${masterRegistryName}' and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false`;
+  const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`;
+  
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const data = await handleResponse(res, 'Gagal mencari master registry di Google Drive');
+  
+  if (data.files && data.files.length > 0) {
+    return data.files[0].id;
+  }
+  return null;
+}
+
+/**
+ * Creates a new master registry spreadsheet with 'MasterRegistry' worksheet
+ */
+export async function createMasterRegistry(accessToken: string, masterRegistryName: string): Promise<string> {
+  const url = 'https://sheets.googleapis.com/v4/spreadsheets';
+  const body = {
+    properties: {
+      title: masterRegistryName,
+    },
+    sheets: [
+      { properties: { title: 'MasterRegistry' } },
+    ],
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await handleResponse(res, 'Gagal membuat master registry spreadsheet baru');
+  const spreadsheetId = data.spreadsheetId;
+
+  // Populate initial headers
+  const headersUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/MasterRegistry!A1:R1?valueInputOption=USER_ENTERED`;
+  const headersBody = {
+    range: 'MasterRegistry!A1:R1',
+    values: [[
+      'TenantID', 'OrganizationName', 'OwnerName', 'OwnerEmail', 'WhatsApp', 'City', 
+      'Edition', 'Plan', 'Status', 'TrialStartAt', 'TrialEndAt', 'SpreadsheetID', 
+      'SpreadsheetURL', 'InstanceURL', 'RegisteredAt', 'LastLoginAt', 'UpdatedAt', 'Notes'
+    ]]
+  };
+
+  const headersRes = await fetch(headersUrl, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(headersBody),
+  });
+  await handleResponse(headersRes, 'Gagal menginisialisasi header master registry');
+
+  return spreadsheetId;
+}
+
+export interface TenantRegistry {
+  TenantID: string;
+  OrganizationName: string;
+  OwnerName: string;
+  OwnerEmail: string;
+  WhatsApp: string;
+  City: string;
+  Edition: string;
+  Plan: string;
+  Status: 'Trial' | 'Active' | 'Suspended' | 'Expired';
+  TrialStartAt: string;
+  TrialEndAt: string;
+  SpreadsheetID: string;
+  SpreadsheetURL: string;
+  InstanceURL: string;
+  RegisteredAt: string;
+  LastLoginAt: string;
+  UpdatedAt: string;
+  Notes: string;
+  rowIndex?: number; // 0-based index of row in data rows (exclude header, so actual row is rowIndex + 2)
+}
+
+/**
+ * Fetches and parses all tenant records from MasterRegistry sheet
+ */
+export async function fetchMasterRegistryRows(accessToken: string, masterSpreadsheetId: string): Promise<TenantRegistry[]> {
+  const range = 'MasterRegistry!A1:R2000';
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${masterSpreadsheetId}/values/${encodeURIComponent(range)}`;
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const data = await handleResponse(res, 'Gagal mengambil data master registry');
+  const rows = data.values || [];
+  if (rows.length <= 1) return [];
+
+  const headers = rows[0];
+  const headerMap: Record<string, number> = {};
+  headers.forEach((h: string, idx: number) => {
+    headerMap[h.trim()] = idx;
+  });
+
+  return rows.slice(1).map((row: any[], index: number) => {
+    const getValue = (key: string, fallback: string = '') => {
+      const idx = headerMap[key];
+      return idx !== undefined && row[idx] !== undefined ? String(row[idx]) : fallback;
+    };
+
+    return {
+      TenantID: getValue('TenantID'),
+      OrganizationName: getValue('OrganizationName'),
+      OwnerName: getValue('OwnerName'),
+      OwnerEmail: getValue('OwnerEmail'),
+      WhatsApp: getValue('WhatsApp'),
+      City: getValue('City'),
+      Edition: getValue('Edition'),
+      Plan: getValue('Plan'),
+      Status: getValue('Status', 'Trial') as any,
+      TrialStartAt: getValue('TrialStartAt'),
+      TrialEndAt: getValue('TrialEndAt'),
+      SpreadsheetID: getValue('SpreadsheetID'),
+      SpreadsheetURL: getValue('SpreadsheetURL'),
+      InstanceURL: getValue('InstanceURL'),
+      RegisteredAt: getValue('RegisteredAt'),
+      LastLoginAt: getValue('LastLoginAt'),
+      UpdatedAt: getValue('UpdatedAt'),
+      Notes: getValue('Notes'),
+      rowIndex: index // 0-based index of the data row
+    };
+  });
+}
+
+/**
+ * Registers a new tenant by appending a row to the MasterRegistry sheet
+ */
+export async function registerTenantInMasterRegistry(accessToken: string, masterSpreadsheetId: string, tenant: TenantRegistry) {
+  const appendUrl = `https://sheets.googleapis.com/v4/spreadsheets/${masterSpreadsheetId}/values/MasterRegistry!A2:append?valueInputOption=USER_ENTERED`;
+  const body = {
+    range: 'MasterRegistry!A2',
+    majorDimension: 'ROWS',
+    values: [[
+      tenant.TenantID,
+      tenant.OrganizationName,
+      tenant.OwnerName,
+      tenant.OwnerEmail,
+      tenant.WhatsApp,
+      tenant.City,
+      tenant.Edition,
+      tenant.Plan,
+      tenant.Status,
+      tenant.TrialStartAt,
+      tenant.TrialEndAt,
+      tenant.SpreadsheetID,
+      tenant.SpreadsheetURL,
+      tenant.InstanceURL,
+      tenant.RegisteredAt,
+      tenant.LastLoginAt,
+      tenant.UpdatedAt,
+      tenant.Notes
+    ]]
+  };
+
+  const res = await fetch(appendUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  await handleResponse(res, 'Gagal mendaftarkan tenant di master registry');
+}
+
+/**
+ * Updates a tenant row in the MasterRegistry sheet
+ */
+export async function updateTenantInMasterRegistry(
+  accessToken: string, 
+  masterSpreadsheetId: string, 
+  tenantId: string, 
+  updatedFields: Partial<TenantRegistry>
+) {
+  // 1. Fetch current rows to find row index
+  const tenants = await fetchMasterRegistryRows(accessToken, masterSpreadsheetId);
+  const tenant = tenants.find(t => t.TenantID === tenantId);
+  if (!tenant || tenant.rowIndex === undefined) {
+    throw new Error(`Tenant dengan ID ${tenantId} tidak ditemukan di master registry.`);
+  }
+
+  const actualRowNumber = tenant.rowIndex + 2; // +1 for 1-based index, +1 for header row
+  const updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${masterSpreadsheetId}/values/MasterRegistry!A${actualRowNumber}:R${actualRowNumber}?valueInputOption=USER_ENTERED`;
+  
+  // Create full updated row payload
+  const mergedTenant = { ...tenant, ...updatedFields, UpdatedAt: new Date().toISOString() };
+  const rowValues = [
+    mergedTenant.TenantID,
+    mergedTenant.OrganizationName,
+    mergedTenant.OwnerName,
+    mergedTenant.OwnerEmail,
+    mergedTenant.WhatsApp,
+    mergedTenant.City,
+    mergedTenant.Edition,
+    mergedTenant.Plan,
+    mergedTenant.Status,
+    mergedTenant.TrialStartAt,
+    mergedTenant.TrialEndAt,
+    mergedTenant.SpreadsheetID,
+    mergedTenant.SpreadsheetURL,
+    mergedTenant.InstanceURL,
+    mergedTenant.RegisteredAt,
+    mergedTenant.LastLoginAt,
+    mergedTenant.UpdatedAt,
+    mergedTenant.Notes
+  ];
+
+  const res = await fetch(updateUrl, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      range: `MasterRegistry!A${actualRowNumber}:R${actualRowNumber}`,
+      values: [rowValues]
+    }),
+  });
+  await handleResponse(res, 'Gagal memperbarui tenant di master registry');
 }
