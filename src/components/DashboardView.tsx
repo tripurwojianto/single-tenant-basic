@@ -8,7 +8,7 @@ import { MosqueState, CashTransaction, InventoryItem, Announcement } from '../ty
 import { 
   TrendingUp, TrendingDown, Wallet, Box, Megaphone, PlusCircle, 
   ArrowUpRight, ArrowDownRight, Calendar, User, FileText, MapPin, 
-  Settings, Check, X, AlertTriangle 
+  Settings, Check, X, AlertTriangle, Sparkles, ArrowRight
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -22,6 +22,7 @@ interface DashboardViewProps {
   onAddExpense: (expense: Omit<CashTransaction, 'id'>) => Promise<void>;
   onAddInventory: (item: Omit<InventoryItem, 'id'>) => Promise<void>;
   onAddAnnouncement: (ann: Omit<Announcement, 'id'>) => Promise<void>;
+  onNavigateToAmina?: () => void;
 }
 
 export default function DashboardView({ 
@@ -33,7 +34,8 @@ export default function DashboardView({
   onAddIncome, 
   onAddExpense, 
   onAddInventory, 
-  onAddAnnouncement 
+  onAddAnnouncement,
+  onNavigateToAmina
 }: DashboardViewProps) {
   // Modal states
   const [activeModal, setActiveModal] = useState<'income' | 'expense' | 'inventory' | 'announcement' | null>(null);
@@ -383,6 +385,43 @@ export default function DashboardView({
         </div>
       </div>
 
+      {/* 1.5 KARTU ASISTEN AMINA */}
+      <div className="bg-gradient-to-r from-emerald-900 via-emerald-850 to-teal-900 rounded-[28px] sm:rounded-[32px] p-6 sm:p-7 text-white shadow-xl shadow-emerald-950/10 border border-emerald-700/60 relative overflow-hidden">
+        {/* Background Decorative Glow */}
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 -mb-8 w-40 h-40 bg-teal-400/10 rounded-full blur-xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-emerald-950 flex items-center justify-center font-black text-2xl shadow-md border border-emerald-300/30 shrink-0">
+              <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-950" />
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <h3 className="font-display font-black text-lg sm:text-xl text-white tracking-tight flex items-center gap-2">
+                  <span>✨ Asisten Amina</span>
+                </h3>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold border border-emerald-400/30 uppercase tracking-wider">
+                  AI Pendamping DKM
+                </span>
+              </div>
+              <p className="text-emerald-100/90 text-xs sm:text-sm font-sans font-medium leading-relaxed max-w-2xl">
+                Bingung menyusun laporan, membuat pengumuman, atau menjawab pertanyaan administrasi masjid? Amina siap membantu.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => onNavigateToAmina?.()}
+            className="w-full md:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-display font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg shadow-emerald-950/20 hover:shadow-emerald-500/20 transition-all flex items-center justify-center gap-2.5 shrink-0 cursor-pointer active:scale-95 group border border-emerald-300/50"
+          >
+            <span>[ Mulai Bertanya ]</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+      </div>
+
       {/* 2. KARTU TOTAL SALDO KAS */}
       <div className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 text-white shadow-xl shadow-emerald-950/10 flex flex-col justify-between min-h-[200px]">
         <div>
@@ -470,12 +509,12 @@ export default function DashboardView({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
           <button 
             onClick={() => setActiveModal('income')}
             className="flex items-center justify-between p-4 bg-slate-50 hover:bg-emerald-50/80 rounded-2xl border border-slate-200/60 hover:border-emerald-200 transition-all group cursor-pointer text-left"
           >
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center font-black text-lg shrink-0">
                 +
               </div>
@@ -491,7 +530,7 @@ export default function DashboardView({
             onClick={() => setActiveModal('expense')}
             className="flex items-center justify-between p-4 bg-slate-50 hover:bg-rose-50/80 rounded-2xl border border-slate-200/60 hover:border-rose-200 transition-all group cursor-pointer text-left"
           >
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-rose-100 text-rose-700 rounded-xl flex items-center justify-center font-black text-lg shrink-0">
                 -
               </div>
@@ -507,12 +546,12 @@ export default function DashboardView({
             onClick={() => setActiveModal('inventory')}
             className="flex items-center justify-between p-4 bg-slate-50 hover:bg-amber-50/80 rounded-2xl border border-slate-200/60 hover:border-amber-200 transition-all group cursor-pointer text-left"
           >
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center text-base shrink-0">
                 📦
               </div>
               <div>
-                <p className="font-bold text-slate-900 text-xs sm:text-sm">Catat Inventaris</p>
+                <p className="font-bold text-slate-900 text-xs sm:text-sm">Tambah Inventaris</p>
                 <p className="text-[10px] text-slate-500">Aset & Perlengkapan</p>
               </div>
             </div>
@@ -523,7 +562,7 @@ export default function DashboardView({
             onClick={() => setActiveModal('announcement')}
             className="flex items-center justify-between p-4 bg-slate-50 hover:bg-blue-50/80 rounded-2xl border border-slate-200/60 hover:border-blue-200 transition-all group cursor-pointer text-left"
           >
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center text-base shrink-0">
                 📢
               </div>
@@ -533,6 +572,22 @@ export default function DashboardView({
               </div>
             </div>
             <span className="text-slate-300 group-hover:text-blue-600 transition-colors">→</span>
+          </button>
+
+          <button 
+            onClick={() => onNavigateToAmina?.()}
+            className="flex items-center justify-between p-4 bg-emerald-50/60 hover:bg-emerald-100/80 rounded-2xl border border-emerald-200/80 transition-all group cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center text-base shrink-0 shadow-xs">
+                🤖
+              </div>
+              <div>
+                <p className="font-bold text-slate-900 text-xs sm:text-sm">Asisten Amina</p>
+                <p className="text-[10px] text-emerald-700 font-medium">Tanya DKM & Kas</p>
+              </div>
+            </div>
+            <span className="text-emerald-400 group-hover:text-emerald-700 transition-colors">→</span>
           </button>
         </div>
       </div>

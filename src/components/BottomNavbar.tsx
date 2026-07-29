@@ -19,7 +19,15 @@ import {
   FileSpreadsheet,
   CheckCircle2,
   AlertTriangle,
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  Smartphone,
+  Users,
+  Globe,
+  HeartHandshake,
+  QrCode,
+  Receipt,
+  Info
 } from 'lucide-react';
 
 interface BottomNavbarProps {
@@ -268,139 +276,213 @@ export default function BottomNavbar({
             </div>
 
             {/* List Menu Sekunder */}
-            <div className="space-y-2">
+            <div className="space-y-4">
               
-              {/* 1. Profil Tempat Ibadah */}
-              <button
-                onClick={() => handleNavigateMenu('mosque-info')}
-                className="w-full p-3.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 hover:border-emerald-200 flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer text-left group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
-                    <Building className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-emerald-950">Profil Tempat Ibadah</h4>
-                    <p className="text-[11px] text-slate-500">Identitas, pengurus, & alamat masjid</p>
-                  </div>
+              {/* Kelola Masjid Group */}
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">🕌 Kelola Masjid</p>
+                <div className="space-y-1.5">
+                  <button
+                    onClick={() => handleNavigateMenu('mosque-info')}
+                    className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 flex items-center justify-between transition-all cursor-pointer text-left group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                        <Building className="w-4 h-4" />
+                      </div>
+                      <span className="font-bold text-xs text-slate-800">Informasi Masjid</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                  </button>
+                  <button
+                    onClick={() => handleNavigateMenu('inventory')}
+                    className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 flex items-center justify-between transition-all cursor-pointer text-left group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                        <Box className="w-4 h-4" />
+                      </div>
+                      <span className="font-bold text-xs text-slate-800">Daftar Inventaris</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                  </button>
+                  <button
+                    onClick={() => handleNavigateMenu('announcements')}
+                    className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 flex items-center justify-between transition-all cursor-pointer text-left group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-800 flex items-center justify-center shrink-0">
+                        <Megaphone className="w-4 h-4" />
+                      </div>
+                      <span className="font-bold text-xs text-slate-800">Komposer Pengumuman</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                  </button>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600" />
-              </button>
+              </div>
 
-              {/* 2. Sinkronisasi Google Sheets */}
-              <button
-                onClick={() => {
-                  setIsLainnyaSheetOpen(false);
-                  if (syncError && onReauthenticate) {
-                    onReauthenticate();
-                  } else if (spreadsheetId) {
-                    window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`, '_blank');
-                  } else if (onOpenDeploy) {
-                    onOpenDeploy();
-                  }
-                }}
-                className="w-full p-3.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 hover:border-emerald-200 flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer text-left group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                    syncError ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
-                  }`}>
-                    {syncError ? <AlertTriangle className="w-5 h-5 text-amber-600" /> : <FileSpreadsheet className="w-5 h-5" />}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-emerald-950">
-                      Sinkronisasi Google Sheets
-                    </h4>
-                    <p className="text-[11px] text-slate-500">
-                      {syncError ? 'Perlu diperbarui (Klik untuk hubungkan kembali)' : spreadsheetId ? 'Terhubung (Buka Google Drive)' : 'Menggunakan Penyimpanan Lokal'}
-                    </p>
-                  </div>
+              {/* Bantuan Group */}
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">🤖 Bantuan</p>
+                <div className="space-y-1.5">
+                  <button
+                    onClick={() => handleNavigateMenu('amina')}
+                    className="w-full p-3 rounded-2xl bg-emerald-50/60 hover:bg-emerald-100/80 border border-emerald-100 flex items-center justify-between transition-all cursor-pointer text-left group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                        <Sparkles className="w-4 h-4" />
+                      </div>
+                      <span className="font-bold text-xs text-emerald-950">Asisten Amina AI</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-emerald-600" />
+                  </button>
+                  <button
+                    onClick={() => handleNavigateMenu('feedback')}
+                    className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 flex items-center justify-between transition-all cursor-pointer text-left group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center shrink-0">
+                        <MessageSquare className="w-4 h-4" />
+                      </div>
+                      <span className="font-bold text-xs text-slate-800">Kirim Feedback</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                  </button>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600" />
-              </button>
+              </div>
 
-              {/* 3. Deploy Mandiri */}
-              <button
-                onClick={() => {
-                  setIsLainnyaSheetOpen(false);
-                  if (onOpenDeploy) onOpenDeploy();
-                }}
-                className="w-full p-3.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 hover:border-emerald-200 flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer text-left group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center shrink-0">
-                    <Rocket className="w-5 h-5" />
+              {/* Upgrade KasMasjid Group */}
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider px-1">🚀 Upgrade KasMasjid</p>
+                <button
+                  onClick={() => handleNavigateMenu('upgrade')}
+                  className="w-full p-3 rounded-2xl bg-emerald-700 hover:bg-emerald-600 text-white flex items-center justify-between transition-all cursor-pointer text-left shadow-xs"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-xs text-white">Pilihan Paket & Upgrade</p>
+                      <p className="text-[10px] text-emerald-100/90">Bandingkan Basic, Portal & Membership</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-emerald-950">Deploy Mandiri</h4>
-                    <p className="text-[11px] text-slate-500">Panduan & aktivasi gratis selamanya</p>
-                  </div>
+                  <ChevronRight className="w-4 h-4 text-emerald-200" />
+                </button>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleNavigateMenu('whatsapp-notif')}
+                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Smartphone className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-indigo-950 truncate">WA Notif</span>
+                    </div>
+                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigateMenu('multi-admin')}
+                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Users className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-indigo-950 truncate">Multi Admin</span>
+                    </div>
+                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigateMenu('portal-jamaah')}
+                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Globe className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-indigo-950 truncate">Portal Jamaah</span>
+                    </div>
+                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigateMenu('zakat-digital')}
+                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <HeartHandshake className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-indigo-950 truncate">Zakat Digital</span>
+                    </div>
+                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigateMenu('infaq-qris')}
+                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <QrCode className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-indigo-950 truncate">Infaq QRIS</span>
+                    </div>
+                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigateMenu('thermal-print')}
+                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Receipt className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-indigo-950 truncate">Cetak Struk</span>
+                    </div>
+                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
+                  </button>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600" />
-              </button>
+              </div>
 
-              {/* 4. Pendampingan Deployment */}
-              <button
-                onClick={() => {
-                  setIsLainnyaSheetOpen(false);
-                  if (onOpenContact) onOpenContact();
-                }}
-                className="w-full p-3.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 hover:border-emerald-200 flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer text-left group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center shrink-0">
-                    <Headphones className="w-5 h-5" />
+              {/* Tentang & Sistem */}
+              <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                <button
+                  onClick={() => handleNavigateMenu('about')}
+                  className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 flex items-center justify-between transition-all cursor-pointer text-left group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center shrink-0">
+                      <Info className="w-4 h-4" />
+                    </div>
+                    <span className="font-bold text-xs text-slate-800">Tentang KasMasjid</span>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-emerald-950">Pendampingan Deployment</h4>
-                    <p className="text-[11px] text-slate-500">Bantuan teknis dari tim pengembang</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600" />
-              </button>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </button>
 
-              {/* 5. Membership & Fitur Tambahan */}
-              <button
-                onClick={() => handleNavigateMenu('portal-jamaah')}
-                className="w-full p-3.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 hover:border-emerald-200 flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer text-left group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
-                    <Award className="w-5 h-5" />
+                <button
+                  onClick={() => {
+                    setIsLainnyaSheetOpen(false);
+                    if (syncError && onReauthenticate) {
+                      onReauthenticate();
+                    } else if (spreadsheetId) {
+                      window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`, '_blank');
+                    } else if (onOpenDeploy) {
+                      onOpenDeploy();
+                    }
+                  }}
+                  className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 flex items-center justify-between transition-all cursor-pointer text-left group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                      syncError ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                    }`}>
+                      {syncError ? <AlertTriangle className="w-4 h-4 text-amber-600" /> : <FileSpreadsheet className="w-4 h-4" />}
+                    </div>
+                    <span className="font-bold text-xs text-slate-800">Google Sheets Sync</span>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-emerald-950">Membership & Pro Features</h4>
-                    <p className="text-[11px] text-slate-500">QRIS, WhatsApp, & Portal Jamaah</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600" />
-              </button>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </button>
+              </div>
 
-              {/* 6. Feedback */}
-              <button
-                onClick={() => handleNavigateMenu('feedback')}
-                className="w-full p-3.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 hover:border-emerald-200 flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer text-left group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center shrink-0">
-                    <MessageSquare className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-emerald-950">Feedback & Saran</h4>
-                    <p className="text-[11px] text-slate-500">Kirim masukan untuk pengembangan app</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600" />
-              </button>
-
-              {/* 7. Logout */}
-              <div className="pt-3 border-t border-slate-100 mt-2">
+              {/* Logout */}
+              <div className="pt-2">
                 <button
                   onClick={() => {
                     setIsLainnyaSheetOpen(false);
                     onLogout();
                   }}
-                  className="w-full p-3.5 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-100 text-rose-700 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
+                  className="w-full py-3 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-100 text-rose-700 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <LogOut className="w-4 h-4 text-rose-600" />
                   <span>Logout dari Sesi</span>

@@ -50,7 +50,7 @@ export default function OnboardingWizard({
   }, [draftKey]);
 
   const [step, setStep] = useState<number>(draft?.step || 1);
-  const [deploymentMode, setDeploymentMode] = useState<'MANDIRI' | 'PENDAMPINGAN' | 'MEMBERSHIP' | null>(draft?.deploymentMode || null);
+  const [deploymentMode, setDeploymentMode] = useState<'MANDIRI' | 'PENDAMPINGAN' | 'PENGELOLAAN' | null>(draft?.deploymentMode || null);
   
   // Dynamic fields state (generic field namaMasjid corresponds to organization name)
   const [namaMasjid, setNamaMasjid] = useState(draft?.namaMasjid || '');
@@ -209,30 +209,30 @@ export default function OnboardingWizard({
                 {[
                   {
                     id: 'MANDIRI',
-                    title: 'Deployment Mandiri',
-                    desc: 'Deploy sendiri menggunakan panduan resmi github secara gratis. Direkomendasikan jika Anda memiliki keahlian teknis dasar.',
-                    badge: 'Gratis Selamanya',
+                    title: 'Implementasi Mandiri',
+                    desc: 'Sekali bayar, aplikasi dikelola sendiri. Deploy mandiri menggunakan panduan resmi repository KasMasjid.',
+                    badge: 'Aplikasi Dikelola Sendiri',
                     icon: Laptop,
                     iconColor: brand.accentTextClass,
                     bgColor: `hover:border-slate-300`
                   },
                   {
                     id: 'PENDAMPINGAN',
-                    title: 'Pendampingan Developer',
-                    desc: `Tim developer membantu deployment & penyiapan spreadsheet ${brand.orgLabel} Anda hingga siap digunakan 100%.`,
-                    badge: 'Donasi Sukarela',
+                    title: 'Pendampingan Implementasi',
+                    desc: `Sekali bayar, kami membantu proses implementasi. Tim teknis membantu penyiapan spreadsheet & deployment ${brand.orgLabel} Anda hingga siap 100%.`,
+                    badge: 'Dibantu Sampai Live',
                     icon: Users,
                     iconColor: 'text-indigo-600',
                     bgColor: 'hover:border-indigo-300'
                   },
                   {
-                    id: 'MEMBERSHIP',
-                    title: 'Edisi Cloud / Membership',
-                    desc: 'Aplikasi langsung siap pakai instan tanpa perlu repot melakukan deployment sendiri. Termasuk dukungan teknis 24/7.',
-                    badge: 'Populer & Praktis',
+                    id: 'PENGELOLAAN',
+                    title: 'Layanan Pengelolaan',
+                    desc: 'Berlangganan bulanan, aplikasi & website dikelola penuh oleh tim KasMasjid. Bebas repot server, backup rutin & support 24/7.',
+                    badge: 'Dikelola Tim KasMasjid',
                     icon: HeartHandshake,
-                    iconColor: 'text-amber-600',
-                    bgColor: 'hover:border-amber-300'
+                    iconColor: 'text-purple-600',
+                    bgColor: 'hover:border-purple-300'
                   }
                 ].map((option) => {
                   const Icon = option.icon;

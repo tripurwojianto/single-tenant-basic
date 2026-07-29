@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { 
   Users, Smartphone, Receipt, QrCode, HeartHandshake, Globe, 
-  Sparkles, ArrowLeft, CheckCircle2, Zap, MessageSquareCode, 
+  Sparkles, ArrowLeft, CheckCircle2, Zap, Wrench, Cloud,
   ChevronRight, Calendar, BellRing, ClipboardCheck, LayoutGrid, CheckSquare
 } from 'lucide-react';
+import ProServiceModal from './ProServiceModal';
 
 interface FeaturePreviewViewProps {
   featureKey: string;
@@ -12,14 +13,13 @@ interface FeaturePreviewViewProps {
 }
 
 export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgradeClick }: FeaturePreviewViewProps) {
-  const [successModal, setSuccessModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState('');
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
 
-  // Define details for locked features
+  // Define details for locked features (All non-basic features are KasMasjid Pro)
   const featureDetails: {
     [key: string]: {
       title: string;
-      tier: 'PRO' | 'MEMBERSHIP';
+      tier: 'PRO';
       icon: React.ComponentType<any>;
       badgeColor: string;
       iconBg: string;
@@ -43,7 +43,7 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
         'Kirim struk digital otomatis ke nomor WhatsApp donatur.',
         'Notifikasi real-time untuk pengeluaran bernominal besar kepada Ketua DKM.',
         'Kirim resume saldo kas mingguan otomatis ke grup WA pengurus masjid.',
-        'Tanpa perlu biaya sewa server server tambahan (siap pakai).'
+        'Tanpa perlu biaya sewa server tambahan (siap pakai).'
       ],
       useCases: [
         {
@@ -110,11 +110,11 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
     },
     'portal-jamaah': {
       title: 'Portal Jamaah & Mading Digital',
-      tier: 'MEMBERSHIP',
+      tier: 'PRO',
       icon: Globe,
-      badgeColor: 'bg-amber-50 border-amber-200 text-amber-700',
-      iconBg: 'bg-amber-50 text-amber-600',
-      iconColor: 'text-amber-600',
+      badgeColor: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+      iconBg: 'bg-indigo-50 text-indigo-600',
+      iconColor: 'text-indigo-600',
       tagline: 'Publikasikan transparansi keuangan & jadwal kegiatan masjid ke seluruh dunia',
       description: 'Satu halaman web khusus (portal publik) berdomain kustom untuk masjid Anda. Seluruh jamaah dapat memantau secara langsung laporan keuangan mingguan, program kerja DKM, inventaris barang yang siap dipinjam, serta jadwal kajian terdekat.',
       highlights: [
@@ -136,11 +136,11 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
     },
     'zakat-digital': {
       title: 'Manajemen Zakat Fitrah & Maal',
-      tier: 'MEMBERSHIP',
+      tier: 'PRO',
       icon: HeartHandshake,
-      badgeColor: 'bg-amber-50 border-amber-200 text-amber-700',
-      iconBg: 'bg-amber-50 text-amber-600',
-      iconColor: 'text-amber-600',
+      badgeColor: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+      iconBg: 'bg-indigo-50 text-indigo-600',
+      iconColor: 'text-indigo-600',
       tagline: 'Pembukuan zakat profesional terintegrasi dari muzakki hingga mustahik',
       description: 'Modul komprehensif untuk mendata pembayar zakat (muzakki) dan penerima manfaat (mustahik) di lingkungan sekitar masjid. Dilengkapi dengan kalkulator zakat syar\'i untuk membantu jamaah menghitung kewajibannya secara akurat.',
       highlights: [
@@ -162,11 +162,11 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
     },
     'infaq-qris': {
       title: 'Infaq QRIS Dinamis & Statis',
-      tier: 'MEMBERSHIP',
+      tier: 'PRO',
       icon: QrCode,
-      badgeColor: 'bg-amber-50 border-amber-200 text-amber-700',
-      iconBg: 'bg-amber-50 text-amber-600',
-      iconColor: 'text-amber-600',
+      badgeColor: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+      iconBg: 'bg-indigo-50 text-indigo-600',
+      iconColor: 'text-indigo-600',
       tagline: 'Terima infaq non-tunai langsung masuk rekonsiliasi buku kas besar',
       description: 'Integrasi sistem pembayaran non-tunai berbiaya admin rendah khusus tempat ibadah. Setiap kali jamaah memindai QRIS masjid Anda, transaksi akan terekam otomatis di sistem KasMasjid tanpa perlu bendahara menginput satu-persatu.',
       highlights: [
@@ -189,24 +189,19 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
   };
 
   const feature = featureDetails[featureKey] || {
-    title: 'Fitur Premium KasMasjid',
+    title: 'Fitur KasMasjid Pro',
     tier: 'PRO',
     icon: Sparkles,
     badgeColor: 'bg-indigo-50 border-indigo-200 text-indigo-700',
     iconBg: 'bg-indigo-50 text-indigo-600',
     iconColor: 'text-indigo-600',
     tagline: 'Kembangkan pengelolaan administrasi masjid Anda ke tingkat berikutnya',
-    description: 'Fitur ini tersedia dalam edisi premium KasMasjid untuk mendukung ekosistem pengelolaan operasional masjid yang lebih maju.',
+    description: 'Fitur ini tersedia dalam produk KasMasjid Pro untuk mendukung ekosistem pengelolaan operasional masjid yang lebih maju.',
     highlights: ['Manajemen canggih', 'Transparansi optimal', 'Integrasi andal'],
     useCases: []
   };
 
   const IconComponent = feature.icon;
-
-  const handleCTA = (planType: string) => {
-    setSelectedPlan(planType);
-    setSuccessModal(true);
-  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-12">
@@ -220,13 +215,12 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
           Kembali ke Fitur Demo
         </button>
         <div className={`px-3 py-1 rounded-full border text-[10px] font-extrabold uppercase tracking-widest ${feature.badgeColor}`}>
-          Edisi {feature.tier}
+          Produk KasMasjid Pro
         </div>
       </div>
 
       {/* Hero Header Section */}
       <div className="bg-white rounded-[32px] border border-slate-200/80 p-6 sm:p-10 shadow-sm relative overflow-hidden">
-        {/* Decorative Grid or Accent */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -z-10 flex items-center justify-center opacity-40">
           <Sparkles className="w-8 h-8 text-slate-300" />
         </div>
@@ -242,7 +236,7 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
             <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
               {feature.tagline}
             </p>
-            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-sans pt-1">
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-sans">
               {feature.description}
             </p>
           </div>
@@ -261,7 +255,7 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
         </div>
       </div>
 
-      {/* Typical Use Cases (Studi Kasus) */}
+      {/* Typical Use Cases */}
       {feature.useCases.length > 0 && (
         <div className="space-y-4">
           <h3 className="font-display font-bold text-base text-slate-800 px-1 flex items-center gap-2">
@@ -289,31 +283,85 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
         </div>
       )}
 
-      {/* Upgrading Comparison / Call To Action Panel */}
+      {/* Model Layanan Overview Section */}
+      <div className="bg-white rounded-[32px] p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+        <div className="space-y-1.5 text-left">
+          <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block">Skema Implementasi</span>
+          <h3 className="font-display font-black text-lg text-slate-900">
+            3 Pilihan Model Layanan KasMasjid Pro
+          </h3>
+          <p className="text-xs text-slate-500">
+            Fitur ini tersedia dalam produk KasMasjid Pro. Pilih skema layanan yang paling sesuai dengan kebutuhan DKM Anda:
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4 text-left">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                <Wrench className="w-4 h-4" />
+              </div>
+              <h4 className="font-bold text-xs text-slate-900">Implementasi Mandiri</h4>
+            </div>
+            <p className="text-[11px] font-semibold text-emerald-700">Sekali bayar, dikelola sendiri</p>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Menerima akses source code & panduan instalasi ke Vercel/Cloud. Database dikelola mandiri tanpa iuran bulanan.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center shrink-0">
+                <Users className="w-4 h-4" />
+              </div>
+              <h4 className="font-bold text-xs text-slate-900">Pendampingan Implementasi</h4>
+            </div>
+            <p className="text-[11px] font-semibold text-indigo-700">Sekali bayar, dibantu sampai live</p>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Tim teknis KasMasjid mendampingi proses setup, konfigurasi Google API, hingga aplikasi siap pakai 100%.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center shrink-0">
+                <Cloud className="w-4 h-4" />
+              </div>
+              <h4 className="font-bold text-xs text-slate-900">Layanan Pengelolaan</h4>
+            </div>
+            <p className="text-[11px] font-semibold text-purple-700">Berlangganan bulanan</p>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Tim KasMasjid mengelola penuh infrastruktur server, backup rutin, domain kustom, & support prioritas 24/7.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Upgrading Call To Action Panel */}
       <div className="bg-slate-900 text-white rounded-[32px] p-6 sm:p-10 shadow-lg relative overflow-hidden">
         <div className="absolute bottom-0 right-0 w-64 h-64 bg-emerald-950 rounded-tl-full -z-10 opacity-30"></div>
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="space-y-3 text-center md:text-left">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-              <Sparkles className="w-3 h-3" />
-              Siap Bertransformasi Digital?
+              <Sparkles className="w-3.5 h-3.5" />
+              KasMasjid Pro
             </div>
             <h3 className="font-display font-bold text-xl sm:text-2xl text-white tracking-tight">
-              Mulai Langkah Modernisasi Masjid Anda
+              Aktivasi KasMasjid Pro untuk DKM Anda
             </h3>
             <p className="text-xs sm:text-sm text-slate-400 max-w-lg leading-relaxed">
-              Dapatkan semua keunggulan fitur {feature.tier} dan modul lanjutan lainnya untuk mempercepat transparansi, koordinasi, dan kemudahan pelayanan jamaah.
+              Pelajari 3 pilihan model layanan (Mandiri, Pendampingan, atau Pengelolaan) dan sesuaikan dengan kebutuhan tempat ibadah Anda.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto shrink-0 justify-center">
             <button
-              onClick={() => handleCTA(feature.tier)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-sm text-center cursor-pointer hover:scale-[1.02] active:scale-95"
+              onClick={() => setIsServiceModalOpen(true)}
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-sm text-center cursor-pointer hover:scale-[1.02] active:scale-95"
             >
-              Ajukan Aktivasi {feature.tier}
+              Lihat Pilihan Model Layanan Pro
             </button>
             <button
-              onClick={() => handleCTA('KONSULTASI')}
+              onClick={() => setIsServiceModalOpen(true)}
               className="border border-slate-700 hover:border-slate-600 bg-slate-800/40 text-slate-200 px-6 py-3 rounded-2xl text-sm font-bold transition-all text-center cursor-pointer"
             >
               Konsultasi Layanan
@@ -328,43 +376,17 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
           onClick={onBackToDemo}
           className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline underline-offset-4 cursor-pointer"
         >
-          ← Kembali ke Dashboard Demo (Gunakan Fitur Basic Gratis)
+          ← Kembali ke Dashboard Demo (Gunakan Fitur KasMasjid Basic)
         </button>
       </div>
 
-      {/* Success Modal Simulation */}
-      {successModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[999] no-print">
-          <div className="bg-white rounded-[32px] max-w-md w-full p-8 shadow-2xl border border-slate-100 text-center space-y-6 animate-scale-in">
-            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-              <Sparkles className="w-8 h-8" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-display font-extrabold text-xl text-slate-900">
-                Pengajuan Berhasil Disimulasikan!
-              </h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Terima kasih atas ketertarikan Anda pada <strong>KasMasjid {selectedPlan === 'KONSULTASI' ? 'Consultancy' : selectedPlan}</strong>. Pada aplikasi asli, tombol ini akan menghubungkan WhatsApp DKM Anda langsung dengan tim teknis KasMasjid Community untuk proses instalasi mandiri atau setup cloud.
-              </p>
-            </div>
-            <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 text-left space-y-2.5">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-800">
-                <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600" />
-                Dukungan Penuh Ekosistem
-              </div>
-              <p className="text-[11px] text-emerald-700 leading-relaxed font-medium">
-                Tim support kami menyediakan pendampingan adaptasi teknologi gratis bagi DKM di seluruh Indonesia untuk mewujudkan akuntansi masjid yang profesional dan amanah.
-              </p>
-            </div>
-            <button
-              onClick={() => setSuccessModal(false)}
-              className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-xs transition-colors cursor-pointer"
-            >
-              Lanjutkan Eksplorasi Demo
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Pro Service Modal */}
+      <ProServiceModal
+        isOpen={isServiceModalOpen}
+        onClose={() => setIsServiceModalOpen(false)}
+        featureTitle={feature.title}
+      />
     </div>
   );
 }
+

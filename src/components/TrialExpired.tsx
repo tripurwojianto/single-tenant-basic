@@ -124,18 +124,18 @@ export default function TrialExpired({ brand = getActiveBrand(), onLogout, orgNa
               </a>
             </div>
 
-            {/* OPTION 3: MEMBERSHIP */}
+            {/* OPTION 3: LAYANAN PENGELOLAAN */}
             <div className="bg-white rounded-[24px] border border-slate-200/80 hover:border-slate-300 shadow-xs hover:shadow-md transition-all p-6 flex flex-col justify-between space-y-6">
               <div className="space-y-4">
-                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
                   <HeartHandshake className="w-5 h-5" />
                 </div>
                 <div className="space-y-1.5">
                   <h3 className="font-display font-extrabold text-sm text-slate-900">
-                    Membership / Cloud
+                    Layanan Pengelolaan
                   </h3>
                   <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                    Ingin siap pakai instan tanpa repot? Kami yang mengelola seluruh server, deployment, dan dukungan teknis 24/7 untuk Anda.
+                    Berlangganan bulanan. Tim KasMasjid mengelola seluruh infrastruktur server, pemeliharaan, backup database rutin, dan support 24/7.
                   </p>
                 </div>
               </div>
@@ -144,10 +144,10 @@ export default function TrialExpired({ brand = getActiveBrand(), onLogout, orgNa
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 font-bold text-xs text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer no-underline shadow-xs shadow-amber-100"
+                className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 font-bold text-xs text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer no-underline shadow-xs shadow-purple-100"
               >
                 <ExternalLink className="w-4 h-4" />
-                Pelajari Membership
+                Pilih Layanan Pengelolaan
               </a>
             </div>
 

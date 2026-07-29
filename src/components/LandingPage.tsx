@@ -119,16 +119,16 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
   const pricingCards = [
     {
       title: 'KasMasjid Basic',
-      subtitle: 'Community Edition',
-      deployment: 'Single Tenant',
-      storage: 'Google Sheets',
+      subtitle: 'Single Admin & Sheets',
+      deployment: 'Self-Hosted / Google Sheets',
+      storage: 'Google Drive Pribadi',
       price: 'Gratis Selamanya',
-      cta: 'Mulai Gunakan',
+      cta: 'Mulai Gunakan Basic',
       path: '/onboarding',
       isPrimary: true,
       perks: [
         'Data di Google Drive Pribadi',
-        'Ledger Arus Kas & Saldo',
+        'Ledger Arus Kas & Rekap Saldo',
         'Inventarisasi & Aset Fisik',
         'Komposer Warta & Pengumuman',
         'Laporan Mingguan PDF/Cetak',
@@ -137,40 +137,21 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
     },
     {
       title: 'KasMasjid Pro',
-      subtitle: 'Multi Admin',
-      deployment: 'Kolaborasi',
-      storage: 'Cloud Database',
-      price: 'Pelajari Pro',
-      cta: 'Pelajari Paket Pro',
+      subtitle: 'Fitur Lengkap & Kolaborasi',
+      deployment: 'Cloud Database / Multi-Admin',
+      storage: 'Ecosystem Suite',
+      price: 'Pelajari KasMasjid Pro',
+      cta: 'Pelajari KasMasjid Pro',
       path: '/pro',
       isPrimary: false,
       badge: 'PRO',
       perks: [
-        'Multi-Admin & Kolaborasi',
-        'Pemberitahuan WhatsApp Otomatis',
-        'Sistem Log Aktivitas Pengurus',
-        'Pencetakan Struk Fisik Termal',
-        'Kunci Tutup Buku Bulanan',
-        'Database Berkinerja Tinggi'
-      ]
-    },
-    {
-      title: 'KasMasjid Membership',
-      subtitle: 'Portal Jamaah & Qris',
-      deployment: 'Managed Service',
-      storage: 'Ecosystem Suite',
-      price: 'Hubungi Kami',
-      cta: 'Hubungi Kami',
-      path: '/membership',
-      isPrimary: false,
-      badge: 'MEMBERSHIP',
-      perks: [
-        'Portal Publik Publikasi Jamaah',
+        'Multi-Admin & Akses Berlevel',
+        'Notifikasi WhatsApp Otomatis',
+        'Portal Jamaah & Mading Digital',
         'Infaq QRIS Dinamis & Statis',
-        'Pendaftaran Qurban & Anggota',
-        'Modul Zakat Fitrah & Maal',
-        'Bantuan Deployment 100% Selesai',
-        'Dukungan Teknis Prioritas'
+        'Manajemen Zakat Fitrah & Maal',
+        'Cetak Struk Fisik Termal'
       ]
     }
   ];
@@ -178,18 +159,18 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
   const onboardingOptions = [
     {
       step: '01',
-      title: 'Deployment Mandiri',
-      desc: 'Deploy mandiri secara gratis menggunakan panduan resmi repository KasMasjid Basic di Github KasMasjid.'
+      title: 'Implementasi Mandiri',
+      desc: 'Sekali bayar, aplikasi dikelola sendiri. Menerima source code & panduan instalasi ke Vercel/Cloud tanpa iuran rutin.'
     },
     {
       step: '02',
-      title: 'Pendampingan Developer',
-      desc: 'Dapatkan bantuan langsung dari tim teknis KasMasjid untuk setup awal database Google Sheets Anda hingga lancar.'
+      title: 'Pendampingan Implementasi',
+      desc: 'Sekali bayar, kami membantu proses implementasi. Tim KasMasjid mendampingi setup awal hingga sistem live 100%.'
     },
     {
       step: '03',
-      title: 'Membership Managed',
-      desc: 'Nikmati infrastruktur siap pakai instan tanpa pusing setup domain, deployment, atau konfigurasi Google API.'
+      title: 'Layanan Pengelolaan',
+      desc: 'Berlangganan bulanan, aplikasi & website dikelola oleh tim KasMasjid. Perawatan server, backup rutin & support 24/7.'
     }
   ];
 

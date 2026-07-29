@@ -43,8 +43,10 @@ import AminaView from './components/AminaView';
 import ReportsView from './components/ReportsView';
 import FeedbackView from './components/FeedbackView';
 import FeaturePreviewView from './components/FeaturePreviewView';
+import AboutView from './components/AboutView';
 import ProPage from './components/ProPage';
 import MembershipPage from './components/MembershipPage';
+import UpgradeView from './components/UpgradeView';
 import BottomNavbar from './components/BottomNavbar';
 import QuickActionModal from './components/QuickActionModal';
 
@@ -837,27 +839,48 @@ export default function App() {
     );
   }
 
-  const menuItems = [
-    // BASIC
-    { key: 'dashboard', label: 'Dashboard', icon: LayoutGrid, tier: 'BASIC' },
-    { key: 'mosque-info', label: 'Informasi Masjid', icon: Building, tier: 'BASIC' },
-    { key: 'cash-flow', label: 'Arus Kas Ledger', icon: TrendingUp, tier: 'BASIC' },
-    { key: 'announcements', label: 'Komposer Pengumuman', icon: Megaphone, tier: 'BASIC' },
-    { key: 'amina', label: 'Asisten Amina', icon: Sparkles, tier: 'BASIC' },
-    { key: 'inventory', label: 'Daftar Inventaris', icon: Box, tier: 'BASIC' },
-    { key: 'reports', label: 'Ringkasan Laporan', icon: FileText, tier: 'BASIC' },
-    { key: 'feedback', label: 'Kirim Feedback', icon: MessageSquare, tier: 'BASIC' },
-    
-    // PRO
-    { key: 'whatsapp-notif', label: 'Notifikasi WhatsApp', icon: Smartphone, tier: 'PRO' },
-    { key: 'thermal-print', label: 'Cetak Struk Termal', icon: Receipt, tier: 'PRO' },
-    { key: 'multi-admin', label: 'Multi-Admin Kolaborasi', icon: Users, tier: 'PRO' },
-
-    // MEMBERSHIP
-    { key: 'portal-jamaah', label: 'Portal Jamaah', icon: Globe, tier: 'MEMBERSHIP' },
-    { key: 'zakat-digital', label: 'Zakat & Shodaqoh', icon: HeartHandshake, tier: 'MEMBERSHIP' },
-    { key: 'infaq-qris', label: 'Infaq QRIS Mandiri', icon: QrCode, tier: 'MEMBERSHIP' },
-  ] as const;
+  const menuGroups = [
+    {
+      groupTitle: '📊 Dashboard',
+      items: [
+        { key: 'dashboard', label: 'Dashboard', icon: LayoutGrid, tier: 'BASIC' },
+        { key: 'cash-flow', label: 'Arus Kas Ledger', icon: TrendingUp, tier: 'BASIC' },
+        { key: 'reports', label: 'Ringkasan Laporan', icon: FileText, tier: 'BASIC' },
+      ],
+    },
+    {
+      groupTitle: '🕌 Kelola Masjid',
+      items: [
+        { key: 'mosque-info', label: 'Informasi Masjid', icon: Building, tier: 'BASIC' },
+        { key: 'inventory', label: 'Daftar Inventaris', icon: Box, tier: 'BASIC' },
+        { key: 'announcements', label: 'Komposer Pengumuman', icon: Megaphone, tier: 'BASIC' },
+      ],
+    },
+    {
+      groupTitle: '🤖 Bantuan',
+      items: [
+        { key: 'feedback', label: 'Kirim Feedback', icon: MessageSquare, tier: 'BASIC' },
+      ],
+    },
+    {
+      groupTitle: '🚀 Upgrade KasMasjid',
+      items: [
+        { key: 'upgrade', label: 'Paket & Upgrade KasMasjid', icon: Sparkles, tier: 'BASIC' },
+        { key: 'whatsapp-notif', label: 'Notifikasi WhatsApp', icon: Smartphone, tier: 'PRO' },
+        { key: 'multi-admin', label: 'Multi Admin Kolaborasi', icon: Users, tier: 'PRO' },
+        { key: 'portal-jamaah', label: 'Portal Jamaah', icon: Globe, tier: 'PRO' },
+        { key: 'zakat-digital', label: 'Zakat & Shodaqoh', icon: HeartHandshake, tier: 'PRO' },
+        { key: 'infaq-qris', label: 'Infaq QRIS Mandiri', icon: QrCode, tier: 'PRO' },
+        { key: 'thermal-print', label: 'Cetak Struk Termal', icon: Receipt, tier: 'PRO' },
+      ],
+    },
+    {
+      groupTitle: 'ℹ️ Tentang KasMasjid',
+      items: [
+        { key: 'about', label: 'Tentang KasMasjid', icon: Info, tier: 'BASIC', isPlaceholder: true },
+      ],
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-[#F8FAF9] flex flex-col font-sans selection:bg-emerald-100">
@@ -936,42 +959,52 @@ export default function App() {
           </div>
 
           {/* Scrollable Nav Menus */}
-          <nav className="p-4 space-y-1.5 flex-1 overflow-y-auto custom-scrollbar">
-            {menuItems.map((item) => {
-              const IconComponent = item.icon;
-              const isActive = activeMenu === item.key;
-              return (
-                <button
-                  key={item.key}
-                  onClick={() => {
-                    setActiveMenu(item.key);
-                    setIsSidebarOpen(false);
-                  }}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
-                    isActive 
-                      ? 'bg-emerald-800 text-white font-bold shadow-xs'
-                      : 'text-emerald-100/80 hover:text-white hover:bg-emerald-800/50'
-                  }`}
-                >
-                  <IconComponent className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-emerald-300' : 'text-emerald-400'}`} />
-                  <span className="truncate text-left flex-1">{item.label}</span>
-                  {item.tier !== 'BASIC' && (
-                    <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider shrink-0 border ${
-                      item.tier === 'PRO' 
-                        ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20' 
-                        : 'bg-amber-500/10 text-amber-300 border-amber-500/20'
-                    }`}>
-                      {item.tier === 'MEMBERSHIP' ? 'MEMB' : item.tier}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+          <nav className="p-3.5 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
+            {menuGroups.map((group, groupIdx) => (
+              <div key={groupIdx} className="space-y-1">
+                <div className="px-2.5 py-1 text-[11px] font-extrabold text-emerald-300/90 tracking-wide flex items-center justify-between">
+                  <span>{group.groupTitle}</span>
+                </div>
+                <div className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const IconComponent = item.icon;
+                    const isActive = activeMenu === item.key;
+                    return (
+                      <button
+                        key={item.key}
+                        onClick={() => {
+                          setActiveMenu(item.key);
+                          setIsSidebarOpen(false);
+                        }}
+                        className={`w-full px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+                          isActive 
+                            ? 'bg-emerald-800 text-white font-bold shadow-xs border border-emerald-700/50'
+                            : 'text-emerald-100/80 hover:text-white hover:bg-emerald-800/50'
+                        }`}
+                      >
+                        <IconComponent className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-emerald-300' : 'text-emerald-400'}`} />
+                        <span className="truncate text-left flex-1">{item.label}</span>
+                        {item.tier && item.tier !== 'BASIC' && (
+                          <span className="px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider shrink-0 border bg-indigo-500/20 text-indigo-200 border-indigo-400/30">
+                            PRO
+                          </span>
+                        )}
+                        {item.isPlaceholder && (
+                          <span className="px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase shrink-0 bg-emerald-950 text-emerald-300 border border-emerald-700/50">
+                            INFO
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
 
             {/* Developer Menu Section */}
             {(userRole === 'admin' || userRole === 'developer') && (
-              <div className="pt-4 border-t border-emerald-800/60 mt-4 space-y-1">
-                <span className="px-4 text-[9px] font-black text-emerald-400 uppercase tracking-widest block mb-2">
+              <div className="pt-3 border-t border-emerald-800/60 mt-3 space-y-1">
+                <span className="px-2.5 text-[9px] font-black text-emerald-400 uppercase tracking-widest block mb-2">
                   Menu Developer
                 </span>
                 <button
@@ -979,7 +1012,7 @@ export default function App() {
                     setIsAuditorOpen(true);
                     setIsSidebarOpen(false);
                   }}
-                  className="w-full px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 text-emerald-100/80 hover:text-white hover:bg-emerald-800/50 transition-all cursor-pointer"
+                  className="w-full px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2.5 text-emerald-100/80 hover:text-white hover:bg-emerald-800/50 transition-all cursor-pointer"
                   id="developer-auditor-btn"
                 >
                   <ShieldCheck className="w-4 h-4 text-emerald-400 animate-pulse" />
@@ -1206,6 +1239,7 @@ export default function App() {
                     onAddExpense={(expense) => handleAddTransaction('Expense', expense)}
                     onAddInventory={handleAddInventory}
                     onAddAnnouncement={handleAddAnnouncement}
+                    onNavigateToAmina={() => setActiveMenu('amina')}
                   />
                 )}
 
@@ -1261,12 +1295,23 @@ export default function App() {
                   <FeedbackView onSendFeedback={handleSendFeedback} />
                 )}
 
+                {activeMenu === 'upgrade' && (
+                  <UpgradeView 
+                    mosqueName={state.info?.namaMasjid}
+                    onNavigateToDemo={() => setActiveMenu('dashboard')}
+                  />
+                )}
+
                 {['whatsapp-notif', 'thermal-print', 'multi-admin', 'portal-jamaah', 'zakat-digital', 'infaq-qris'].includes(activeMenu) && (
                   <FeaturePreviewView 
                     featureKey={activeMenu}
                     onBackToDemo={() => setActiveMenu('dashboard')}
-                    onUpgradeClick={handleLogin}
+                    onUpgradeClick={() => setActiveMenu('upgrade')}
                   />
+                )}
+
+                {activeMenu === 'about' && (
+                  <AboutView onNavigate={(menuKey) => setActiveMenu(menuKey)} />
                 )}
               </>
             )}
