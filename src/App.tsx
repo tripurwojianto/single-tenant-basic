@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { MosqueState, MosqueInfo, CashTransaction, InventoryItem, Announcement, Category, FeedbackData } from './types';
-import { initAuth, googleSignIn, logout, setAccessToken, getMasterRegistryIdFromFirestore, saveMasterRegistryIdToFirestore, isGsiAvailable, ensureGsiLoaded } from './lib/firebase';
+import { auth, initAuth, googleSignIn, logout, setAccessToken, getMasterRegistryIdFromFirestore, saveMasterRegistryIdToFirestore, isGsiAvailable, ensureGsiLoaded } from './lib/firebase';
 import { 
   findSpreadsheet, 
   createSpreadsheet, 
@@ -79,10 +79,10 @@ export default function App() {
   const brand = getActiveBrand();
   const initialSession = React.useMemo(() => getSavedSession(), []);
 
-  // Auth state
-  const [user, setUser] = useState<User | any>(() => initialSession?.user || null);
-  const [token, setToken] = useState<string | null>(() => initialSession?.token || localStorage.getItem('kasmasjid_google_access_token') || null);
-  const [needsAuth, setNeedsAuth] = useState<boolean>(() => !initialSession || !initialSession.isLoggedIn);
+  // Auth state - strictly driven by Firebase auth.currentUser
+  const [user, setUser] = useState<User | any>(() => auth.currentUser);
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('kasmasjid_google_access_token'));
+  const [needsAuth, setNeedsAuth] = useState<boolean>(() => !auth.currentUser);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isAuthScriptReady, setIsAuthScriptReady] = useState<boolean>(() => isGsiAvailable());
@@ -228,40 +228,13 @@ export default function App() {
         setToken(cachedToken);
         setNeedsAuth(false);
 
-        const currentSess = getSavedSession();
-        const onboarded = currentUser?.uid ? localStorage.getItem(`kasmasjid_onboarded_${currentUser.uid}`) : null;
-        const isComplete = currentSess?.isOnboardingComplete || onboarded === 'true' || !!currentSess?.info?.namaMasjid;
-
-        if (isComplete) {
-          setIsOnboarding(false);
-          console.log('[SYNC 3] Dipanggil dari: onAuthStateChanged');
-          handleSpreadsheetSync(cachedToken, 'onAuthStateChanged');
-        } else {
-          setIsOnboarding(true);
-          const newSession = {
-            isLoggedIn: true,
-            user: {
-              uid: currentUser.uid,
-              email: currentUser.email,
-              displayName: currentUser.displayName,
-              photoURL: currentUser.photoURL,
-            },
-            token: cachedToken,
-            spreadsheetId: currentSess?.spreadsheetId || null,
-            info: currentSess?.info || null,
-            isOnboardingComplete: false,
-            lastLoginTimestamp: Date.now()
-          };
-          localStorage.setItem(SESSION_KEY, JSON.stringify(newSession));
-        }
+        console.log('[SYNC 3] Dipanggil dari: onAuthStateChanged');
+        handleSpreadsheetSync(cachedToken, 'onAuthStateChanged');
       },
       () => {
-        const currentSess = getSavedSession();
-        if (!currentSess || !currentSess.isLoggedIn) {
-          setNeedsAuth(true);
-        } else {
-          setNeedsAuth(false);
-        }
+        setUser(null);
+        setToken(null);
+        setNeedsAuth(true);
       }
     );
   }, []);
@@ -273,8 +246,10 @@ export default function App() {
     setSheetLoadingError(null);
     try {
       let sheetId = spreadsheetId || (await findSpreadsheet(accessToken));
-      if (!sheetId) {
-        // Automatic creation
+      if (sheetId) {
+        console.log('[ONBOARDING] Spreadsheet ditemukan:', sheetId);
+      } else {
+        console.log('[ONBOARDING] Spreadsheet baru');
         sheetId = await createSpreadsheet(accessToken);
       }
       setSpreadsheetId(sheetId);
@@ -287,16 +262,32 @@ export default function App() {
         localStorage.setItem(CACHED_DATA_KEY, JSON.stringify(data));
       } catch (e) {}
 
+      // Google Sheets is the single source of truth for onboarding status
+      const hasMosqueInfo = Boolean(
+        data.info?.namaMasjid && data.info.namaMasjid.trim().length > 0
+      );
+
+      if (hasMosqueInfo) {
+        console.log('[ONBOARDING] Mosque_Info ditemukan');
+        console.log('[ONBOARDING] Skip onboarding');
+        setIsOnboarding(false);
+        navigate('/');
+      } else {
+        console.log('[ONBOARDING] Mosque_Info tidak ditemukan / kosong');
+        console.log('[ONBOARDING] Start onboarding');
+        setIsOnboarding(true);
+        navigate('/onboarding');
+      }
+
       // Save updated session
       const sess = getSavedSession();
       if (sess) {
-        const isComplete = sess.isOnboardingComplete || !!data.info?.namaMasjid;
         const updated = {
           ...sess,
           token: accessToken,
           spreadsheetId: sheetId,
           info: data.info?.namaMasjid ? data.info : sess.info,
-          isOnboardingComplete: isComplete,
+          isOnboardingComplete: hasMosqueInfo,
           lastLoginTimestamp: Date.now()
         };
         localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
@@ -323,10 +314,7 @@ export default function App() {
         setNeedsAuth(false);
         setIsDemoMode(false);
 
-        const onboarded = localStorage.getItem(`kasmasjid_onboarded_${result.user.uid}`);
         const currentSess = getSavedSession();
-        const isComplete = currentSess?.isOnboardingComplete || onboarded === 'true' || !!currentSess?.info?.namaMasjid;
-
         const newSession = {
           isLoggedIn: true,
           user: {
@@ -338,27 +326,17 @@ export default function App() {
           token: result.accessToken,
           spreadsheetId: currentSess?.spreadsheetId || null,
           info: currentSess?.info || null,
-          isOnboardingComplete: isComplete,
+          isOnboardingComplete: currentSess?.isOnboardingComplete || false,
           lastLoginTimestamp: Date.now()
         };
         localStorage.setItem(SESSION_KEY, JSON.stringify(newSession));
 
-        if (isComplete) {
-          setIsOnboarding(false);
-          console.log('[SYNC 2] Dipanggil dari: handleLogin');
-          await handleSpreadsheetSync(result.accessToken, 'handleLogin');
-          navigate('/');
-        } else {
-          setIsOnboarding(true);
-          console.log('[SYNC 2] Dipanggil dari: handleLogin');
-          await handleSpreadsheetSync(result.accessToken, 'handleLogin');
-          navigate('/onboarding');
-        }
+        console.log('[SYNC 2] Dipanggil dari: handleLogin');
+        await handleSpreadsheetSync(result.accessToken, 'handleLogin');
       }
     } catch (err: any) {
       if (err?.isCancelled || err?.message?.includes('dibatalkan') || err?.message?.includes('closed') || err?.message?.includes('popup')) {
         setLoginError('Proses masuk dengan Google dibatalkan.');
-        // If sheetLoadingError is already set (e.g. 401 session expired), leave it so user can retry anytime
       } else {
         console.error('Login error:', err);
         const errMsg = err?.message || 'Gagal memuat proses login. Silakan refresh halaman dan coba lagi.';
@@ -430,7 +408,16 @@ export default function App() {
 
   const handleOnboardingComplete = async (info: MosqueInfo, deploymentMode: string) => {
     try {
+      if (state.info?.namaMasjid && state.info.namaMasjid.trim().length > 0) {
+        console.log('[ONBOARDING] Skip save, Mosque_Info already exists');
+        setIsOnboarding(false);
+        navigate('/');
+        return;
+      }
+
       await handleSaveMosqueInfo(info);
+      console.log('[ONBOARDING] Mosque_Info berhasil disimpan');
+
       if (user) {
         localStorage.setItem(`kasmasjid_onboarded_${user.uid}`, 'true');
         localStorage.removeItem(`kasmasjid_onboarding_draft_${user.uid}`);
@@ -882,17 +869,25 @@ export default function App() {
         </div>
       )}
 
-      <div className="flex-1 flex min-w-0">
-        {/* Sidebar Wrapper Desktop */}
+      <div className="flex-1 flex min-w-0 relative">
+        {/* Mobile Backdrop Overlay */}
+        {isSidebarOpen && (
+          <div 
+            onClick={() => setIsSidebarOpen(false)} 
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-30 lg:hidden transition-opacity"
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Sidebar Wrapper Desktop & Mobile */}
         <aside 
           id="sidebar"
-          className={`fixed inset-y-0 left-0 z-40 w-64 bg-emerald-900 border-r border-emerald-800 flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static shrink-0 no-print ${
+          className={`fixed inset-y-0 left-0 z-40 w-64 bg-emerald-900 border-r border-emerald-800 flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static shrink-0 h-full no-print ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
-      >
-        <div>
-          {/* Logo brand */}
-          <div className="h-20 px-6 border-b border-emerald-800 flex items-center justify-between">
+        >
+          {/* Logo brand Header */}
+          <div className="h-20 px-6 border-b border-emerald-800 flex items-center justify-between shrink-0">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-emerald-400 rounded-lg flex items-center justify-center font-bold text-emerald-900 italic">KM</div>
               <div>
@@ -902,14 +897,15 @@ export default function App() {
             </div>
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="w-7 h-7 rounded-lg hover:bg-emerald-800 text-emerald-200 flex items-center justify-center lg:hidden cursor-pointer"
+              className="w-8 h-8 rounded-lg hover:bg-emerald-800 text-emerald-200 flex items-center justify-center lg:hidden cursor-pointer active:bg-emerald-700 transition-colors"
+              aria-label="Tutup Menu"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Menus */}
-          <nav className="p-4 space-y-2 mt-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+          {/* Scrollable Nav Menus */}
+          <nav className="p-4 space-y-1.5 flex-1 overflow-y-auto custom-scrollbar">
             {menuItems.map((item) => {
               const IconComponent = item.icon;
               const isActive = activeMenu === item.key;
@@ -964,33 +960,32 @@ export default function App() {
               </div>
             )}
           </nav>
-        </div>
 
-        {/* User context footer in sidebar */}
-        <div className="p-4 mt-auto border-t border-emerald-800">
-          <div className="bg-emerald-800/50 p-4 rounded-2xl flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-900 font-bold uppercase text-xs border border-emerald-200 shrink-0">
-              {isDemoMode ? 'D' : (user?.email ? user.email.substring(0, 2).toUpperCase() : 'BA')}
+          {/* Sticky User Context Footer in Sidebar */}
+          <div className="p-4 border-t border-emerald-800 bg-emerald-950/30 shrink-0 pb-8 sm:pb-6 space-y-3">
+            <div className="bg-emerald-800/50 p-3.5 rounded-2xl flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-900 font-bold uppercase text-xs border border-emerald-200 shrink-0 shadow-xs">
+                {isDemoMode ? 'D' : (user?.email ? user.email.substring(0, 2).toUpperCase() : 'BA')}
+              </div>
+              <div className="truncate min-w-0">
+                <p className="text-xs font-semibold text-white leading-none truncate">
+                  {isDemoMode ? 'Bendahara Demo' : (user?.displayName || 'Bendahara Masjid')}
+                </p>
+                <p className="text-[10px] text-emerald-400 mt-1 uppercase truncate leading-none">
+                  {isDemoMode ? 'Administrator' : (user?.email || 'Administrator')}
+                </p>
+              </div>
             </div>
-            <div className="truncate min-w-0">
-              <p className="text-xs font-semibold text-white leading-none truncate">
-                {isDemoMode ? 'Bendahara Demo' : (user?.displayName || 'Bendahara Masjid')}
-              </p>
-              <p className="text-[10px] text-emerald-400 mt-1 uppercase truncate leading-none">
-                {isDemoMode ? 'Administrator' : (user?.email || 'Administrator')}
-              </p>
-            </div>
+
+            <button
+              onClick={handleLogout}
+              className="w-full py-3 px-4 text-xs font-bold text-emerald-100 bg-emerald-800/80 hover:bg-emerald-800 hover:text-white border border-emerald-700/60 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.99] shadow-xs"
+            >
+              <LogOut className="w-4 h-4 text-emerald-300" />
+              Keluar
+            </button>
           </div>
-
-          <button
-            onClick={handleLogout}
-            className="w-full py-2.5 px-4 text-xs font-bold text-emerald-200 hover:text-white hover:bg-emerald-800 border border-emerald-800 hover:border-emerald-700 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
-          >
-            <LogOut className="w-4 h-4 text-emerald-300" />
-            Keluar Panel
-          </button>
-        </div>
-      </aside>
+        </aside>
 
       {/* Main Content Pane */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">

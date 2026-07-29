@@ -110,21 +110,6 @@ export const initAuth = (
         if (onAuthFailure) onAuthFailure();
       }
     } else {
-      // Check if persistent session exists in localStorage before triggering failure
-      try {
-        const sessStr = localStorage.getItem('kasmasjid_session');
-        if (sessStr) {
-          const sess = JSON.parse(sessStr);
-          if (sess && sess.isLoggedIn && sess.user && sess.token) {
-            cachedAccessToken = sess.token;
-            if (onAuthSuccess) {
-              onAuthSuccess(sess.user as User, sess.token);
-            }
-            return;
-          }
-        }
-      } catch (e) {}
-
       cachedAccessToken = null;
       try {
         localStorage.removeItem(TOKEN_KEY);

@@ -370,7 +370,8 @@ export default function ReportsView({ state }: ReportsViewProps) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
     doc.setTextColor(148, 163, 184);
-    doc.text("KASMASJID BASIC COMMUNITY EDITION | LAPORAN TERVERIFIKASI VIA GOOGLE SHEETS DATABASE", pageWidth / 2, y, { align: 'center' });
+    const footerName = (state.info.namaMasjid || 'KasMasjid Basic Community Edition').toUpperCase();
+    doc.text(`${footerName} | LAPORAN TERVERIFIKASI VIA GOOGLE SHEETS DATABASE`, pageWidth / 2, y, { align: 'center' });
 
     // Save/Download PDF
     const cleanMosqueName = (state.info.namaMasjid || 'Masjid').replace(/[^a-zA-Z0-9]/g, '_');
@@ -845,7 +846,7 @@ export default function ReportsView({ state }: ReportsViewProps) {
 
         {/* Printable Footer notes */}
         <div className="mt-8 sm:mt-12 text-center text-[10px] text-slate-400 font-mono uppercase tracking-wider pt-6 border-t border-dashed border-slate-100">
-          KasMasjid Basic Community Edition | Laporan terverifikasi via Google Sheets Database.
+          {state.info.namaMasjid || 'KasMasjid Basic Community Edition'} | Laporan terverifikasi via Google Sheets Database.
         </div>
       </div>
     </div>
