@@ -1,6 +1,8 @@
 {
-  "name": "KasMasjid Basic",
+  "name": "Remix KasMasjid Basic",
   "description": "Aplikasi administrasi dan manajemen keuangan masjid berbasis web (Single Tenant) yang terintegrasi dengan Google Sheets.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

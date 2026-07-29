@@ -14,6 +14,10 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 interface DashboardViewProps {
   state: MosqueState;
+  spreadsheetId?: string | null;
+  isDemoMode?: boolean;
+  syncError?: string | null;
+  onReauthenticate?: () => void;
   onAddIncome: (income: Omit<CashTransaction, 'id'>) => Promise<void>;
   onAddExpense: (expense: Omit<CashTransaction, 'id'>) => Promise<void>;
   onAddInventory: (item: Omit<InventoryItem, 'id'>) => Promise<void>;
@@ -22,6 +26,10 @@ interface DashboardViewProps {
 
 export default function DashboardView({ 
   state, 
+  spreadsheetId,
+  isDemoMode,
+  syncError,
+  onReauthenticate,
   onAddIncome, 
   onAddExpense, 
   onAddInventory, 
@@ -299,186 +307,280 @@ export default function DashboardView({
   const latestTransactions = allTransactions.slice(0, 4);
 
   return (
-    <div id="dashboard-view" className="space-y-6 animate-fade-in">
-      {/* Mosque Profile Header styled as a clean Bento Card */}
-      <div className="bg-white p-6 sm:p-8 rounded-[32px] border border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-5">
-          {state.info.logo ? (
-            <img 
-              src={state.info.logo} 
-              alt="Logo" 
-              className="w-16 h-16 rounded-2xl object-cover border border-slate-100 shadow-sm"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center font-display font-bold text-white text-2xl shadow-md">
-              {state.info.namaMasjid ? state.info.namaMasjid.substring(0, 2).toUpperCase() : 'KM'}
+    <div id="dashboard-view" className="space-y-6 sm:space-y-8 animate-fade-in">
+      
+      {/* 1. HERO MASJID DASHBOARD */}
+      <div className="relative overflow-hidden rounded-[28px] sm:rounded-[32px] bg-emerald-950 text-white shadow-xl shadow-emerald-950/10 border border-emerald-800/60">
+        {/* Subtle Mosque Background Pattern / Image Overlay */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-20 scale-105"
+          style={{ 
+            backgroundImage: `url('https://images.unsplash.com/photo-1542810634-71277d95dcbb?q=80&w=1200&auto=format&fit=crop')` 
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-950 via-emerald-900/95 to-teal-950/90 backdrop-blur-[1px]" />
+
+        {/* Hero Content */}
+        <div className="relative p-6 sm:p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 z-10">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            {state.info.logo ? (
+              <img 
+                src={state.info.logo} 
+                alt="Logo Masjid" 
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-emerald-400/40 shadow-lg shrink-0"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-emerald-950 flex items-center justify-center font-display font-black text-2xl sm:text-3xl shadow-lg border border-emerald-300/30 shrink-0">
+                {state.info.namaMasjid ? state.info.namaMasjid.substring(0, 2).toUpperCase() : '🕌'}
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="font-display font-black text-2xl sm:text-3xl md:text-4xl text-white tracking-tight leading-snug">
+                  {state.info.namaMasjid || 'Masjid Al-Ikhlas'}
+                </h1>
+              </div>
+
+              <p className="text-emerald-200/90 text-xs sm:text-sm font-sans italic font-medium max-w-xl">
+                "{state.info.tagline || 'Menuju Masyarakat Madani Berlandaskan Al-Qur\'an'}"
+              </p>
+
+              <div className="flex items-center gap-1.5 text-emerald-300/80 text-xs font-semibold pt-1">
+                <MapPin className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+                <span className="truncate">
+                  {state.info.alamat ? `${state.info.alamat}${state.info.kota ? ', ' + state.info.kota : ''}` : 'Jl. Masjid Raya No.1'}
+                </span>
+              </div>
             </div>
-          )}
-          <div>
-            <h1 className="font-display font-bold text-2xl sm:text-3xl text-slate-900 leading-tight">
-              {state.info.namaMasjid || 'Masjid Al-Ikhlas'}
-            </h1>
-            <p className="text-slate-500 text-sm font-sans mt-1 italic">
-              "{state.info.tagline || 'Mengabdi untuk Kemaslahatan Ummat'}"
-            </p>
           </div>
-        </div>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="text-right hidden sm:block">
-            <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Status Server</span>
-            <span className="text-xs font-bold text-emerald-500 flex items-center gap-1.5 justify-end">
-              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span> Google Sheets Connected
-            </span>
+
+          {/* Sync Status Badge inside Hero */}
+          <div className="shrink-0 self-start md:self-center">
+            {syncError ? (
+              <div className="px-3.5 py-1.5 rounded-full bg-rose-500/20 border border-rose-400/30 text-rose-200 text-xs font-extrabold flex items-center gap-2 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                <span>🔴 Sinkronisasi Bermasalah</span>
+              </div>
+            ) : isDemoMode ? (
+              <div className="px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-200 text-xs font-extrabold flex items-center gap-2 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span>🟡 Mode Demo (Lokal)</span>
+              </div>
+            ) : spreadsheetId ? (
+              <div className="px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 text-xs font-extrabold flex items-center gap-2 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>🟢 Google Sheets Tersinkron</span>
+              </div>
+            ) : (
+              <div className="px-3.5 py-1.5 rounded-full bg-slate-500/20 border border-slate-400/30 text-slate-200 text-xs font-extrabold flex items-center gap-2 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-slate-400" />
+                <span>🟡 Perlu Sinkronisasi</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Bento Dashboard Grid */}
+      {/* 2. KARTU TOTAL SALDO KAS */}
+      <div className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 text-white shadow-xl shadow-emerald-950/10 flex flex-col justify-between min-h-[200px]">
+        <div>
+          <div className="flex items-center justify-between">
+            <p className="text-emerald-100 font-semibold uppercase tracking-[0.2em] text-[10px] sm:text-xs">
+              Total Saldo Kas Utama
+            </p>
+            <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase backdrop-blur-md tracking-wider">
+              Realtime Balance
+            </span>
+          </div>
+          <h3 className="text-3xl sm:text-5xl font-black mt-2 tracking-tight font-display">
+            {formatRupiah(balance)}
+          </h3>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-emerald-500/40 pt-4 mt-6">
+          <div className="flex flex-wrap items-center gap-6 sm:gap-8">
+            <div>
+              <p className="text-[10px] text-emerald-200 uppercase tracking-wider font-semibold">Pemasukan Bulan Ini</p>
+              <p className="font-extrabold text-sm sm:text-base text-emerald-100">+{formatRupiah(monthIncomes)}</p>
+            </div>
+            <div className="h-8 w-px bg-emerald-500/40 hidden sm:block" />
+            <div>
+              <p className="text-[10px] text-emerald-200 uppercase tracking-wider font-semibold">Pengeluaran Bulan Ini</p>
+              <p className="font-extrabold text-sm sm:text-base text-rose-200">-{formatRupiah(monthExpenses)}</p>
+            </div>
+          </div>
+
+          <div className="text-[10px] text-emerald-200 font-semibold italic">
+            Aman & Terverifikasi DKM
+          </div>
+        </div>
+      </div>
+
+      {/* 3. RINGKASAN DASHBOARD (INVENTARIS, PENGUMUMAN, ARSIP) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        {/* Inventaris */}
+        <div className="bg-white border border-slate-200/80 rounded-[24px] sm:rounded-[28px] p-6 flex items-center gap-4 shadow-xs hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 font-black text-2xl shrink-0 border border-amber-100/80">
+            <Box className="w-7 h-7" />
+          </div>
+          <div>
+            <p className="text-2xl font-black text-slate-900 tracking-tight">{totalInventory}</p>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Inventaris</p>
+            <p className="text-[11px] text-slate-400 font-medium">Barang & Aset Tercatat</p>
+          </div>
+        </div>
+
+        {/* Pengumuman */}
+        <div className="bg-white border border-slate-200/80 rounded-[24px] sm:rounded-[28px] p-6 flex items-center gap-4 shadow-xs hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 font-black text-2xl shrink-0 border border-blue-100/80">
+            <Megaphone className="w-7 h-7" />
+          </div>
+          <div>
+            <p className="text-2xl font-black text-slate-900 tracking-tight">
+              {state.announcements.filter(a => a.status === 'Publish').length}
+            </p>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pengumuman</p>
+            <p className="text-[11px] text-slate-400 font-medium">Terpublikasi untuk Jamaah</p>
+          </div>
+        </div>
+
+        {/* Arsip / Transaksi */}
+        <div className="bg-white border border-slate-200/80 rounded-[24px] sm:rounded-[28px] p-6 flex items-center gap-4 shadow-xs hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 font-black text-2xl shrink-0 border border-emerald-100/80">
+            <FileText className="w-7 h-7" />
+          </div>
+          <div>
+            <p className="text-2xl font-black text-slate-900 tracking-tight">
+              {state.incomes.length + state.expenses.length}
+            </p>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Arsip Kas</p>
+            <p className="text-[11px] text-slate-400 font-medium">Catatan Arus Transaksi</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. AKSI CEPAT ADMIN / PENGURUS */}
+      <div className="bg-white border border-slate-200/80 rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 shadow-xs">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h3 className="font-display font-black text-lg text-slate-900">Aksi Cepat Admin</h3>
+            <p className="text-xs text-slate-500 font-medium">Pintasan cepat untuk penginputan data harian masjid</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <button 
+            onClick={() => setActiveModal('income')}
+            className="flex items-center justify-between p-4 bg-slate-50 hover:bg-emerald-50/80 rounded-2xl border border-slate-200/60 hover:border-emerald-200 transition-all group cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center font-black text-lg shrink-0">
+                +
+              </div>
+              <div>
+                <p className="font-bold text-slate-900 text-xs sm:text-sm">Tambah Pemasukan</p>
+                <p className="text-[10px] text-slate-500">Infaq, Sedekah, Donasi</p>
+              </div>
+            </div>
+            <span className="text-slate-300 group-hover:text-emerald-600 transition-colors">→</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveModal('expense')}
+            className="flex items-center justify-between p-4 bg-slate-50 hover:bg-rose-50/80 rounded-2xl border border-slate-200/60 hover:border-rose-200 transition-all group cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 bg-rose-100 text-rose-700 rounded-xl flex items-center justify-center font-black text-lg shrink-0">
+                -
+              </div>
+              <div>
+                <p className="font-bold text-slate-900 text-xs sm:text-sm">Tambah Pengeluaran</p>
+                <p className="text-[10px] text-slate-500">Operasional, Gaji, Listrik</p>
+              </div>
+            </div>
+            <span className="text-slate-300 group-hover:text-rose-600 transition-colors">→</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveModal('inventory')}
+            className="flex items-center justify-between p-4 bg-slate-50 hover:bg-amber-50/80 rounded-2xl border border-slate-200/60 hover:border-amber-200 transition-all group cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center text-base shrink-0">
+                📦
+              </div>
+              <div>
+                <p className="font-bold text-slate-900 text-xs sm:text-sm">Catat Inventaris</p>
+                <p className="text-[10px] text-slate-500">Aset & Perlengkapan</p>
+              </div>
+            </div>
+            <span className="text-slate-300 group-hover:text-amber-600 transition-colors">→</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveModal('announcement')}
+            className="flex items-center justify-between p-4 bg-slate-50 hover:bg-blue-50/80 rounded-2xl border border-slate-200/60 hover:border-blue-200 transition-all group cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center text-base shrink-0">
+                📢
+              </div>
+              <div>
+                <p className="font-bold text-slate-900 text-xs sm:text-sm">Buat Pengumuman</p>
+                <p className="text-[10px] text-slate-500">DKM, Agenda, Kajian</p>
+              </div>
+            </div>
+            <span className="text-slate-300 group-hover:text-blue-600 transition-colors">→</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 5. AKTIVITAS TERBARU & GRAFIK */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        {/* Stat: Total Saldo (col-span-6) */}
-        <div className="md:col-span-12 lg:col-span-6 bg-emerald-600 rounded-[32px] p-8 text-white shadow-xl shadow-emerald-950/10 flex flex-col justify-between min-h-[220px]">
-          <div>
-            <p className="text-emerald-100 font-semibold uppercase tracking-[0.2em] text-[10px]">Total Saldo Kas</p>
-            <h3 className="text-4xl sm:text-5xl font-black mt-2 tracking-tight font-display">
-              {formatRupiah(balance)}
-            </h3>
-          </div>
-          <div className="flex justify-between items-end border-t border-emerald-500/50 pt-4 mt-6">
-            <div className="flex gap-6">
-              <div>
-                <p className="text-[10px] text-emerald-200 uppercase tracking-wider font-semibold">Pemasukan Bln Ini</p>
-                <p className="font-bold text-sm">+{formatRupiah(monthIncomes)}</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-emerald-200 uppercase tracking-wider font-semibold">Pengeluaran Bln Ini</p>
-                <p className="font-bold text-sm">-{formatRupiah(monthExpenses)}</p>
-              </div>
-            </div>
-            <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase backdrop-blur-md">v1.0.0 Stable</span>
-          </div>
-        </div>
-
-        {/* Stat: Inventaris Metric (col-span-3) */}
-        <div className="md:col-span-6 lg:col-span-3 bg-white border border-slate-200 rounded-[32px] p-6 flex flex-col justify-center items-center text-center min-h-[220px]">
-          <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 mb-4 font-bold text-xl">
-            {totalInventory}
-          </div>
-          <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Inventaris</p>
-          <p className="text-sm font-medium text-slate-400 mt-1">Barang Tercatat</p>
-        </div>
-
-        {/* Stat: Pengumuman Metric (col-span-3) */}
-        <div className="md:col-span-6 lg:col-span-3 bg-white border border-slate-200 rounded-[32px] p-6 flex flex-col justify-center items-center text-center min-h-[220px]">
-          <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-4 font-bold text-xl">
-            {state.announcements.filter(a => a.status === 'Publish').length}
-          </div>
-          <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Pengumuman</p>
-          <p className="text-sm font-medium text-slate-400 mt-1">Terbit Publik</p>
-        </div>
-
-        {/* Quick Actions (col-span-4) */}
-        <div className="md:col-span-12 lg:col-span-4 bg-white border border-slate-200 rounded-[32px] p-8 flex flex-col justify-between">
-          <div>
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Aksi Cepat Admin</h4>
-            <div className="space-y-3">
-              <button 
-                onClick={() => setActiveModal('income')}
-                className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-emerald-50 rounded-2xl border border-transparent hover:border-emerald-100 transition-all group cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center font-bold text-lg">+</div>
-                  <div className="text-left">
-                    <p className="font-bold text-slate-800 text-sm">Tambah Pemasukan</p>
-                    <p className="text-[10px] text-slate-500 uppercase">Infaq, Sedekah, Donasi</p>
-                  </div>
-                </div>
-                <span className="text-slate-300 group-hover:text-emerald-500 transition-colors">→</span>
-              </button>
-
-              <button 
-                onClick={() => setActiveModal('expense')}
-                className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-red-50 rounded-2xl border border-transparent hover:border-red-100 transition-all group cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center font-bold text-lg">-</div>
-                  <div className="text-left">
-                    <p className="font-bold text-slate-800 text-sm">Tambah Pengeluaran</p>
-                    <p className="text-[10px] text-slate-500 uppercase">Operasional, Gaji, Listrik</p>
-                  </div>
-                </div>
-                <span className="text-slate-300 group-hover:text-red-500 transition-colors">→</span>
-              </button>
-
-              <button 
-                onClick={() => setActiveModal('inventory')}
-                className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-amber-50 rounded-2xl border border-transparent hover:border-amber-100 transition-all group cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-lg">📦</div>
-                  <div className="text-left">
-                    <p className="font-bold text-slate-800 text-sm">Catat Inventaris</p>
-                    <p className="text-[10px] text-slate-500 uppercase">Aset & Perlengkapan</p>
-                  </div>
-                </div>
-                <span className="text-slate-300 group-hover:text-amber-500 transition-colors">→</span>
-              </button>
-
-              <button 
-                onClick={() => setActiveModal('announcement')}
-                className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-blue-50 rounded-2xl border border-transparent hover:border-blue-100 transition-all group cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-lg">📢</div>
-                  <div className="text-left">
-                    <p className="font-bold text-slate-800 text-sm">Buat Pengumuman</p>
-                    <p className="text-[10px] text-slate-500 uppercase">DKM, Agenda, Kajian</p>
-                  </div>
-                </div>
-                <span className="text-slate-300 group-hover:text-blue-500 transition-colors">→</span>
-              </button>
-            </div>
-          </div>
-          <div className="mt-6 border-t border-slate-100 pt-4">
-            <p className="text-[10px] text-slate-400 text-center font-medium">BASIC EDITION • SECURE SYSTEM</p>
-          </div>
-        </div>
-
+        
         {/* Recent Activity Table (col-span-8) */}
-        <div className="md:col-span-12 lg:col-span-8 bg-white border border-slate-200 rounded-[32px] p-8 flex flex-col justify-between">
+        <div className="md:col-span-12 lg:col-span-8 bg-white border border-slate-200/80 rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 flex flex-col justify-between shadow-xs">
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Ringkasan Arus Kas</h4>
-              <span className="text-[10px] font-bold text-emerald-600 uppercase">Aktual Terakhir</span>
+              <div>
+                <h3 className="font-display font-black text-base sm:text-lg text-slate-900">Aktivitas Transaksi Terbaru</h3>
+                <p className="text-xs text-slate-500">Ringkasan transaksi arus kas terkini</p>
+              </div>
+              <span className="text-[10px] font-extrabold text-emerald-600 uppercase px-2.5 py-1 bg-emerald-50 border border-emerald-100 rounded-lg">
+                Aktual
+              </span>
             </div>
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-[10px] text-slate-400 uppercase border-b border-slate-100">
-                    <th className="pb-4 font-bold">Tanggal</th>
-                    <th className="pb-4 font-bold">Kategori</th>
-                    <th className="pb-4 font-bold">Keterangan</th>
-                    <th className="pb-4 font-bold text-right">Nominal</th>
+                    <th className="pb-3 font-bold">Tanggal</th>
+                    <th className="pb-3 font-bold">Kategori</th>
+                    <th className="pb-3 font-bold">Keterangan</th>
+                    <th className="pb-3 font-bold text-right">Nominal</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm divide-y divide-slate-50">
                   {latestTransactions.length > 0 ? (
                     latestTransactions.map((tx, idx) => (
                       <tr key={idx}>
-                        <td className="py-4 text-slate-500 font-medium text-xs whitespace-nowrap">{tx.tanggal}</td>
-                        <td className="py-4">
+                        <td className="py-3.5 text-slate-500 font-medium text-xs whitespace-nowrap">{tx.tanggal}</td>
+                        <td className="py-3.5">
                           <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase ${
                             tx.tipe === 'Income' 
-                              ? 'bg-emerald-50 text-emerald-600' 
-                              : 'bg-rose-50 text-rose-600'
+                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+                              : 'bg-rose-50 text-rose-600 border border-rose-100'
                           }`}>
                             {tx.kategori}
                           </span>
                         </td>
-                        <td className="py-4 font-medium text-slate-700 text-xs max-w-[180px] truncate" title={tx.deskripsi}>
+                        <td className="py-3.5 font-medium text-slate-700 text-xs max-w-[180px] truncate" title={tx.deskripsi}>
                           {tx.deskripsi || '-'}
                         </td>
-                        <td className={`py-4 text-right font-bold text-xs whitespace-nowrap ${
+                        <td className={`py-3.5 text-right font-bold text-xs whitespace-nowrap ${
                           tx.tipe === 'Income' ? 'text-emerald-600' : 'text-rose-600'
                         }`}>
                           {tx.tipe === 'Income' ? '+' : '-'} {formatRupiah(tx.nominal)}
@@ -496,100 +598,103 @@ export default function DashboardView({
               </table>
             </div>
           </div>
+
           <div className="flex items-center gap-2 mt-4 text-[10px] font-medium text-slate-400 italic">
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
             Terintegrasi Realtime dengan Google Sheets
           </div>
         </div>
 
-        {/* Trend Area Chart (col-span-8) */}
-        <div className="md:col-span-12 lg:col-span-8 bg-white p-6 sm:p-8 rounded-[32px] border border-slate-200/80">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-            <div>
-              <h3 className="font-display font-bold text-base sm:text-lg text-slate-900">Grafik Arus Kas Aktual</h3>
-              <p className="text-xs text-slate-500">Aliran dana kas harian pada hari dengan transaksi aktif</p>
-            </div>
-            <div className="flex gap-4 text-xs font-semibold">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 block"></span>
-                <span>Pemasukan</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 block"></span>
-                <span>Pengeluaran</span>
-              </div>
-            </div>
-          </div>
-          <div className="h-64 w-full">
-            {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorIn" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorOut" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                  <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    formatter={(value) => [formatRupiah(Number(value)), '']}
-                  />
-                  <Area type="monotone" dataKey="Pemasukan" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorIn)" />
-                  <Area type="monotone" dataKey="Pengeluaran" stroke="#f43f5e" strokeWidth={2.5} fillOpacity={1} fill="url(#colorOut)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                <Calendar className="w-8 h-8 mb-2" />
-                <span className="text-sm">Belum ada history transaksi untuk divisualisasikan</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Latest Announcements Detail (col-span-4) */}
-        <div className="md:col-span-12 lg:col-span-4 bg-white p-8 rounded-[32px] border border-slate-200/80 flex flex-col justify-between min-h-[340px]">
+        {/* Latest Announcements Sidebar Card (col-span-4) */}
+        <div className="md:col-span-12 lg:col-span-4 bg-white p-6 sm:p-8 rounded-[28px] sm:rounded-[32px] border border-slate-200/80 flex flex-col justify-between shadow-xs">
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-display font-bold text-lg text-slate-900">Pengumuman Terbaru</h3>
-              <Megaphone className="w-5 h-5 text-sky-600 animate-bounce" />
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-display font-black text-base text-slate-900">Pengumuman Terbaru</h3>
+              <Megaphone className="w-4 h-4 text-emerald-600" />
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3.5">
               {latestAnnouncements.length > 0 ? (
                 latestAnnouncements.map((ann) => (
-                  <div key={ann.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <span className="text-[10px] font-mono font-bold text-slate-400 flex items-center gap-1 mb-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
+                  <div key={ann.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100/80">
+                    <span className="text-[10px] font-mono font-bold text-slate-400 flex items-center gap-1 mb-1">
+                      <Calendar className="w-3 h-3" />
                       {ann.tanggal}
                     </span>
-                    <h4 className="font-display font-bold text-slate-900 text-sm mb-1">{ann.judul}</h4>
+                    <h4 className="font-display font-bold text-slate-900 text-xs sm:text-sm mb-1">{ann.judul}</h4>
                     <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{ann.isi}</p>
                   </div>
                 ))
               ) : (
-                <div className="py-12 text-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                  <Megaphone className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <div className="py-8 text-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <Megaphone className="w-6 h-6 mx-auto mb-1.5 opacity-50" />
                   <p className="text-xs">Tidak ada pengumuman terpublikasi</p>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-100 text-center">
-            <span className="text-xs text-slate-500">Mencakup agenda DKM, kajian, & sosial</span>
+          <div className="mt-4 pt-3 border-t border-slate-100 text-center">
+            <span className="text-[11px] text-slate-400 font-medium">Mencakup agenda DKM, kajian, & sosial</span>
           </div>
         </div>
 
-        {/* Monthly Trend Area Chart (col-span-12) */}
-        <div className="md:col-span-12 bg-white p-6 sm:p-8 rounded-[32px] border border-slate-200/80">
+      </div>
+
+      {/* Trend Area Chart (Full Width Below) */}
+      <div className="bg-white p-6 sm:p-8 rounded-[28px] sm:rounded-[32px] border border-slate-200/80 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+          <div>
+            <h3 className="font-display font-black text-base sm:text-lg text-slate-900">Grafik Arus Kas Harian</h3>
+            <p className="text-xs text-slate-500">Aliran dana kas harian pada hari dengan transaksi aktif</p>
+          </div>
+          <div className="flex gap-4 text-xs font-semibold">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 block"></span>
+              <span>Pemasukan</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 block"></span>
+              <span>Pengeluaran</span>
+            </div>
+          </div>
+        </div>
+        <div className="h-64 w-full">
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorIn" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorOut" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  formatter={(value) => [formatRupiah(Number(value)), '']}
+                />
+                <Area type="monotone" dataKey="Pemasukan" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorIn)" />
+                <Area type="monotone" dataKey="Pengeluaran" stroke="#f43f5e" strokeWidth={2.5} fillOpacity={1} fill="url(#colorOut)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              <Calendar className="w-8 h-8 mb-2" />
+              <span className="text-sm">Belum ada riwayat transaksi untuk divisualisasikan</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Monthly Trend Area Chart */}
+      <div className="bg-white p-6 sm:p-8 rounded-[28px] sm:rounded-[32px] border border-slate-200/80 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <h3 className="font-display font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">
@@ -644,7 +749,33 @@ export default function DashboardView({
             )}
           </div>
         </div>
-      </div>
+
+      {/* 6. BANNER NOTIFIKASI SINKRONISASI (TAMPIL DI BAWAH HANYA JIKA TERJADI KENDALA) */}
+      {syncError && (
+        <div className="p-4 sm:p-5 bg-amber-50/90 border border-amber-200/80 rounded-[20px] sm:rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs text-amber-900 transition-all">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-amber-100 rounded-xl text-amber-700 shrink-0 mt-0.5">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs sm:text-sm text-amber-950">
+                Sinkronisasi Google Sheets Perlu Diperbarui
+              </h4>
+              <p className="text-[11px] sm:text-xs text-amber-800/90 mt-0.5 leading-relaxed">
+                Sinkronisasi Google Sheets perlu diperbarui agar perubahan terbaru dapat tersimpan secara otomatis. Data saat ini tersimpan sementara di penyimpanan lokal.
+              </p>
+            </div>
+          </div>
+          {onReauthenticate && (
+            <button
+              onClick={onReauthenticate}
+              className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold rounded-xl text-xs transition-all shrink-0 flex items-center justify-center gap-2 cursor-pointer shadow-xs whitespace-nowrap"
+            >
+              <span>Masuk Kembali dengan Google</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* QUICK ACTION MODALS */}
       {activeModal && (

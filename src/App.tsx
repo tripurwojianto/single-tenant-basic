@@ -33,16 +33,20 @@ import { INITIAL_MOCK_DATA } from './data/mockData';
 // Views
 import LandingPage from './components/LandingPage';
 import OnboardingWizard from './components/OnboardingWizard';
+import { ChooseStartPath } from './components/ChooseStartPath';
 import DashboardView from './components/DashboardView';
 import MosqueInfoView from './components/MosqueInfoView';
 import CashFlowView from './components/CashFlowView';
 import InventoryView from './components/InventoryView';
 import AnnouncementsView from './components/AnnouncementsView';
+import AminaView from './components/AminaView';
 import ReportsView from './components/ReportsView';
 import FeedbackView from './components/FeedbackView';
 import FeaturePreviewView from './components/FeaturePreviewView';
 import ProPage from './components/ProPage';
 import MembershipPage from './components/MembershipPage';
+import BottomNavbar from './components/BottomNavbar';
+import QuickActionModal from './components/QuickActionModal';
 
 // Icons
 import { 
@@ -93,6 +97,7 @@ export default function App() {
     }
     return false;
   });
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState<boolean>(false);
 
   // Ensure Google Identity Services script is initialized
   useEffect(() => {
@@ -176,6 +181,7 @@ export default function App() {
 
   // UI state
   const [activeMenu, setActiveMenu] = useState<string>('dashboard');
+  const [quickActionModal, setQuickActionModal] = useState<'income' | 'expense' | 'inventory' | 'announcement' | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuditorOpen, setIsAuditorOpen] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'developer' | 'viewer'>('admin');
@@ -700,15 +706,27 @@ export default function App() {
 
   if (path === '/onboarding') {
     if (user) {
+      if (showOnboardingWizard) {
+        return (
+          <OnboardingWizard
+            user={user}
+            brand={brand}
+            onComplete={handleOnboardingComplete}
+            onCancel={() => setShowOnboardingWizard(false)}
+            syncSpreadsheet={() => handleSpreadsheetSync(token!)}
+            isSyncing={isInitializingSheet}
+            syncError={sheetLoadingError}
+          />
+        );
+      }
+
       return (
-        <OnboardingWizard
+        <ChooseStartPath
           user={user}
           brand={brand}
-          onComplete={handleOnboardingComplete}
-          onCancel={handleCancelOnboarding}
-          syncSpreadsheet={() => handleSpreadsheetSync(token!)}
-          isSyncing={isInitializingSheet}
-          syncError={sheetLoadingError}
+          onSelectFreeTrial={() => setShowOnboardingWizard(true)}
+          onLogout={handleCancelOnboarding}
+          onNavigate={navigate}
         />
       );
     } else {
@@ -794,15 +812,27 @@ export default function App() {
   }
 
   if (isOnboarding && user) {
+    if (showOnboardingWizard) {
+      return (
+        <OnboardingWizard
+          user={user}
+          brand={brand}
+          onComplete={handleOnboardingComplete}
+          onCancel={() => setShowOnboardingWizard(false)}
+          syncSpreadsheet={() => handleSpreadsheetSync(token!)}
+          isSyncing={isInitializingSheet}
+          syncError={sheetLoadingError}
+        />
+      );
+    }
+
     return (
-      <OnboardingWizard
+      <ChooseStartPath
         user={user}
         brand={brand}
-        onComplete={handleOnboardingComplete}
-        onCancel={handleCancelOnboarding}
-        syncSpreadsheet={() => handleSpreadsheetSync(token!)}
-        isSyncing={isInitializingSheet}
-        syncError={sheetLoadingError}
+        onSelectFreeTrial={() => setShowOnboardingWizard(true)}
+        onLogout={handleCancelOnboarding}
+        onNavigate={navigate}
       />
     );
   }
@@ -812,8 +842,9 @@ export default function App() {
     { key: 'dashboard', label: 'Dashboard', icon: LayoutGrid, tier: 'BASIC' },
     { key: 'mosque-info', label: 'Informasi Masjid', icon: Building, tier: 'BASIC' },
     { key: 'cash-flow', label: 'Arus Kas Ledger', icon: TrendingUp, tier: 'BASIC' },
-    { key: 'inventory', label: 'Daftar Inventaris', icon: Box, tier: 'BASIC' },
     { key: 'announcements', label: 'Komposer Pengumuman', icon: Megaphone, tier: 'BASIC' },
+    { key: 'amina', label: 'Asisten Amina', icon: Sparkles, tier: 'BASIC' },
+    { key: 'inventory', label: 'Daftar Inventaris', icon: Box, tier: 'BASIC' },
     { key: 'reports', label: 'Ringkasan Laporan', icon: FileText, tier: 'BASIC' },
     { key: 'feedback', label: 'Kirim Feedback', icon: MessageSquare, tier: 'BASIC' },
     
@@ -962,27 +993,41 @@ export default function App() {
           </nav>
 
           {/* Sticky User Context Footer in Sidebar */}
-          <div className="p-4 border-t border-emerald-800 bg-emerald-950/30 shrink-0 pb-8 sm:pb-6 space-y-3">
-            <div className="bg-emerald-800/50 p-3.5 rounded-2xl flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-900 font-bold uppercase text-xs border border-emerald-200 shrink-0 shadow-xs">
-                {isDemoMode ? 'D' : (user?.email ? user.email.substring(0, 2).toUpperCase() : 'BA')}
+          <div className="p-4 border-t border-emerald-800 bg-emerald-950/40 shrink-0 pb-8 sm:pb-6 space-y-3">
+            {/* Profil Pengguna */}
+            <div className="bg-emerald-800/40 p-3.5 rounded-2xl flex items-center gap-3 border border-emerald-700/40">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-900 font-bold uppercase text-xs shrink-0 shadow-xs">
+                {isDemoMode ? 'D' : (user?.email ? user.email.substring(0, 2).toUpperCase() : 'KM')}
               </div>
               <div className="truncate min-w-0">
-                <p className="text-xs font-semibold text-white leading-none truncate">
-                  {isDemoMode ? 'Bendahara Demo' : (user?.displayName || 'Bendahara Masjid')}
+                <p className="text-xs font-bold text-white leading-tight truncate">
+                  {isDemoMode ? 'Bendahara Demo' : (user?.displayName || 'Pengurus Masjid')}
                 </p>
-                <p className="text-[10px] text-emerald-400 mt-1 uppercase truncate leading-none">
-                  {isDemoMode ? 'Administrator' : (user?.email || 'Administrator')}
+                <p className="text-[10px] text-emerald-300 mt-1 truncate leading-tight">
+                  {isDemoMode ? 'demo@kasmasjid.web.id' : (user?.email || 'admin@masjid.id')}
                 </p>
               </div>
             </div>
 
+            {/* Kelola Akun */}
+            <button
+              onClick={() => {
+                setActiveMenu('mosque-info');
+                setIsSidebarOpen(false);
+              }}
+              className="w-full py-2.5 px-3.5 text-xs font-bold text-emerald-200 hover:text-white bg-emerald-800/50 hover:bg-emerald-800 border border-emerald-700/50 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+            >
+              <Building className="w-3.5 h-3.5 text-emerald-300" />
+              <span>Kelola Akun & Informasi</span>
+            </button>
+
+            {/* Logout */}
             <button
               onClick={handleLogout}
-              className="w-full py-3 px-4 text-xs font-bold text-emerald-100 bg-emerald-800/80 hover:bg-emerald-800 hover:text-white border border-emerald-700/60 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.99] shadow-xs"
+              className="w-full py-2.5 px-4 text-xs font-extrabold text-rose-100 bg-rose-900/50 hover:bg-rose-900/90 hover:text-white border border-rose-800/60 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.99] shadow-xs"
             >
-              <LogOut className="w-4 h-4 text-emerald-300" />
-              Keluar
+              <LogOut className="w-3.5 h-3.5 text-rose-300" />
+              <span>Logout</span>
             </button>
           </div>
         </aside>
@@ -1009,7 +1054,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Mode Badge & Google Sheets Link */}
+          {/* Header Status Indicator */}
           <div className="flex items-center gap-3">
             {isDemoMode ? (
               <div className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
@@ -1017,37 +1062,21 @@ export default function App() {
                 Mode Demo
               </div>
             ) : spreadsheetId ? (
-              <div className="flex flex-col items-end">
-                <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Status Sinkronisasi</span>
-                <a 
-                  href={`https://docs.google.com/spreadsheets/d/${spreadsheetId}`}
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors cursor-pointer"
-                  title="Buka Berkas Google Sheets Databasenya"
-                >
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                  Google Sheets Connected
-                </a>
-              </div>
-            ) : (
-              <div className="flex flex-col items-end">
-                <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider font-sans">Status Sinkron</span>
-                <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span> Disconnected
-                </span>
-              </div>
-            )}
-
-            {!isDemoMode && (
-              <button
-                onClick={handleLogout}
-                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-200/80 ml-2"
-                title="Keluar dari Sesi"
+              <a 
+                href={`https://docs.google.com/spreadsheets/d/${spreadsheetId}`}
+                target="_blank" 
+                rel="noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Buka Berkas Google Sheets Databasenya"
               >
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Keluar</span>
-              </button>
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span>Google Sheets</span>
+              </a>
+            ) : (
+              <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-500 flex items-center gap-1.5">
+                <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                <span>Lokal</span>
+              </div>
             )}
           </div>
         </header>
@@ -1112,166 +1141,182 @@ export default function App() {
         )}
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-6 sm:p-8">
-          
-          {/* Main Loading states */}
-          {isInitializingSheet ? (
-            <div className="h-96 flex flex-col items-center justify-center text-slate-500 space-y-4">
-              <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
-              <div className="text-center">
-                <p className="font-semibold text-slate-700">Menyinkronkan Basis Data Google Sheets...</p>
-                <p className="text-xs text-slate-400 mt-0.5">Memeriksa struktur spreadsheet 'KasMasjid Database' di Google Drive Anda.</p>
-              </div>
-            </div>
-          ) : sheetLoadingError && !(state.info?.namaMasjid || state.incomes.length > 0 || state.expenses.length > 0 || isDemoMode) ? (
-            <div className="max-w-md mx-auto py-12 text-center bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-              <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
-                <AlertCircle className="w-6 h-6" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-display font-bold text-lg text-slate-900">
-                  {sheetLoadingError.includes('401') || sheetLoadingError.includes('UNAUTHENTICATED') || sheetLoadingError.includes('kedaluwarsa')
-                    ? 'Sesi Google Telah Kedaluwarsa'
-                    : 'Sinkronisasi Database Gagal'}
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  {sheetLoadingError.includes('401') || sheetLoadingError.includes('UNAUTHENTICATED') || sheetLoadingError.includes('kedaluwarsa')
-                    ? 'Akses token Google OAuth Anda telah berakhir. Silakan masuk kembali dengan Google untuk melanjutkan sinkronisasi Google Sheets.'
-                    : 'Gagal menghubungi Google Drive API. Hal ini biasanya terjadi karena token akses Google telah kedaluwarsa atau izin Drive ditarik.'}
-                </p>
-                <div className="p-3 bg-slate-50 rounded-xl text-left border border-slate-100 font-mono text-[10px] text-slate-600 overflow-x-auto max-h-24">
-                  {sheetLoadingError}
+        <main className="flex-1 overflow-y-auto p-6 sm:p-8 pb-32 sm:pb-28 flex flex-col justify-between">
+          <div>
+            {/* Main Loading states */}
+            {isInitializingSheet ? (
+              <div className="h-96 flex flex-col items-center justify-center text-slate-500 space-y-4">
+                <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
+                <div className="text-center">
+                  <p className="font-semibold text-slate-700">Menyinkronkan Basis Data Google Sheets...</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Memeriksa struktur spreadsheet 'KasMasjid Database' di Google Drive Anda.</p>
                 </div>
               </div>
-              <div className="space-y-2">
-                <button
-                  onClick={handleLogin}
-                  disabled={isLoggingIn}
-                  className="w-full py-3 bg-[#16A34A] hover:bg-[#159242] text-white font-bold rounded-xl text-xs transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2"
-                >
-                  {isLoggingIn ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : null}
-                  <span>Masuk Kembali dengan Google</span>
-                </button>
-                {token && (
-                  <button
-                    onClick={() => handleSpreadsheetSync(token)}
-                    disabled={isInitializingSheet}
-                    className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl text-xs transition-all cursor-pointer"
-                  >
-                    Coba Ulang Sinkronisasi Token Saat Ini
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            // VIEW CONTROLLER
-            <>
-              {sheetLoadingError && (
-                <div className="mb-6 p-4 bg-amber-50 border border-amber-200/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-amber-900 shadow-xs">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-bold text-sm text-amber-950">
-                        Sesi Google Sheets Kedaluwarsa (401 UNAUTHENTICATED)
-                      </h4>
-                      <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
-                        Akses token Google OAuth Anda telah berakhir. Data yang tampil saat ini menggunakan data tembolok (cache) lokal. Klik tombol untuk memperbarui token dan melanjutkan sinkronisasi.
-                      </p>
-                    </div>
+            ) : sheetLoadingError && !(state.info?.namaMasjid || state.incomes.length > 0 || state.expenses.length > 0 || isDemoMode) ? (
+              <div className="max-w-md mx-auto py-12 text-center bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+                <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-display font-bold text-lg text-slate-900">
+                    {sheetLoadingError.includes('401') || sheetLoadingError.includes('UNAUTHENTICATED') || sheetLoadingError.includes('kedaluwarsa')
+                      ? 'Sesi Google Telah Kedaluwarsa'
+                      : 'Sinkronisasi Database Gagal'}
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {sheetLoadingError.includes('401') || sheetLoadingError.includes('UNAUTHENTICATED') || sheetLoadingError.includes('kedaluwarsa')
+                      ? 'Akses token Google OAuth Anda telah berakhir. Silakan masuk kembali dengan Google untuk melanjutkan sinkronisasi Google Sheets.'
+                      : 'Gagal menghubungi Google Drive API. Hal ini biasanya terjadi karena token akses Google telah kedaluwarsa atau izin Drive ditarik.'}
+                  </p>
+                  <div className="p-3 bg-slate-50 rounded-xl text-left border border-slate-100 font-mono text-[10px] text-slate-600 overflow-x-auto max-h-24">
+                    {sheetLoadingError}
                   </div>
+                </div>
+                <div className="space-y-2">
                   <button
                     onClick={handleLogin}
                     disabled={isLoggingIn}
-                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all shrink-0 flex items-center justify-center gap-2 cursor-pointer shadow-xs whitespace-nowrap"
+                    className="w-full py-3 bg-[#16A34A] hover:bg-[#159242] text-white font-bold rounded-xl text-xs transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2"
                   >
-                    {isLoggingIn && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    {isLoggingIn ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : null}
                     <span>Masuk Kembali dengan Google</span>
                   </button>
+                  {token && (
+                    <button
+                      onClick={() => handleSpreadsheetSync(token)}
+                      disabled={isInitializingSheet}
+                      className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl text-xs transition-all cursor-pointer"
+                    >
+                      Coba Ulang Sinkronisasi Token Saat Ini
+                    </button>
+                  )}
                 </div>
-              )}
-              {activeMenu === 'dashboard' && (
-                <DashboardView 
-                  state={state} 
-                  onAddIncome={(income) => handleAddTransaction('Income', income)}
-                  onAddExpense={(expense) => handleAddTransaction('Expense', expense)}
-                  onAddInventory={handleAddInventory}
-                  onAddAnnouncement={handleAddAnnouncement}
-                />
-              )}
+              </div>
+            ) : (
+              // VIEW CONTROLLER
+              <>
+                {activeMenu === 'dashboard' && (
+                  <DashboardView 
+                    state={state} 
+                    spreadsheetId={spreadsheetId}
+                    isDemoMode={isDemoMode}
+                    syncError={sheetLoadingError}
+                    onReauthenticate={handleLogin}
+                    onAddIncome={(income) => handleAddTransaction('Income', income)}
+                    onAddExpense={(expense) => handleAddTransaction('Expense', expense)}
+                    onAddInventory={handleAddInventory}
+                    onAddAnnouncement={handleAddAnnouncement}
+                  />
+                )}
 
-              {activeMenu === 'mosque-info' && (
-                <MosqueInfoView 
-                  info={state.info} 
-                  onSave={handleSaveMosqueInfo} 
-                />
-              )}
+                {activeMenu === 'mosque-info' && (
+                  <MosqueInfoView 
+                    info={state.info} 
+                    onSave={handleSaveMosqueInfo} 
+                  />
+                )}
 
-              {activeMenu === 'cash-flow' && (
-                <CashFlowView 
-                  state={state} 
-                  onAddTransaction={handleAddTransaction}
-                  onEditTransaction={handleEditTransaction}
-                  onDeleteTransaction={handleDeleteTransaction}
-                  onAddCategory={handleAddCategory}
-                />
-              )}
+                {activeMenu === 'cash-flow' && (
+                  <CashFlowView 
+                    state={state} 
+                    onAddTransaction={handleAddTransaction}
+                    onEditTransaction={handleEditTransaction}
+                    onDeleteTransaction={handleDeleteTransaction}
+                    onAddCategory={handleAddCategory}
+                  />
+                )}
 
-              {activeMenu === 'inventory' && (
-                <InventoryView 
-                  state={state} 
-                  onAddInventory={handleAddInventory}
-                  onEditInventory={handleEditInventory}
-                  onDeleteInventory={handleDeleteInventory}
-                />
-              )}
+                {activeMenu === 'inventory' && (
+                  <InventoryView 
+                    state={state} 
+                    onAddInventory={handleAddInventory}
+                    onEditInventory={handleEditInventory}
+                    onDeleteInventory={handleDeleteInventory}
+                  />
+                )}
 
-              {activeMenu === 'announcements' && (
-                <AnnouncementsView 
-                  state={state} 
-                  onAddAnnouncement={handleAddAnnouncement}
-                  onEditAnnouncement={handleEditAnnouncement}
-                  onDeleteAnnouncement={handleDeleteAnnouncement}
-                />
-              )}
+                {activeMenu === 'announcements' && (
+                  <AnnouncementsView 
+                    state={state} 
+                    onAddAnnouncement={handleAddAnnouncement}
+                    onEditAnnouncement={handleEditAnnouncement}
+                    onDeleteAnnouncement={handleDeleteAnnouncement}
+                  />
+                )}
 
-              {activeMenu === 'reports' && (
-                <ReportsView state={state} />
-              )}
+                {activeMenu === 'amina' && (
+                  <AminaView
+                    state={state}
+                    onAddAnnouncement={handleAddAnnouncement}
+                    onNavigate={navigate}
+                    setActiveMenu={setActiveMenu}
+                  />
+                )}
 
-              {activeMenu === 'feedback' && (
-                <FeedbackView onSendFeedback={handleSendFeedback} />
-              )}
+                {activeMenu === 'reports' && (
+                  <ReportsView state={state} />
+                )}
 
-              {['whatsapp-notif', 'thermal-print', 'multi-admin', 'portal-jamaah', 'zakat-digital', 'infaq-qris'].includes(activeMenu) && (
-                <FeaturePreviewView 
-                  featureKey={activeMenu}
-                  onBackToDemo={() => setActiveMenu('dashboard')}
-                  onUpgradeClick={handleLogin}
-                />
-              )}
-            </>
-          )}
+                {activeMenu === 'feedback' && (
+                  <FeedbackView onSendFeedback={handleSendFeedback} />
+                )}
 
+                {['whatsapp-notif', 'thermal-print', 'multi-admin', 'portal-jamaah', 'zakat-digital', 'infaq-qris'].includes(activeMenu) && (
+                  <FeaturePreviewView 
+                    featureKey={activeMenu}
+                    onBackToDemo={() => setActiveMenu('dashboard')}
+                    onUpgradeClick={handleLogin}
+                  />
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Simplified Dashboard Footer */}
+          <footer className="mt-12 pt-6 border-t border-slate-200/60 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 no-print">
+            <div className="text-center sm:text-left leading-relaxed">
+              <span className="font-semibold text-slate-700">© 2026 KasMasjid Basic</span> — Dikembangkan untuk mendukung transparansi administrasi masjid.
+            </div>
+            <div className="text-center sm:text-right font-medium">
+              Powered by{' '}
+              <a 
+                href="https://www.kukas.biz.id" 
+                target="_blank" 
+                rel="noreferrer" 
+                className="text-emerald-600 hover:text-emerald-700 font-bold underline underline-offset-4 transition-colors"
+              >
+                KUKAS
+              </a>
+            </div>
+          </footer>
         </main>
-
-        {/* Simplified Dashboard Footer */}
-        <footer className="py-6 px-8 border-t border-slate-200/60 bg-white text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0 no-print">
-          <div>
-            <span className="font-semibold text-slate-600">© 2026 KasMasjid Basic</span> — Dikembangkan untuk mendukung transparansi administrasi masjid.
-          </div>
-          <div>
-            Powered by{' '}
-            <a 
-              href="https://www.kasmasjid.web.id" 
-              target="_blank" 
-              rel="noreferrer" 
-              className="text-emerald-600 hover:text-emerald-700 font-bold underline underline-offset-4"
-            >
-              KasMasjid
-            </a>
-          </div>
-        </footer>
       </div>
+
+      {/* Sticky Bottom Navigation Bar */}
+      <BottomNavbar 
+        activeMenu={activeMenu}
+        setActiveMenu={setActiveMenu}
+        onOpenQuickAction={(action) => setQuickActionModal(action)}
+        spreadsheetId={spreadsheetId}
+        isDemoMode={isDemoMode}
+        syncError={sheetLoadingError}
+        onReauthenticate={handleLogin}
+        onOpenGuide={() => setIsGuideOpen(true)}
+        onOpenContact={() => { setIsContactOpen(true); setContactSubmitted(false); }}
+        onOpenDeploy={() => { setIsDemoMode(false); setNeedsAuth(true); navigate('/onboarding'); }}
+        onLogout={handleLogout}
+      />
+
+      {/* Global Quick Action Modal */}
+      <QuickActionModal 
+        activeModal={quickActionModal}
+        onClose={() => setQuickActionModal(null)}
+        state={state}
+        onAddIncome={(income) => handleAddTransaction('Income', income)}
+        onAddExpense={(expense) => handleAddTransaction('Expense', expense)}
+        onAddInventory={handleAddInventory}
+        onAddAnnouncement={handleAddAnnouncement}
+      />
 
       {/* PANDUAN IMPLEMENTASI MODAL */}
       {isGuideOpen && (

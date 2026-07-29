@@ -14,7 +14,7 @@ export const db = getFirestore(app);
 
 export const GOOGLE_CLIENT_ID =
   (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID ||
-  firebaseConfig.oAuthClientId ||
+  (firebaseConfig as any).oAuthClientId ||
   '621496665265-03aolfd2fibn6vth5omfml703psb256o.apps.googleusercontent.com';
 
 // Check if GIS script is loaded and ready
