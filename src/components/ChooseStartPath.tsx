@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User } from 'firebase/auth';
+import KasMasjidLogo from './KasMasjidLogo';
 import { 
   Rocket, 
   Users, 
@@ -87,14 +88,12 @@ Mohon informasi dan petunjuk langkah selanjutnya. Terima kasih.`;
       {/* Header Bar */}
       <header className="h-20 bg-white border-b border-slate-200/80 sticky top-0 z-40 px-4 sm:px-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#16A34A] rounded-2xl flex items-center justify-center font-black text-white text-base tracking-wider shadow-sm">
-            KM
-          </div>
+          <KasMasjidLogo className="w-10 h-10" />
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-display font-black text-slate-900 text-base sm:text-lg tracking-tight">KasMasjid</h1>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold border border-emerald-200">
-                v1.2
+              <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-[#16A34A] text-[10px] font-black uppercase border border-emerald-200">
+                Basic
               </span>
             </div>
             <p className="text-[11px] text-slate-500 font-semibold">Pilih Cara Memulai</p>
@@ -286,18 +285,7 @@ Mohon informasi dan petunjuk langkah selanjutnya. Terima kasih.`;
       {/* Footer */}
       <footer className="py-6 px-8 border-t border-slate-200/60 bg-white text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
         <div>
-          <span className="font-semibold text-slate-600">© 2026 KasMasjid Basic</span> — Dikembangkan untuk mendukung transparansi administrasi masjid.
-        </div>
-        <div>
-          Powered by{' '}
-          <a 
-            href="https://www.kasmasjid.web.id" 
-            target="_blank" 
-            rel="noreferrer" 
-            className="text-emerald-600 hover:text-emerald-700 font-bold underline underline-offset-4"
-          >
-            KasMasjid
-          </a>
+          <span className="font-semibold text-slate-600">© 2026 KasMasjid — Sistem Administrasi & Transparansi Keuangan Masjid</span>
         </div>
       </footer>
 

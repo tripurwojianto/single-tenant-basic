@@ -25,6 +25,31 @@ async function handleResponse(res: Response, errorMessage: string) {
 }
 
 /**
+ * Checks if the Google Spreadsheet exists and is accessible (Database Health Check)
+ */
+export async function checkSpreadsheetHealth(accessToken: string, spreadsheetId: string): Promise<boolean> {
+  try {
+    const url = `https://www.googleapis.com/drive/v3/files/${spreadsheetId}?fields=id,name,trashed`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!res.ok) {
+      console.error('[SYNC ERROR] Health Check Failed - HTTP Status:', res.status);
+      return false;
+    }
+    const data = await res.json();
+    if (data.trashed) {
+      console.error('[SYNC ERROR] Health Check Failed - Spreadsheet in Trash');
+      return false;
+    }
+    return true;
+  } catch (err: any) {
+    console.error('[SYNC ERROR] Health Check Exception:', err?.message || String(err));
+    return false;
+  }
+}
+
+/**
  * Searches the user's Google Drive for the spreadsheet
  */
 export async function findSpreadsheet(accessToken: string): Promise<string | null> {

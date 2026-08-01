@@ -4,11 +4,12 @@
  */
 
 import React, { useState } from 'react';
+import KasMasjidLogo from './KasMasjidLogo';
 import { MosqueState, CashTransaction, InventoryItem, Announcement } from '../types';
 import { 
   TrendingUp, TrendingDown, Wallet, Box, Megaphone, PlusCircle, 
   ArrowUpRight, ArrowDownRight, Calendar, User, FileText, MapPin, 
-  Settings, Check, X, AlertTriangle, Sparkles, ArrowRight
+  Settings, Check, X, AlertTriangle, Sparkles, ArrowRight, Loader2
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { getIncomeCategories, getExpenseCategories } from '../constants/transactionCategories';
@@ -18,6 +19,9 @@ interface DashboardViewProps {
   spreadsheetId?: string | null;
   isDemoMode?: boolean;
   syncError?: string | null;
+  connectionStatus?: 'connected' | 'pending' | 'error';
+  syncQueueLength?: number;
+  onManualSync?: () => void;
   onReauthenticate?: () => void;
   onAddIncome: (income: Omit<CashTransaction, 'id'>) => Promise<void>;
   onAddExpense: (expense: Omit<CashTransaction, 'id'>) => Promise<void>;
@@ -31,6 +35,9 @@ export default function DashboardView({
   spreadsheetId,
   isDemoMode,
   syncError,
+  connectionStatus = 'connected',
+  syncQueueLength = 0,
+  onManualSync,
   onReauthenticate,
   onAddIncome, 
   onAddExpense, 
@@ -329,17 +336,19 @@ export default function DashboardView({
             {state.info.logo ? (
               <img 
                 src={state.info.logo} 
-                alt="Logo Masjid" 
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-emerald-400/40 shadow-lg shrink-0"
+                alt={`Logo ${state.info.namaMasjid || 'Masjid'}`} 
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-emerald-400/40 shadow-lg shrink-0 bg-white/10"
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-emerald-950 flex items-center justify-center font-display font-black text-2xl sm:text-3xl shadow-lg border border-emerald-300/30 shrink-0">
-                {state.info.namaMasjid ? state.info.namaMasjid.substring(0, 2).toUpperCase() : '🕌'}
-              </div>
+              <KasMasjidLogo className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-emerald-400/40 shadow-lg shrink-0 bg-white/10 p-1" />
             )}
 
             <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <KasMasjidLogo className="w-5 h-5" />
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-emerald-300">KasMasjid Basic</span>
+              </div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="font-display font-black text-2xl sm:text-3xl md:text-4xl text-white tracking-tight leading-snug">
                   {state.info.namaMasjid || 'Masjid Al-Ikhlas'}
@@ -361,25 +370,25 @@ export default function DashboardView({
 
           {/* Sync Status Badge inside Hero */}
           <div className="shrink-0 self-start md:self-center">
-            {syncError ? (
-              <div className="px-3.5 py-1.5 rounded-full bg-rose-500/20 border border-rose-400/30 text-rose-200 text-xs font-extrabold flex items-center gap-2 backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                <span>🔴 Sinkronisasi Bermasalah</span>
-              </div>
-            ) : isDemoMode ? (
+            {isDemoMode ? (
               <div className="px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-200 text-xs font-extrabold flex items-center gap-2 backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-amber-400" />
                 <span>🟡 Mode Demo (Lokal)</span>
               </div>
-            ) : spreadsheetId ? (
-              <div className="px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 text-xs font-extrabold flex items-center gap-2 backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>🟢 Google Sheets Tersinkron</span>
+            ) : connectionStatus === 'error' || syncError ? (
+              <div className="px-3.5 py-1.5 rounded-full bg-rose-500/20 border border-rose-400/30 text-rose-200 text-xs font-extrabold flex items-center gap-2 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                <span>🔴 Google Sheets Tidak Dapat Diakses</span>
+              </div>
+            ) : connectionStatus === 'pending' || syncQueueLength > 0 ? (
+              <div className="px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-200 text-xs font-extrabold flex items-center gap-2 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span>🟡 Menunggu Sinkronisasi {syncQueueLength > 0 ? `(${syncQueueLength} data)` : ''}</span>
               </div>
             ) : (
-              <div className="px-3.5 py-1.5 rounded-full bg-slate-500/20 border border-slate-400/30 text-slate-200 text-xs font-extrabold flex items-center gap-2 backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-slate-400" />
-                <span>🟡 Perlu Sinkronisasi</span>
+              <div className="px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 text-xs font-extrabold flex items-center gap-2 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>🟢 Google Sheets Terhubung</span>
               </div>
             )}
           </div>
@@ -806,32 +815,66 @@ export default function DashboardView({
           </div>
         </div>
 
-      {/* 6. BANNER NOTIFIKASI SINKRONISASI (TAMPIL DI BAWAH HANYA JIKA TERJADI KENDALA) */}
-      {syncError && (
-        <div className="p-4 sm:p-5 bg-amber-50/90 border border-amber-200/80 rounded-[20px] sm:rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs text-amber-900 transition-all">
+      {/* 6. BANNER NOTIFIKASI SINKRONISASI (TAMPIL HANYA JIKA ADA KENDALA ATAU ANTREAN PENDING) */}
+      {(connectionStatus === 'error' || syncError) ? (
+        <div className="p-4 sm:p-5 bg-rose-50/90 border border-rose-200/80 rounded-[20px] sm:rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs text-rose-900 transition-all">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-amber-100 rounded-xl text-amber-700 shrink-0 mt-0.5">
+            <div className="p-2 bg-rose-100 rounded-xl text-rose-700 shrink-0 mt-0.5">
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="font-bold text-xs sm:text-sm text-amber-950">
-                Sinkronisasi Google Sheets Perlu Diperbarui
+              <h4 className="font-bold text-xs sm:text-sm text-rose-950">
+                🔴 Google Sheets Tidak Dapat Diakses
               </h4>
-              <p className="text-[11px] sm:text-xs text-amber-800/90 mt-0.5 leading-relaxed">
-                Sinkronisasi Google Sheets perlu diperbarui agar perubahan terbaru dapat tersimpan secara otomatis. Data saat ini tersimpan sementara di penyimpanan lokal.
+              <p className="text-[11px] sm:text-xs text-rose-800/90 mt-0.5 leading-relaxed">
+                Periksa koneksi internet atau pulihkan database Google Sheets Anda. Data transaksi tetap tersimpan aman di penyimpanan lokal.
               </p>
             </div>
           </div>
-          {onReauthenticate && (
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
+            {onManualSync && (
+              <button
+                onClick={onManualSync}
+                className="w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white font-extrabold rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs whitespace-nowrap"
+              >
+                <span>Sinkronkan Sekarang</span>
+              </button>
+            )}
+            {onReauthenticate && (
+              <button
+                onClick={onReauthenticate}
+                className="w-full sm:w-auto px-4 py-2.5 bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white font-extrabold rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs whitespace-nowrap"
+              >
+                <span>Masuk Kembali dengan Google</span>
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (connectionStatus === 'pending' || syncQueueLength > 0) ? (
+        <div className="p-4 sm:p-5 bg-amber-50/90 border border-amber-200/80 rounded-[20px] sm:rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs text-amber-900 transition-all">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-amber-100 rounded-xl text-amber-700 shrink-0 mt-0.5">
+              <AlertTriangle className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs sm:text-sm text-amber-950">
+                🟡 Menunggu Sinkronisasi
+              </h4>
+              <p className="text-[11px] sm:text-xs text-amber-800/90 mt-0.5 leading-relaxed">
+                Terdapat {syncQueueLength} jenis data/transaksi tersimpan lokal yang akan dikirim ke Google Sheets secara otomatis saat koneksi tersedia.
+              </p>
+            </div>
+          </div>
+          {onManualSync && (
             <button
-              onClick={onReauthenticate}
-              className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold rounded-xl text-xs transition-all shrink-0 flex items-center justify-center gap-2 cursor-pointer shadow-xs whitespace-nowrap"
+              onClick={onManualSync}
+              className="w-full sm:w-auto px-4 py-2.5 bg-amber-600 hover:bg-amber-700 active:scale-[0.98] text-white font-extrabold rounded-xl text-xs transition-all shrink-0 flex items-center justify-center gap-2 cursor-pointer shadow-xs whitespace-nowrap"
             >
-              <span>Masuk Kembali dengan Google</span>
+              <span>Sinkronkan Sekarang</span>
             </button>
           )}
         </div>
-      )}
+      ) : null}
 
       {/* QUICK ACTION MODALS */}
       {activeModal && (

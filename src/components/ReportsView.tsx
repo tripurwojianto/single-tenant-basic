@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { jsPDF } from 'jspdf';
+import KasMasjidLogo from './KasMasjidLogo';
 import { MosqueState } from '../types';
 import { Printer, Calendar, FileText, Download, PieChart, CheckSquare, Award } from 'lucide-react';
 
@@ -619,13 +620,15 @@ export default function ReportsView({ state }: ReportsViewProps) {
       >
         {/* Kop Surat / Header */}
         <div className="text-center pb-5 sm:pb-6 border-b-2 border-double border-slate-800 space-y-1.5 sm:space-y-2">
-          {state.info.logo && (
+          {state.info.logo ? (
             <img 
               src={state.info.logo} 
               alt="Logo" 
               className="w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-full object-cover mb-2 no-print"
               referrerPolicy="no-referrer"
             />
+          ) : (
+            <KasMasjidLogo className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 no-print" />
           )}
           <h1 className="font-display font-extrabold text-lg sm:text-2xl tracking-tight text-slate-900 uppercase">
             {state.info.namaMasjid || 'Masjid Raya Baiturrahman'}
@@ -846,7 +849,7 @@ export default function ReportsView({ state }: ReportsViewProps) {
 
         {/* Printable Footer notes */}
         <div className="mt-8 sm:mt-12 text-center text-[10px] text-slate-400 font-mono uppercase tracking-wider pt-6 border-t border-dashed border-slate-100">
-          {state.info.namaMasjid || 'KasMasjid Basic Community Edition'} | Laporan terverifikasi via Google Sheets Database.
+          © 2026 KasMasjid — Sistem Administrasi & Transparansi Keuangan Masjid
         </div>
       </div>
     </div>

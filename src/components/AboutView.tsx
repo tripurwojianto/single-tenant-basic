@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import KasMasjidLogo from './KasMasjidLogo';
 import { 
   Info, Sparkles, Rocket, BookOpen, HelpCircle, Activity, 
   ShieldCheck, PhoneCall, ChevronRight, Search, CheckCircle2, 
@@ -77,9 +78,7 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
             </p>
           </div>
           <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white font-black text-sm flex items-center justify-center font-display italic">
-              KM
-            </div>
+            <KasMasjidLogo className="w-10 h-10" />
             <div className="text-left">
               <div className="text-xs font-bold text-white">KasMasjid Basic</div>
               <div className="text-[10px] text-emerald-300 font-medium">v2.4.0 (Agustus 2026)</div>

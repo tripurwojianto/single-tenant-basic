@@ -11,6 +11,7 @@ import {
   findSpreadsheet, 
   createSpreadsheet, 
   fetchSpreadsheetData, 
+  checkSpreadsheetHealth,
   saveMosqueInfo, 
   saveIncomes, 
   saveExpenses, 
@@ -33,6 +34,7 @@ import { INITIAL_MOCK_DATA } from './data/mockData';
 // Views
 import LandingPage from './components/LandingPage';
 import OnboardingWizard from './components/OnboardingWizard';
+import KasMasjidLogo from './components/KasMasjidLogo';
 import { ChooseStartPath } from './components/ChooseStartPath';
 import DashboardView from './components/DashboardView';
 import MosqueInfoView from './components/MosqueInfoView';
@@ -81,6 +83,9 @@ const getSavedSession = () => {
   }
   return null;
 };
+
+export type SyncItemType = 'incomes' | 'expenses' | 'inventory' | 'announcements' | 'categories' | 'info';
+export type ConnectionStatusType = 'connected' | 'pending' | 'error';
 
 export default function App() {
   const brand = getActiveBrand();
@@ -181,6 +186,219 @@ export default function App() {
   const [spreadsheetId, setSpreadsheetId] = useState<string | null>(() => initialSession?.spreadsheetId || null);
   const [isInitializingSheet, setIsInitializingSheet] = useState(false);
   const [sheetLoadingError, setSheetLoadingError] = useState<string | null>(null);
+
+  // Sync Queue & Connection Status state
+  const [syncQueue, setSyncQueue] = useState<SyncItemType[]>(() => {
+    try {
+      const cached = localStorage.getItem('kasmasjid_sync_queue');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatusType>('connected');
+  const isSyncingRef = React.useRef(false);
+  const syncTimeoutRef = React.useRef<any>(null);
+  const stateRef = React.useRef(state);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  const addToSyncQueue = (types: SyncItemType[]) => {
+    console.log('[SYNC] Queue Add', types);
+    setSyncQueue(prev => {
+      const updated = Array.from(new Set([...prev, ...types]));
+      localStorage.setItem('kasmasjid_sync_queue', JSON.stringify(updated));
+      return updated;
+    });
+    setConnectionStatus('pending');
+    triggerBackgroundSync(300);
+  };
+
+  const triggerBackgroundSync = (delayMs: number = 300) => {
+    if (syncTimeoutRef.current) {
+      clearTimeout(syncTimeoutRef.current);
+    }
+    syncTimeoutRef.current = setTimeout(() => {
+      processSyncQueue();
+    }, delayMs);
+  };
+
+  const processSyncQueue = async (currentToken?: string, currentSheetId?: string) => {
+    const activeToken = currentToken || token;
+    const activeSheetId = currentSheetId || spreadsheetId;
+
+    if (isDemoMode) {
+      setSyncQueue([]);
+      localStorage.removeItem('kasmasjid_sync_queue');
+      setConnectionStatus('connected');
+      return;
+    }
+
+    const rawQueue = (function() {
+      try {
+        return JSON.parse(localStorage.getItem('kasmasjid_sync_queue') || '[]') as SyncItemType[];
+      } catch (e) {
+        return [];
+      }
+    })();
+
+    if (!navigator.onLine) {
+      console.log('[SYNC] Device offline - queue preserved');
+      if (rawQueue.length > 0) {
+        setConnectionStatus('pending');
+      }
+      return;
+    }
+
+    if (!activeToken || !activeSheetId) {
+      if (rawQueue.length > 0) {
+        setConnectionStatus('pending');
+      }
+      return;
+    }
+
+    if (isSyncingRef.current) return;
+    isSyncingRef.current = true;
+
+    console.log('[SYNC] Background Sync Start');
+
+    try {
+      // Database Health Check
+      const healthy = await checkSpreadsheetHealth(activeToken, activeSheetId);
+      if (!healthy) {
+        console.error('[SYNC ERROR]', {
+          Reason: 'Google Spreadsheet tidak dapat diakses atau berada di Sampah Google Drive',
+          'HTTP Status': 404,
+          'Spreadsheet Status': 'Trashed or Missing',
+          'Apps Script Status': 'Inactive'
+        });
+        setSheetLoadingError('Spreadsheet Google Sheets tidak dapat diakses atau telah dihapus.');
+        setConnectionStatus('error');
+        console.log('[SYNC] Status Updated');
+        isSyncingRef.current = false;
+        return;
+      }
+
+      console.log('[SYNC] Google Sheets Connected');
+
+      if (rawQueue.length === 0) {
+        setConnectionStatus('connected');
+        setSheetLoadingError(null);
+        console.log('[SYNC] Status Updated');
+        isSyncingRef.current = false;
+        return;
+      }
+
+      const remaining = [...rawQueue];
+      let hasFailure = false;
+
+      for (const itemType of rawQueue) {
+        try {
+          if (itemType === 'incomes') {
+            await saveIncomes(activeToken, activeSheetId, stateRef.current.incomes);
+            console.log('[SYNC] Transaction Uploaded: Incomes');
+          } else if (itemType === 'expenses') {
+            await saveExpenses(activeToken, activeSheetId, stateRef.current.expenses);
+            console.log('[SYNC] Transaction Uploaded: Expenses');
+          } else if (itemType === 'inventory') {
+            await saveInventory(activeToken, activeSheetId, stateRef.current.inventory);
+            console.log('[SYNC] Transaction Uploaded: Inventory');
+          } else if (itemType === 'announcements') {
+            await saveAnnouncements(activeToken, activeSheetId, stateRef.current.announcements);
+            console.log('[SYNC] Transaction Uploaded: Announcements');
+          } else if (itemType === 'categories') {
+            await saveCategories(activeToken, activeSheetId, stateRef.current.categories);
+            console.log('[SYNC] Transaction Uploaded: Categories');
+          } else if (itemType === 'info') {
+            if (stateRef.current.info) {
+              await saveMosqueInfo(activeToken, activeSheetId, stateRef.current.info);
+              console.log('[SYNC] Transaction Uploaded: Mosque Info');
+            }
+          }
+
+          const idx = remaining.indexOf(itemType);
+          if (idx !== -1) {
+            remaining.splice(idx, 1);
+            console.log('[SYNC] Queue Removed:', itemType);
+          }
+        } catch (err: any) {
+          hasFailure = true;
+          console.error('[SYNC ERROR]', {
+            Reason: err?.message || String(err),
+            'HTTP Status': err?.status || 500,
+            'Spreadsheet Status': 'Error',
+            'Apps Script Status': 'Failed'
+          });
+          const msg = err?.message || 'Gagal mengirim data ke Google Sheets';
+          setSheetLoadingError(msg);
+          setConnectionStatus('error');
+          console.log('[SYNC] Status Updated');
+          break;
+        }
+      }
+
+      localStorage.setItem('kasmasjid_sync_queue', JSON.stringify(remaining));
+      setSyncQueue(remaining);
+
+      if (!hasFailure && remaining.length === 0) {
+        setConnectionStatus('connected');
+        setSheetLoadingError(null);
+        console.log('[SYNC] Status Updated');
+        addToast({
+          type: 'success',
+          title: '✅ Sinkronisasi Berhasil',
+          message: '☁️ Data berhasil disinkronkan ke Google Sheets.'
+        });
+      } else if (remaining.length > 0 && !hasFailure) {
+        setConnectionStatus('pending');
+        console.log('[SYNC] Status Updated');
+      }
+    } catch (err: any) {
+      console.error('[SYNC ERROR]', {
+        Reason: err?.message || String(err),
+        'HTTP Status': 500,
+        'Spreadsheet Status': 'Failed',
+        'Apps Script Status': 'Unknown'
+      });
+      setConnectionStatus('error');
+      console.log('[SYNC] Status Updated');
+    } finally {
+      isSyncingRef.current = false;
+    }
+  };
+
+  const handleManualSync = async () => {
+    if (!token) {
+      handleLogin();
+      return;
+    }
+    addToast({
+      type: 'warning',
+      title: '⏳ Menyinkronkan Data',
+      message: 'Memeriksa koneksi & mengirim antrean data ke Google Sheets...'
+    });
+    await handleSpreadsheetSync(token, 'manualSyncButton');
+    await processSyncQueue(token, spreadsheetId || undefined);
+  };
+
+  // Online & Auth Auto Sync triggers
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log('[SYNC] Network restored - trigger background sync');
+      triggerBackgroundSync(200);
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, []);
+
+  useEffect(() => {
+    if (token && spreadsheetId && !isDemoMode) {
+      triggerBackgroundSync(500);
+    }
+  }, [token, spreadsheetId, isDemoMode]);
 
   // UI state
   const [activeMenu, setActiveMenu] = useState<string>('dashboard');
@@ -843,6 +1061,13 @@ export default function App() {
       return (
         <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-between">
           <header className="h-20 bg-white border-b border-slate-200/80 sticky top-0 z-40 px-6 sm:px-8 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <KasMasjidLogo className="w-10 h-10" />
+              <div>
+                <span className="font-display font-black text-base text-slate-900 leading-none block">KasMasjid</span>
+                <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">Sistem Administrasi & Transparansi Keuangan Masjid</span>
+              </div>
+            </div>
             <button
               onClick={() => navigate('/')}
               className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-2 transition-all cursor-pointer bg-slate-50 hover:bg-slate-100 px-4 py-2.5 rounded-xl border border-slate-200/50"
@@ -853,11 +1078,14 @@ export default function App() {
           </header>
           <main className="flex-1 flex items-center justify-center p-4">
             <div className="bg-white rounded-[32px] border border-slate-200/80 shadow-md p-8 max-w-md w-full text-center space-y-6">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-                <UserIcon className="w-6 h-6" />
+              <div className="flex flex-col items-center justify-center space-y-3">
+                <KasMasjidLogo className="w-16 h-16" />
+                <div>
+                  <h2 className="font-display font-black text-2xl text-slate-900 tracking-tight">KasMasjid</h2>
+                  <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-0.5">Otentikasi Google Admin DKM</p>
+                </div>
               </div>
               <div className="space-y-2">
-                <h2 className="font-display font-black text-2xl text-slate-900 tracking-tight">Otentikasi Google</h2>
                 <p className="text-xs text-slate-500 leading-relaxed font-sans font-medium">
                   Masuk menggunakan akun Google pengurus masjid Anda untuk mengaktifkan sinkronisasi otomatis Google Sheets.
                 </p>
@@ -902,8 +1130,8 @@ export default function App() {
               </button>
             </div>
           </main>
-          <footer className="bg-white border-t border-slate-200/80 py-8 text-xs text-slate-400 text-center">
-            &copy; 2026 KasMasjid Basic — Edisi Komunitas
+          <footer className="bg-white border-t border-slate-200/80 py-6 text-xs text-slate-400 font-medium text-center">
+            &copy; 2026 KasMasjid — Sistem Administrasi & Transparansi Keuangan Masjid
           </footer>
         </div>
       );
@@ -1051,7 +1279,7 @@ export default function App() {
           {/* Logo brand Header */}
           <div className="h-20 px-6 border-b border-emerald-800 flex items-center justify-between shrink-0">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-emerald-400 rounded-lg flex items-center justify-center font-bold text-emerald-900 italic">KM</div>
+              <KasMasjidLogo className="w-9 h-9" />
               <div>
                 <span className="font-display font-bold text-base text-white tracking-tight uppercase block">KasMasjid</span>
                 <span className="text-[9px] font-semibold text-emerald-400 uppercase tracking-[0.2em] block leading-none">Basic Edition</span>
@@ -1185,13 +1413,17 @@ export default function App() {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div>
-              <h2 className="text-lg sm:text-2xl font-bold text-slate-800 tracking-tight font-display">
-                {state.info.namaMasjid || 'Masjid Al-Ikhlas'}
-              </h2>
-              <p className="text-[10px] sm:text-xs text-slate-500 font-semibold uppercase tracking-wider truncate max-w-[160px] sm:max-w-md">
-                {state.info.alamat ? `${state.info.alamat}${state.info.kota ? ', ' + state.info.kota : ''}` : 'Jl. Merdeka No. 45, Bandung'} • Basic Edition
-              </p>
+            <div className="flex items-center gap-3">
+              <KasMasjidLogo className="w-10 h-10" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-display font-black text-sm text-slate-900 tracking-tight">KasMasjid Basic</span>
+                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded">Admin</span>
+                </div>
+                <h2 className="text-xs sm:text-sm font-bold text-slate-600 tracking-tight truncate max-w-[160px] sm:max-w-md">
+                  {state.info.namaMasjid || 'Masjid Al-Ikhlas'}
+                </h2>
+              </div>
             </div>
           </div>
 
@@ -1342,6 +1574,9 @@ export default function App() {
                     spreadsheetId={spreadsheetId}
                     isDemoMode={isDemoMode}
                     syncError={sheetLoadingError}
+                    connectionStatus={connectionStatus}
+                    syncQueueLength={syncQueue.length}
+                    onManualSync={handleManualSync}
                     onReauthenticate={handleLogin}
                     onAddIncome={(income) => handleAddTransaction('Income', income)}
                     onAddExpense={(expense) => handleAddTransaction('Expense', expense)}
@@ -1428,18 +1663,7 @@ export default function App() {
           {/* Simplified Dashboard Footer */}
           <footer className="mt-12 pt-6 border-t border-slate-200/60 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 no-print">
             <div className="text-center sm:text-left leading-relaxed">
-              <span className="font-semibold text-slate-700">© 2026 KasMasjid Basic</span> — Dikembangkan untuk mendukung transparansi administrasi masjid.
-            </div>
-            <div className="text-center sm:text-right font-medium">
-              Powered by{' '}
-              <a 
-                href="https://www.kukas.biz.id" 
-                target="_blank" 
-                rel="noreferrer" 
-                className="text-emerald-600 hover:text-emerald-700 font-bold underline underline-offset-4 transition-colors"
-              >
-                KUKAS
-              </a>
+              <span className="font-semibold text-slate-700">© 2026 KasMasjid — Sistem Administrasi & Transparansi Keuangan Masjid</span>
             </div>
           </footer>
         </main>
@@ -1453,6 +1677,9 @@ export default function App() {
         spreadsheetId={spreadsheetId}
         isDemoMode={isDemoMode}
         syncError={sheetLoadingError}
+        connectionStatus={connectionStatus}
+        syncQueueLength={syncQueue.length}
+        onManualSync={handleManualSync}
         onReauthenticate={handleLogin}
         onOpenGuide={() => setIsGuideOpen(true)}
         onOpenContact={() => { setIsContactOpen(true); setContactSubmitted(false); }}

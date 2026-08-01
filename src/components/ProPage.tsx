@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import KasMasjidLogo from './KasMasjidLogo';
 import { 
   ArrowLeft, Smartphone, Receipt, Users, Clock, ShieldAlert, Sparkles,
   MessageSquare, Send, CheckCircle2, ChevronRight, X, Sparkle
@@ -72,10 +73,14 @@ export default function ProPage({ onNavigate }: ProPageProps) {
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center">
-            <span className="font-display font-black text-xs text-white">KP</span>
+          <KasMasjidLogo className="w-10 h-10" />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-display font-black text-sm text-slate-900 leading-none">KasMasjid</span>
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-md">Pro</span>
+            </div>
+            <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">Edisi Profesional</span>
           </div>
-          <span className="font-display font-black text-xs text-slate-900 hidden sm:inline">KasMasjid Pro</span>
         </div>
       </header>
 
@@ -195,9 +200,8 @@ export default function ProPage({ onNavigate }: ProPageProps) {
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200/80 py-8 text-xs text-slate-400">
-        <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
-          <span>&copy; 2026 KasMasjid Pro</span>
-          <a href="https://kasmasjid.web.id" target="_blank" rel="noreferrer" className="text-indigo-600 font-bold hover:underline">Powered by KasMasjid</a>
+        <div className="max-w-5xl mx-auto px-4 flex items-center justify-center text-center">
+          <span>&copy; 2026 KasMasjid — Sistem Administrasi & Transparansi Keuangan Masjid</span>
         </div>
       </footer>
 

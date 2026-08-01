@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import KasMasjidLogo from './KasMasjidLogo';
 import { 
+
   LayoutGrid, TrendingUp, Box, Megaphone, FileText, MessageSquare, 
   Building, Users, Smartphone, Receipt, Globe, HeartHandshake, QrCode, 
   ArrowRight, Eye, HelpCircle, CheckCircle2, ChevronDown, BookOpen, 
@@ -280,15 +282,13 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
             onClick={() => onNavigate('/')}
             className="flex items-center gap-3 cursor-pointer group text-left border-0 bg-transparent p-0"
           >
-            <div className="w-10 h-10 rounded-2xl bg-[#16A34A] group-hover:bg-[#159242] flex items-center justify-center shadow-md shadow-emerald-100 transition-colors">
-              <span className="font-display font-black text-base text-white">KM</span>
-            </div>
+            <KasMasjidLogo className="w-11 h-11" />
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-display font-black text-sm tracking-tight text-slate-900 leading-none group-hover:text-emerald-600 transition-colors">KasMasjid Basic</span>
-                <span className="text-[8px] font-black uppercase px-1 bg-emerald-50 text-[#16A34A] border border-emerald-100 rounded">v1.2</span>
+              <div className="flex items-center gap-2">
+                <span className="font-display font-black text-base sm:text-lg tracking-tight text-slate-900 leading-none group-hover:text-emerald-600 transition-colors">KasMasjid</span>
+                <span className="text-[10px] font-black uppercase px-2 py-0.5 bg-emerald-100 text-[#16A34A] border border-emerald-200 rounded-md">Basic</span>
               </div>
-              <span className="text-[10px] font-semibold text-slate-400 block mt-0.5">Community Edition</span>
+              <span className="text-[10px] font-semibold text-slate-400 block mt-0.5">Sistem Administrasi & Transparansi Keuangan Masjid</span>
             </div>
           </button>
 
@@ -903,28 +903,15 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
             onClick={() => onNavigate('/')}
             className="flex items-center gap-3 cursor-pointer group text-left border-0 bg-transparent p-0"
           >
-            <div className="w-8 h-8 rounded-xl bg-[#16A34A] group-hover:bg-[#159242] flex items-center justify-center transition-colors">
-              <span className="font-display font-black text-xs text-white">KM</span>
-            </div>
+            <KasMasjidLogo className="w-9 h-9" />
             <div>
-              <span className="font-display font-extrabold text-sm text-slate-900 group-hover:text-emerald-600 transition-colors leading-none block">KasMasjid Basic</span>
-              <span className="text-[10px] text-slate-400 font-semibold block mt-1">Community Edition untuk Digitalisasi Administrasi Masjid.</span>
+              <span className="font-display font-black text-sm text-slate-900 group-hover:text-emerald-600 transition-colors leading-none block">KasMasjid</span>
+              <span className="text-[10px] text-slate-400 font-semibold block mt-1">Sistem Administrasi & Transparansi Keuangan Masjid</span>
             </div>
           </button>
 
-          <div className="text-center md:text-right space-y-1 font-semibold text-slate-400">
-            <p>&copy; 2026 KasMasjid</p>
-            <p>
-              Powered by{' '}
-              <a 
-                href="https://kasmasjid.web.id" 
-                target="_blank" 
-                rel="noreferrer" 
-                className="text-[#16A34A] hover:text-[#159242] font-black underline underline-offset-4"
-              >
-                KasMasjid
-              </a>
-            </p>
+          <div className="text-center md:text-right space-y-1 font-semibold text-slate-400 text-xs">
+            <p>&copy; 2026 KasMasjid — Sistem Administrasi & Transparansi Keuangan Masjid</p>
           </div>
 
         </div>

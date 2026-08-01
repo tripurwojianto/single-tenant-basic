@@ -4,7 +4,9 @@
  */
 
 import React, { useState } from 'react';
+import KasMasjidLogo from './KasMasjidLogo';
 import { 
+
   Building, MapPin, Phone, Mail, ArrowRight, ArrowLeft, 
   Sparkles, CheckCircle2, ShieldCheck, HelpCircle, Laptop,
   Users, HeartHandshake, Loader2
@@ -142,11 +144,9 @@ export default function OnboardingWizard({
       {/* Mini header */}
       <header className="h-16 border-b border-slate-200/80 bg-white flex items-center justify-between px-6 sm:px-8 shrink-0">
         <div className="flex items-center gap-3">
-          <div className={`w-9 h-9 rounded-xl ${brand.accentBgClass} flex items-center justify-center`}>
-            <span className="font-display font-black text-sm text-white">{shortCode}</span>
-          </div>
+          <KasMasjidLogo className="w-9 h-9" />
           <div>
-            <span className="font-display font-extrabold text-sm text-slate-900 leading-none block">{brand.appName}</span>
+            <span className="font-display font-black text-sm text-slate-900 leading-none block">KasMasjid Basic</span>
             <span className="text-[10px] text-slate-400 font-bold block mt-0.5">Wizard Onboarding</span>
           </div>
         </div>

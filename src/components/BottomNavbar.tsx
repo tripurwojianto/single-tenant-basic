@@ -37,6 +37,9 @@ interface BottomNavbarProps {
   spreadsheetId?: string | null;
   isDemoMode?: boolean;
   syncError?: string | null;
+  connectionStatus?: 'connected' | 'pending' | 'error';
+  syncQueueLength?: number;
+  onManualSync?: () => void;
   onReauthenticate?: () => void;
   onOpenGuide?: () => void;
   onOpenContact?: () => void;
@@ -51,6 +54,9 @@ export default function BottomNavbar({
   spreadsheetId,
   isDemoMode,
   syncError,
+  connectionStatus = 'connected',
+  syncQueueLength = 0,
+  onManualSync,
   onReauthenticate,
   onOpenGuide,
   onOpenContact,
@@ -453,7 +459,9 @@ export default function BottomNavbar({
                 <button
                   onClick={() => {
                     setIsLainnyaSheetOpen(false);
-                    if (syncError && onReauthenticate) {
+                    if (onManualSync) {
+                      onManualSync();
+                    } else if (syncError && onReauthenticate) {
                       onReauthenticate();
                     } else if (spreadsheetId) {
                       window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`, '_blank');
@@ -465,11 +473,19 @@ export default function BottomNavbar({
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                      syncError ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                      connectionStatus === 'error' || syncError ? 'bg-rose-100 text-rose-800' :
+                      connectionStatus === 'pending' || syncQueueLength > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
                     }`}>
-                      {syncError ? <AlertTriangle className="w-4 h-4 text-amber-600" /> : <FileSpreadsheet className="w-4 h-4" />}
+                      {connectionStatus === 'error' || syncError ? <AlertTriangle className="w-4 h-4 text-rose-600" /> : <FileSpreadsheet className="w-4 h-4" />}
                     </div>
-                    <span className="font-bold text-xs text-slate-800">Google Sheets Sync</span>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-xs text-slate-800">
+                        {connectionStatus === 'error' || syncError ? '🔴 Google Sheets Tidak Dapat Diakses' :
+                         connectionStatus === 'pending' || syncQueueLength > 0 ? `🟡 Menunggu Sinkronisasi (${syncQueueLength})` :
+                         '🟢 Google Sheets Terhubung'}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-medium">Klik untuk Sinkronkan Sekarang</span>
+                    </div>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>

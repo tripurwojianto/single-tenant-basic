@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import KasMasjidLogo from './KasMasjidLogo';
 import { 
   ArrowLeft, Globe, HeartHandshake, QrCode, ShieldAlert, Sparkles,
   Send, CheckCircle2, X, Star, Calendar, MessageSquare
@@ -72,10 +73,14 @@ export default function MembershipPage({ onNavigate }: MembershipPageProps) {
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center">
-            <span className="font-display font-black text-xs text-white">KM</span>
+          <KasMasjidLogo className="w-10 h-10" />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-display font-black text-sm text-slate-900 leading-none">KasMasjid</span>
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 bg-amber-100 text-amber-700 border border-amber-200 rounded-md">Membership</span>
+            </div>
+            <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">Pendampingan Pengelolaan Kas</span>
           </div>
-          <span className="font-display font-black text-xs text-slate-900 hidden sm:inline">KasMasjid Membership</span>
         </div>
       </header>
 
@@ -195,9 +200,8 @@ export default function MembershipPage({ onNavigate }: MembershipPageProps) {
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200/80 py-8 text-xs text-slate-400">
-        <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
-          <span>&copy; 2026 KasMasjid Membership</span>
-          <a href="https://kasmasjid.web.id" target="_blank" rel="noreferrer" className="text-amber-600 font-bold hover:underline">Powered by KasMasjid</a>
+        <div className="max-w-5xl mx-auto px-4 flex items-center justify-center text-center">
+          <span>&copy; 2026 KasMasjid — Sistem Administrasi & Transparansi Keuangan Masjid</span>
         </div>
       </footer>
 
