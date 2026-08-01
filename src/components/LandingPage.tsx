@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import KasMasjidLogo from './KasMasjidLogo';
 import { 
-
   LayoutGrid, TrendingUp, Box, Megaphone, FileText, MessageSquare, 
   Building, Users, Smartphone, Receipt, Globe, HeartHandshake, QrCode, 
   ArrowRight, Eye, HelpCircle, CheckCircle2, ChevronDown, BookOpen, 
-  Sparkles, Send, X, ShieldCheck
+  Sparkles, Send, X, ShieldCheck, Lock
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -896,22 +895,59 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
       </section>
 
       {/* Footer Section */}
-      <footer className="bg-white border-t border-slate-200/80 py-12 text-slate-500 text-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+      <footer className="bg-slate-50 border-t border-slate-200/80 py-10 sm:py-12 text-slate-600 text-xs font-sans">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           
-          <button 
-            onClick={() => onNavigate('/')}
-            className="flex items-center gap-3 cursor-pointer group text-left border-0 bg-transparent p-0"
-          >
-            <KasMasjidLogo className="w-9 h-9" />
-            <div>
-              <span className="font-display font-black text-sm text-slate-900 group-hover:text-emerald-600 transition-colors leading-none block">KasMasjid</span>
-              <span className="text-[10px] text-slate-400 font-semibold block mt-1">Sistem Administrasi & Transparansi Keuangan Masjid</span>
-            </div>
-          </button>
+          <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
+            {/* Brand Info */}
+            <button 
+              onClick={() => onNavigate('/')}
+              className="flex items-center gap-3 cursor-pointer group text-left border-0 bg-transparent p-0"
+            >
+              <KasMasjidLogo className="w-9 h-9" />
+              <div>
+                <span className="font-display font-black text-sm text-slate-900 group-hover:text-emerald-600 transition-colors leading-none block">KasMasjid</span>
+                <span className="text-[10px] text-slate-500 font-medium block mt-1">Sistem Administrasi & Transparansi Keuangan Masjid</span>
+              </div>
+            </button>
 
-          <div className="text-center md:text-right space-y-1 font-semibold text-slate-400 text-xs">
-            <p>&copy; 2026 KasMasjid — Sistem Administrasi & Transparansi Keuangan Masjid</p>
+            {/* Legal & Help Links */}
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-6 gap-y-3 text-xs sm:text-sm font-medium text-slate-600">
+              <a
+                href="https://blog.kasmasjid.web.id/p/privacy-policy.html?m=1"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-emerald-600 transition-colors text-slate-600 hover:underline"
+              >
+                <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Kebijakan Privasi</span>
+              </a>
+
+              <a
+                href="https://blog.kasmasjid.web.id/p/term-and-condition.html?m=1"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-emerald-600 transition-colors text-slate-600 hover:underline"
+              >
+                <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Syarat & Ketentuan</span>
+              </a>
+
+              <a
+                href="https://wa.me/6288973641682"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-emerald-600 transition-colors text-slate-600 hover:underline"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Bantuan WhatsApp</span>
+              </a>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left text-xs text-slate-500">
+            <p className="font-semibold">&copy; 2026 KasMasjid</p>
+            <p className="text-slate-400">Dikembangkan oleh <span className="font-bold text-slate-600">BukuKasSekolah</span></p>
           </div>
 
         </div>
