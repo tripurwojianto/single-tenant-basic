@@ -358,9 +358,9 @@ export default function BottomNavbar({
                 </div>
               </div>
 
-              {/* Upgrade KasMasjid Group */}
+              {/* Upgrade Group */}
               <div className="space-y-1.5">
-                <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider px-1">🚀 Upgrade KasMasjid</p>
+                <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider px-1">🚀 Layanan & Integrasi Pro</p>
                 <button
                   onClick={() => handleNavigateMenu('upgrade')}
                   className="w-full p-3 rounded-2xl bg-emerald-700 hover:bg-emerald-600 text-white flex items-center justify-between transition-all cursor-pointer text-left shadow-xs"
@@ -370,8 +370,8 @@ export default function BottomNavbar({
                       <Sparkles className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <p className="font-bold text-xs text-white">Pilihan Paket & Upgrade</p>
-                      <p className="text-[10px] text-emerald-100/90">Bandingkan Basic, Portal & Membership</p>
+                      <p className="font-bold text-xs text-white">Fitur & Model Layanan</p>
+                      <p className="text-[10px] text-emerald-100/90">Opsi Ekosistem Integrasi Pro DKM</p>
                     </div>
                   </div>
                   <ChevronRight className="w-4 h-4 text-emerald-200" />
@@ -451,7 +451,7 @@ export default function BottomNavbar({
                     <div className="w-8 h-8 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center shrink-0">
                       <Info className="w-4 h-4" />
                     </div>
-                    <span className="font-bold text-xs text-slate-800">Tentang KasMasjid</span>
+                    <span className="font-bold text-xs text-slate-800">Panduan & Info Aplikasi</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>

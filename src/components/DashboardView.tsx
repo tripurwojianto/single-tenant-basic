@@ -9,7 +9,7 @@ import { MosqueState, CashTransaction, InventoryItem, Announcement } from '../ty
 import { 
   TrendingUp, TrendingDown, Wallet, Box, Megaphone, PlusCircle, 
   ArrowUpRight, ArrowDownRight, Calendar, User, FileText, MapPin, 
-  Settings, Check, X, AlertTriangle, Sparkles, ArrowRight, Loader2
+  Settings, Check, X, AlertTriangle, Sparkles, ArrowRight, Loader2, Building
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { getIncomeCategories, getExpenseCategories } from '../constants/transactionCategories';
@@ -341,13 +341,16 @@ export default function DashboardView({
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <KasMasjidLogo className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-emerald-400/40 shadow-lg shrink-0 bg-white/10 p-1" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-emerald-800/80 text-emerald-100 flex items-center justify-center font-display font-black text-2xl sm:text-3xl border-2 border-emerald-400/40 shadow-lg shrink-0">
+                {state.info.namaMasjid ? state.info.namaMasjid.charAt(0).toUpperCase() : <Building className="w-8 h-8 text-emerald-300" />}
+              </div>
             )}
 
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <KasMasjidLogo className="w-5 h-5" />
-                <span className="text-[11px] font-extrabold uppercase tracking-widest text-emerald-300">KasMasjid Basic</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-200 bg-emerald-800/80 px-2.5 py-0.5 rounded-full border border-emerald-700/60">
+                  Dashboard Administrator
+                </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="font-display font-black text-2xl sm:text-3xl md:text-4xl text-white tracking-tight leading-snug">

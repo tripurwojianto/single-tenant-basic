@@ -1199,9 +1199,9 @@ export default function App() {
       ],
     },
     {
-      groupTitle: '🚀 Upgrade KasMasjid',
+      groupTitle: '🚀 Layanan Integrasi',
       items: [
-        { key: 'upgrade', label: 'Paket & Upgrade KasMasjid', icon: Sparkles, tier: 'BASIC' },
+        { key: 'upgrade', label: 'Fitur & Model Layanan', icon: Sparkles, tier: 'BASIC' },
         { key: 'whatsapp-notif', label: 'Notifikasi WhatsApp', icon: Smartphone, tier: 'PRO' },
         { key: 'multi-admin', label: 'Multi Admin Kolaborasi', icon: Users, tier: 'PRO' },
         { key: 'portal-jamaah', label: 'Portal Jamaah', icon: Globe, tier: 'PRO' },
@@ -1211,9 +1211,9 @@ export default function App() {
       ],
     },
     {
-      groupTitle: 'ℹ️ Tentang KasMasjid',
+      groupTitle: 'ℹ️ Panduan & Informasi',
       items: [
-        { key: 'about', label: 'Tentang KasMasjid', icon: Info, tier: 'BASIC', isPlaceholder: true },
+        { key: 'about', label: 'Panduan & FAQ Portal', icon: Info, tier: 'BASIC', isPlaceholder: true },
       ],
     },
   ];
@@ -1277,17 +1277,32 @@ export default function App() {
           }`}
         >
           {/* Logo brand Header */}
-          <div className="h-20 px-6 border-b border-emerald-800 flex items-center justify-between shrink-0">
-            <div className="flex items-center space-x-3">
-              <KasMasjidLogo className="w-9 h-9" />
-              <div>
-                <span className="font-display font-bold text-base text-white tracking-tight uppercase block">KasMasjid</span>
-                <span className="text-[9px] font-semibold text-emerald-400 uppercase tracking-[0.2em] block leading-none">Basic Edition</span>
+          <div className="h-20 px-5 border-b border-emerald-800 flex items-center justify-between shrink-0">
+            <div className="flex items-center space-x-3 min-w-0">
+              {state.info.logo ? (
+                <img 
+                  src={state.info.logo} 
+                  alt={state.info.namaMasjid || 'Logo Masjid'} 
+                  className="w-10 h-10 rounded-xl object-cover border border-emerald-700/60 bg-white/10 shrink-0"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-emerald-800 border border-emerald-700/60 flex items-center justify-center text-emerald-100 font-display font-black text-sm shrink-0">
+                  {state.info.namaMasjid ? state.info.namaMasjid.charAt(0).toUpperCase() : <Building className="w-5 h-5 text-emerald-300" />}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <span className="font-display font-bold text-sm text-white tracking-tight truncate block leading-tight">
+                  {state.info.namaMasjid || 'Masjid Al-Ikhlas'}
+                </span>
+                <span className="text-[10px] font-semibold text-emerald-300/80 truncate block mt-0.5">
+                  {state.info.tagline || 'Portal Resmi Masjid'}
+                </span>
               </div>
             </div>
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="w-8 h-8 rounded-lg hover:bg-emerald-800 text-emerald-200 flex items-center justify-center lg:hidden cursor-pointer active:bg-emerald-700 transition-colors"
+              className="w-8 h-8 rounded-lg hover:bg-emerald-800 text-emerald-200 flex items-center justify-center lg:hidden cursor-pointer active:bg-emerald-700 transition-colors shrink-0"
               aria-label="Tutup Menu"
             >
               <X className="w-5 h-5" />
@@ -1413,16 +1428,31 @@ export default function App() {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-3">
-              <KasMasjidLogo className="w-10 h-10" />
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-display font-black text-sm text-slate-900 tracking-tight">KasMasjid Basic</span>
-                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded">Admin</span>
+            <div className="flex items-center gap-3 min-w-0">
+              {state.info.logo ? (
+                <img 
+                  src={state.info.logo} 
+                  alt={state.info.namaMasjid || 'Logo Masjid'} 
+                  className="w-10 h-10 rounded-xl object-cover border border-slate-200/80 shadow-xs shrink-0"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-display font-black text-sm shrink-0 shadow-xs">
+                  {state.info.namaMasjid ? state.info.namaMasjid.charAt(0).toUpperCase() : <Building className="w-5 h-5" />}
                 </div>
-                <h2 className="text-xs sm:text-sm font-bold text-slate-600 tracking-tight truncate max-w-[160px] sm:max-w-md">
-                  {state.info.namaMasjid || 'Masjid Al-Ikhlas'}
-                </h2>
+              )}
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-display font-black text-base sm:text-lg text-slate-900 tracking-tight truncate max-w-[180px] sm:max-w-xs md:max-w-md">
+                    {state.info.namaMasjid || 'Masjid Al-Ikhlas'}
+                  </h2>
+                  <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md shrink-0">
+                    Administrator
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-medium truncate max-w-[200px] sm:max-w-md">
+                  {state.info.alamat ? `${state.info.alamat}${state.info.kota ? ', ' + state.info.kota : ''}` : (state.info.tagline || 'Website Resmi & Portal Keuangan DKM')}
+                </p>
               </div>
             </div>
           </div>
@@ -1467,7 +1497,7 @@ export default function App() {
                     Mode Uji Coba
                   </h4>
                   <p className="text-xs text-amber-900/90 leading-relaxed font-semibold">
-                    Anda sedang menggunakan <span className="font-bold text-amber-950">KasMasjid Basic</span> dalam mode uji coba. Untuk penggunaan jangka panjang, lakukan deployment ke akun Vercel milik masjid. Setelah deployment selesai, aplikasi dapat digunakan secara permanen dengan data yang tetap berada di Google Drive milik masjid.
+                    Anda sedang menggunakan <span className="font-bold text-amber-950">Portal Masjid</span> dalam mode uji coba. Untuk penggunaan jangka panjang, lakukan deployment ke akun Vercel milik masjid. Setelah deployment selesai, aplikasi dapat digunakan secara permanen dengan data yang tetap berada di Google Drive milik masjid.
                   </p>
                 </div>
               </div>
@@ -1663,7 +1693,10 @@ export default function App() {
           {/* Simplified Dashboard Footer */}
           <footer className="mt-12 pt-6 border-t border-slate-200/60 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 no-print">
             <div className="text-center sm:text-left leading-relaxed">
-              <span className="font-semibold text-slate-700">© 2026 KasMasjid — Sistem Administrasi & Transparansi Keuangan Masjid</span>
+              <span className="font-semibold text-slate-700">© 2026 {state.info.namaMasjid || 'Masjid Al-Ikhlas'}</span> — Portal Informasi & Transparansi Keuangan DKM
+            </div>
+            <div className="text-center sm:text-right font-medium text-[11px] text-slate-400">
+              Dibangun menggunakan <span className="font-bold text-emerald-600">KasMasjid</span>
             </div>
           </footer>
         </main>
@@ -1720,7 +1753,7 @@ export default function App() {
 
               <div className="space-y-1">
                 <h3 className="font-display font-black text-xl text-slate-950 tracking-tight leading-snug">Panduan Implementasi Mandiri</h3>
-                <p className="text-[10px] font-bold text-slate-400">KasMasjid Basic • Untuk Sekretariat Masjid</p>
+                <p className="text-[10px] font-bold text-slate-400">Panduan Teknis Sekretariat DKM</p>
               </div>
 
               <div className="space-y-5 pt-4 border-t border-slate-100 text-xs text-slate-600 leading-relaxed font-semibold">

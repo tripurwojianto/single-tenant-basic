@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { jsPDF } from 'jspdf';
 import KasMasjidLogo from './KasMasjidLogo';
 import { MosqueState } from '../types';
-import { Printer, Calendar, FileText, Download, PieChart, CheckSquare, Award } from 'lucide-react';
+import { Printer, Calendar, FileText, Download, PieChart, CheckSquare, Award, Building } from 'lucide-react';
 
 interface ReportsViewProps {
   state: MosqueState;
@@ -371,8 +371,8 @@ export default function ReportsView({ state }: ReportsViewProps) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
     doc.setTextColor(148, 163, 184);
-    const footerName = (state.info.namaMasjid || 'KasMasjid Basic Community Edition').toUpperCase();
-    doc.text(`${footerName} | LAPORAN TERVERIFIKASI VIA GOOGLE SHEETS DATABASE`, pageWidth / 2, y, { align: 'center' });
+    const footerName = (state.info.namaMasjid || 'MASJID AL-IKHLAS').toUpperCase();
+    doc.text(`${footerName} | LAPORAN KEUANGAN DKM TERVERIFIKASI`, pageWidth / 2, y, { align: 'center' });
 
     // Save/Download PDF
     const cleanMosqueName = (state.info.namaMasjid || 'Masjid').replace(/[^a-zA-Z0-9]/g, '_');
@@ -628,7 +628,9 @@ export default function ReportsView({ state }: ReportsViewProps) {
               referrerPolicy="no-referrer"
             />
           ) : (
-            <KasMasjidLogo className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 no-print" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 rounded-full bg-emerald-800 text-white flex items-center justify-center font-display font-black text-xl sm:text-2xl no-print">
+              {state.info.namaMasjid ? state.info.namaMasjid.charAt(0).toUpperCase() : <Building className="w-8 h-8" />}
+            </div>
           )}
           <h1 className="font-display font-extrabold text-lg sm:text-2xl tracking-tight text-slate-900 uppercase">
             {state.info.namaMasjid || 'Masjid Raya Baiturrahman'}
@@ -849,7 +851,7 @@ export default function ReportsView({ state }: ReportsViewProps) {
 
         {/* Printable Footer notes */}
         <div className="mt-8 sm:mt-12 text-center text-[10px] text-slate-400 font-mono uppercase tracking-wider pt-6 border-t border-dashed border-slate-100">
-          © 2026 KasMasjid — Sistem Administrasi & Transparansi Keuangan Masjid
+          © 2026 {state.info.namaMasjid || 'Masjid Al-Ikhlas'} — Laporan Keuangan Resmi DKM | Powered by KasMasjid
         </div>
       </div>
     </div>
