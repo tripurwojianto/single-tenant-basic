@@ -4,6 +4,7 @@
  */
 
 import { MosqueState, MosqueInfo, CashTransaction, InventoryItem, Announcement, Category, FeedbackData } from '../types';
+import { DEFAULT_CATEGORIES } from '../constants/transactionCategories';
 
 // Standard spreadsheet name
 export const SPREADSHEET_NAME = 'KasMasjid Database';
@@ -136,17 +137,10 @@ async function populateInitialData(accessToken: string, spreadsheetId: string) {
         ]
       },
       {
-        range: 'Categories!A1:B9',
+        range: `Categories!A1:B${DEFAULT_CATEGORIES.length + 1}`,
         values: [
           ['tipe', 'nama'],
-          ['Income', 'Infaq Jumat'],
-          ['Income', 'Zakat'],
-          ['Income', 'Waqaf'],
-          ['Income', 'Sponsorship'],
-          ['Expense', 'Operasional'],
-          ['Expense', 'Kebersihan'],
-          ['Expense', 'Pemeliharaan'],
-          ['Expense', 'Kegiatan Sosial']
+          ...DEFAULT_CATEGORIES.map(c => [c.tipe, c.nama])
         ]
       },
       {

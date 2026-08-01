@@ -11,6 +11,7 @@ import {
   Settings, Check, X, AlertTriangle, Sparkles, ArrowRight
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { getIncomeCategories, getExpenseCategories } from '../constants/transactionCategories';
 
 interface DashboardViewProps {
   state: MosqueState;
@@ -45,7 +46,7 @@ export default function DashboardView({
   // Income Form State
   const [incomeForm, setIncomeForm] = useState({
     tanggal: new Date().toISOString().split('T')[0],
-    kategori: state.categories.filter(c => c.tipe === 'Income')[0]?.nama || 'Infaq Jumat',
+    kategori: getIncomeCategories(state.categories)[0] || 'Infaq Umum',
     deskripsi: '',
     nominal: '',
     bukti: '',
@@ -54,7 +55,7 @@ export default function DashboardView({
   // Expense Form State
   const [expenseForm, setExpenseForm] = useState({
     tanggal: new Date().toISOString().split('T')[0],
-    kategori: state.categories.filter(c => c.tipe === 'Expense')[0]?.nama || 'Operasional',
+    kategori: getExpenseCategories(state.categories)[0] || 'Air & Listrik',
     deskripsi: '',
     nominal: '',
     bukti: '',
@@ -196,7 +197,7 @@ export default function DashboardView({
       setActiveModal(null);
       setIncomeForm({
         tanggal: new Date().toISOString().split('T')[0],
-        kategori: state.categories.filter(c => c.tipe === 'Income')[0]?.nama || 'Infaq Jumat',
+        kategori: getIncomeCategories(state.categories)[0] || 'Infaq Umum',
         deskripsi: '',
         nominal: '',
         bukti: '',
@@ -227,7 +228,7 @@ export default function DashboardView({
       setActiveModal(null);
       setExpenseForm({
         tanggal: new Date().toISOString().split('T')[0],
-        kategori: state.categories.filter(c => c.tipe === 'Expense')[0]?.nama || 'Operasional',
+        kategori: getExpenseCategories(state.categories)[0] || 'Air & Listrik',
         deskripsi: '',
         nominal: '',
         bukti: '',
@@ -890,10 +891,10 @@ export default function DashboardView({
                       <select
                         value={incomeForm.kategori}
                         onChange={(e) => setIncomeForm({ ...incomeForm, kategori: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm bg-white"
                       >
-                        {state.categories.filter(c => c.tipe === 'Income').map((c, i) => (
-                          <option key={i} value={c.nama}>{c.nama}</option>
+                        {getIncomeCategories(state.categories).map((catName, i) => (
+                          <option key={i} value={catName}>{catName}</option>
                         ))}
                       </select>
                     </div>
@@ -954,10 +955,10 @@ export default function DashboardView({
                       <select
                         value={expenseForm.kategori}
                         onChange={(e) => setExpenseForm({ ...expenseForm, kategori: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-sm"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-sm bg-white"
                       >
-                        {state.categories.filter(c => c.tipe === 'Expense').map((c, i) => (
-                          <option key={i} value={c.nama}>{c.nama}</option>
+                        {getExpenseCategories(state.categories).map((catName, i) => (
+                          <option key={i} value={catName}>{catName}</option>
                         ))}
                       </select>
                     </div>
@@ -1154,13 +1155,20 @@ export default function DashboardView({
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`px-5 py-2 text-sm font-semibold text-white rounded-xl shadow-sm cursor-pointer disabled:opacity-50 ${
+                  className={`px-5 py-2 text-sm font-semibold text-white rounded-xl shadow-sm cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 ${
                     activeModal === 'income' ? 'bg-emerald-600 hover:bg-emerald-700' :
                     activeModal === 'expense' ? 'bg-rose-600 hover:bg-rose-700' :
                     activeModal === 'inventory' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-sky-600 hover:bg-sky-700'
                   }`}
                 >
-                  {loading ? 'Menyimpan...' : 'Simpan Data'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    <span>Simpan Data</span>
+                  )}
                 </button>
               </div>
             </form>

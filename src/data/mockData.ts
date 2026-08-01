@@ -4,6 +4,7 @@
  */
 
 import { MosqueState } from '../types';
+import { DEFAULT_CATEGORIES } from '../constants/transactionCategories';
 
 export const INITIAL_MOCK_DATA: MosqueState = {
   info: {
@@ -21,7 +22,7 @@ export const INITIAL_MOCK_DATA: MosqueState = {
     {
       id: 'inc-1',
       tanggal: '2026-07-03',
-      kategori: 'Infaq Jumat',
+      kategori: 'Kotak Amal',
       deskripsi: 'Infaq kotak amal jumat pekan pertama Juli',
       nominal: 4750000,
       bukti: ''
@@ -29,7 +30,7 @@ export const INITIAL_MOCK_DATA: MosqueState = {
     {
       id: 'inc-2',
       tanggal: '2026-07-05',
-      kategori: 'Zakat',
+      kategori: 'Zakat Mal',
       deskripsi: 'Zakat mal hamba Allah',
       nominal: 3000000,
       bukti: ''
@@ -37,7 +38,7 @@ export const INITIAL_MOCK_DATA: MosqueState = {
     {
       id: 'inc-3',
       tanggal: '2026-07-10',
-      kategori: 'Infaq Jumat',
+      kategori: 'Kotak Amal',
       deskripsi: 'Infaq kotak amal jumat pekan kedua Juli',
       nominal: 5120000,
       bukti: ''
@@ -45,7 +46,7 @@ export const INITIAL_MOCK_DATA: MosqueState = {
     {
       id: 'inc-4',
       tanggal: '2026-07-12',
-      kategori: 'Sponsorship',
+      kategori: 'Donasi',
       deskripsi: 'Donasi CSR Bank Syariah untuk pengajian akbar',
       nominal: 8000000,
       bukti: ''
@@ -53,8 +54,8 @@ export const INITIAL_MOCK_DATA: MosqueState = {
     {
       id: 'inc-5',
       tanggal: '2026-07-17',
-      kategori: 'Waqaf',
-      deskripsi: 'Waqaf karpet sajadah tambahan',
+      kategori: 'Infaq Terikat',
+      deskripsi: 'Infaq terikat karpet sajadah tambahan',
       nominal: 2500000,
       bukti: ''
     }
@@ -63,7 +64,7 @@ export const INITIAL_MOCK_DATA: MosqueState = {
     {
       id: 'exp-1',
       tanggal: '2026-07-04',
-      kategori: 'Operasional',
+      kategori: 'Honor Penceramah',
       deskripsi: 'Insentif ustadz khotib jumat',
       nominal: 750000,
       bukti: ''
@@ -71,23 +72,23 @@ export const INITIAL_MOCK_DATA: MosqueState = {
     {
       id: 'exp-2',
       tanggal: '2026-07-06',
-      kategori: 'Kebersihan',
-      deskripsi: 'Belanja sapu, pewangi ruangan, cairan pel',
-      nominal: 320000,
+      kategori: 'Air & Listrik',
+      deskripsi: 'Tagihan listrik & token tempat wudhu',
+      nominal: 820000,
       bukti: ''
     },
     {
       id: 'exp-3',
       tanggal: '2026-07-08',
-      kategori: 'Pemeliharaan',
-      deskripsi: 'Servis AC ruang sholat utama (2 unit)',
-      nominal: 450000,
+      kategori: 'Gaji Marbot',
+      deskripsi: 'Honorarium marbot & kebersihan masjid',
+      nominal: 1500000,
       bukti: ''
     },
     {
       id: 'exp-4',
       tanggal: '2026-07-15',
-      kategori: 'Kegiatan Sosial',
+      kategori: 'Santunan Fakir Miskin',
       deskripsi: 'Santunan anak yatim & jompo bulanan',
       nominal: 3500000,
       bukti: ''
@@ -163,17 +164,6 @@ export const INITIAL_MOCK_DATA: MosqueState = {
       status: 'Publish'
     }
   ],
-  categories: [
-    { tipe: 'Income', nama: 'Infaq Jumat' },
-    { tipe: 'Income', nama: 'Zakat' },
-    { tipe: 'Income', nama: 'Waqaf' },
-    { tipe: 'Income', nama: 'Sponsorship' },
-    { tipe: 'Income', nama: 'Infaq Khusus' },
-    { tipe: 'Expense', nama: 'Operasional' },
-    { tipe: 'Expense', nama: 'Kebersihan' },
-    { tipe: 'Expense', nama: 'Pemeliharaan' },
-    { tipe: 'Expense', nama: 'Kegiatan Sosial' },
-    { tipe: 'Expense', nama: 'Perlengkapan' }
-  ],
+  categories: DEFAULT_CATEGORIES,
   feedbacks: []
 };

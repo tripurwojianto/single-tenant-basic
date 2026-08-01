@@ -5,9 +5,10 @@
 
 import React, { useState } from 'react';
 import { CashTransaction, Category, MosqueState } from '../types';
+import { getIncomeCategories, getExpenseCategories } from '../constants/transactionCategories';
 import { 
   TrendingUp, TrendingDown, Plus, Edit, Trash, Search, Filter, 
-  Calendar, Check, X, Eye, ExternalLink, AlertTriangle, FileText 
+  Calendar, Check, X, Eye, ExternalLink, AlertTriangle, FileText, Loader2 
 } from 'lucide-react';
 import ConfirmationModal from './ConfirmationModal';
 
@@ -60,10 +61,10 @@ export default function CashFlowView({
 
   // Setup initial category on modal open
   const openAddModal = () => {
-    const cats = state.categories.filter(c => c.tipe === (activeTab === 'income' ? 'Income' : 'Expense'));
+    const cats = activeTab === 'income' ? getIncomeCategories(state.categories) : getExpenseCategories(state.categories);
     setFormField({
       tanggal: new Date().toISOString().split('T')[0],
-      kategori: cats[0]?.nama || '',
+      kategori: cats[0] || '',
       deskripsi: '',
       nominal: '',
       bukti: '',
@@ -167,7 +168,7 @@ export default function CashFlowView({
 
   // Filter lists
   const currentList = activeTab === 'income' ? state.incomes : state.expenses;
-  const categories = state.categories.filter(c => c.tipe === (activeTab === 'income' ? 'Income' : 'Expense'));
+  const availableCategories = activeTab === 'income' ? getIncomeCategories(state.categories) : getExpenseCategories(state.categories);
 
   const filteredList = currentList.filter((item) => {
     const matchesSearch = 
@@ -286,8 +287,8 @@ export default function CashFlowView({
             className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm text-slate-700 bg-white"
           >
             <option value="Semua">Semua Kategori</option>
-            {categories.map((cat, i) => (
-              <option key={i} value={cat.nama}>{cat.nama}</option>
+            {availableCategories.map((catName, i) => (
+              <option key={i} value={catName}>{catName}</option>
             ))}
           </select>
         </div>
@@ -467,8 +468,8 @@ export default function CashFlowView({
                       activeTab === 'income' ? 'focus:border-emerald-500 focus:ring-emerald-500' : 'focus:border-rose-500 focus:ring-rose-500'
                     }`}
                   >
-                    {categories.map((c, i) => (
-                      <option key={i} value={c.nama}>{c.nama}</option>
+                    {availableCategories.map((catName, i) => (
+                      <option key={i} value={catName}>{catName}</option>
                     ))}
                   </select>
                 </div>
@@ -525,11 +526,18 @@ export default function CashFlowView({
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`px-5 py-2 text-sm font-semibold text-white rounded-xl shadow-sm cursor-pointer disabled:opacity-50 ${
+                  className={`px-5 py-2 text-sm font-semibold text-white rounded-xl shadow-sm cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 ${
                     activeTab === 'income' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'
                   }`}
                 >
-                  {loading ? 'Menyimpan...' : 'Simpan Transaksi'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    <span>Simpan Transaksi</span>
+                  )}
                 </button>
               </div>
             </form>

@@ -49,6 +49,7 @@ import MembershipPage from './components/MembershipPage';
 import UpgradeView from './components/UpgradeView';
 import BottomNavbar from './components/BottomNavbar';
 import QuickActionModal from './components/QuickActionModal';
+import { ToastContainer, ToastMessage } from './components/Toast';
 
 // Icons
 import { 
@@ -187,6 +188,21 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuditorOpen, setIsAuditorOpen] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'developer' | 'viewer'>('admin');
+
+  // Toast notification state
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const addToast = (toast: Omit<ToastMessage, 'id'>) => {
+    const newToast: ToastMessage = {
+      id: `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      ...toast
+    };
+    setToasts(prev => [...prev, newToast]);
+  };
+
+  const handleDismissToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
 
   // Trial Mode banner state
   const [isBannerDismissed, setIsBannerDismissed] = useState<boolean>(() => {
@@ -511,57 +527,149 @@ export default function App() {
 
   // Add Cash Transaction
   const handleAddTransaction = async (tipe: 'Income' | 'Expense', data: Omit<CashTransaction, 'id'>) => {
-    return handleMutation(async () => {
-      const newTx: CashTransaction = {
-        id: `${tipe.toLowerCase()}-${Date.now()}`,
-        ...data
-      };
+    console.log('[TRANSACTION] Save Start');
+    const newTx: CashTransaction = {
+      id: `${tipe.toLowerCase()}-${Date.now()}`,
+      ...data
+    };
 
+    let syncedToSheets = false;
+    let localSaveSuccess = false;
+
+    try {
       if (tipe === 'Income') {
         const updated = [...state.incomes, newTx];
-        if (isDemoMode) {
-          setState(prev => ({ ...prev, incomes: updated }));
-          return;
-        }
-        if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-        await saveIncomes(token, spreadsheetId, updated);
         setState(prev => ({ ...prev, incomes: updated }));
+        localSaveSuccess = true;
+        console.log('[TRANSACTION] Save Local Success');
+
+        if (!isDemoMode && token && spreadsheetId) {
+          try {
+            await saveIncomes(token, spreadsheetId, updated);
+            syncedToSheets = true;
+            console.log('[TRANSACTION] Google Sheets Sync Success');
+          } catch (sheetsErr: any) {
+            console.warn('[TRANSACTION] Google Sheets Sync Fallback / Offline:', sheetsErr);
+          }
+        }
       } else {
         const updated = [...state.expenses, newTx];
-        if (isDemoMode) {
-          setState(prev => ({ ...prev, expenses: updated }));
-          return;
-        }
-        if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-        await saveExpenses(token, spreadsheetId, updated);
         setState(prev => ({ ...prev, expenses: updated }));
+        localSaveSuccess = true;
+        console.log('[TRANSACTION] Save Local Success');
+
+        if (!isDemoMode && token && spreadsheetId) {
+          try {
+            await saveExpenses(token, spreadsheetId, updated);
+            syncedToSheets = true;
+            console.log('[TRANSACTION] Google Sheets Sync Success');
+          } catch (sheetsErr: any) {
+            console.warn('[TRANSACTION] Google Sheets Sync Fallback / Offline:', sheetsErr);
+          }
+        }
       }
-    });
+
+      console.log('[TRANSACTION] UI Updated');
+
+      if (syncedToSheets) {
+        addToast({
+          type: 'success',
+          title: tipe === 'Income' ? '✅ Pemasukan berhasil dicatat.' : '✅ Pengeluaran berhasil dicatat.',
+          message: tipe === 'Income' ? '☁️ Data berhasil disimpan ke Google Sheets.' : '☁️ Google Sheets telah diperbarui.'
+        });
+        console.log('[TRANSACTION] Toast Success');
+      } else if (localSaveSuccess) {
+        addToast({
+          type: 'warning',
+          title: '✅ Catatan berhasil disimpan di perangkat.',
+          message: '⏳ Akan dikirim ke Google Sheets saat sinkron kembali.'
+        });
+        console.log('[TRANSACTION] Toast Success');
+      }
+    } catch (err: any) {
+      console.error('[TRANSACTION ERROR]', {
+        Function: 'handleAddTransaction',
+        'Error Message': err?.message || String(err),
+        'Stack Trace': err?.stack || 'N/A'
+      });
+      addToast({
+        type: 'error',
+        title: '❌ Gagal menyimpan transaksi.',
+        message: 'Silakan coba kembali.'
+      });
+      throw err;
+    }
   };
 
   // Edit Cash Transaction
   const handleEditTransaction = async (tipe: 'Income' | 'Expense', id: string, data: Omit<CashTransaction, 'id'>) => {
-    return handleMutation(async () => {
+    console.log('[TRANSACTION] Save Start');
+    let syncedToSheets = false;
+    let localSaveSuccess = false;
+
+    try {
       if (tipe === 'Income') {
         const updated = state.incomes.map(item => item.id === id ? { id, ...data } : item);
-        if (isDemoMode) {
-          setState(prev => ({ ...prev, incomes: updated }));
-          return;
-        }
-        if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-        await saveIncomes(token, spreadsheetId, updated);
         setState(prev => ({ ...prev, incomes: updated }));
+        localSaveSuccess = true;
+        console.log('[TRANSACTION] Save Local Success');
+
+        if (!isDemoMode && token && spreadsheetId) {
+          try {
+            await saveIncomes(token, spreadsheetId, updated);
+            syncedToSheets = true;
+            console.log('[TRANSACTION] Google Sheets Sync Success');
+          } catch (sheetsErr: any) {
+            console.warn('[TRANSACTION] Google Sheets Sync Fallback / Offline:', sheetsErr);
+          }
+        }
       } else {
         const updated = state.expenses.map(item => item.id === id ? { id, ...data } : item);
-        if (isDemoMode) {
-          setState(prev => ({ ...prev, expenses: updated }));
-          return;
-        }
-        if (!token || !spreadsheetId) throw new Error('Akses Google Sheets tidak valid');
-        await saveExpenses(token, spreadsheetId, updated);
         setState(prev => ({ ...prev, expenses: updated }));
+        localSaveSuccess = true;
+        console.log('[TRANSACTION] Save Local Success');
+
+        if (!isDemoMode && token && spreadsheetId) {
+          try {
+            await saveExpenses(token, spreadsheetId, updated);
+            syncedToSheets = true;
+            console.log('[TRANSACTION] Google Sheets Sync Success');
+          } catch (sheetsErr: any) {
+            console.warn('[TRANSACTION] Google Sheets Sync Fallback / Offline:', sheetsErr);
+          }
+        }
       }
-    });
+
+      console.log('[TRANSACTION] UI Updated');
+
+      if (syncedToSheets) {
+        addToast({
+          type: 'success',
+          title: tipe === 'Income' ? '✅ Pemasukan berhasil diperbarui.' : '✅ Pengeluaran berhasil diperbarui.',
+          message: '☁️ Google Sheets telah diperbarui.'
+        });
+        console.log('[TRANSACTION] Toast Success');
+      } else if (localSaveSuccess) {
+        addToast({
+          type: 'warning',
+          title: '✅ Catatan berhasil disimpan di perangkat.',
+          message: '⏳ Akan dikirim ke Google Sheets saat sinkron kembali.'
+        });
+        console.log('[TRANSACTION] Toast Success');
+      }
+    } catch (err: any) {
+      console.error('[TRANSACTION ERROR]', {
+        Function: 'handleEditTransaction',
+        'Error Message': err?.message || String(err),
+        'Stack Trace': err?.stack || 'N/A'
+      });
+      addToast({
+        type: 'error',
+        title: '❌ Gagal menyimpan transaksi.',
+        message: 'Silakan coba kembali.'
+      });
+      throw err;
+    }
   };
 
   // Delete Cash Transaction
@@ -1362,6 +1470,9 @@ export default function App() {
         onAddInventory={handleAddInventory}
         onAddAnnouncement={handleAddAnnouncement}
       />
+
+      {/* Global Toast Container */}
+      <ToastContainer toasts={toasts} onDismiss={handleDismissToast} />
 
       {/* PANDUAN IMPLEMENTASI MODAL */}
       {isGuideOpen && (

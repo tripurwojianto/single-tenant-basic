@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MosqueState, CashTransaction, InventoryItem, Announcement } from '../types';
 import { X, AlertTriangle, Plus, Loader2 } from 'lucide-react';
+import { getIncomeCategories, getExpenseCategories } from '../constants/transactionCategories';
 
 interface QuickActionModalProps {
   activeModal: 'income' | 'expense' | 'inventory' | 'announcement' | null;
@@ -26,7 +27,7 @@ export default function QuickActionModal({
 
   const [incomeForm, setIncomeForm] = useState({
     tanggal: new Date().toISOString().split('T')[0],
-    kategori: 'Infaq Jumaat',
+    kategori: getIncomeCategories(state.categories)[0] || 'Infaq Umum',
     nominal: '',
     deskripsi: '',
     bukti: ''
@@ -34,7 +35,7 @@ export default function QuickActionModal({
 
   const [expenseForm, setExpenseForm] = useState({
     tanggal: new Date().toISOString().split('T')[0],
-    kategori: 'Listrik & Air',
+    kategori: getExpenseCategories(state.categories)[0] || 'Air & Listrik',
     nominal: '',
     deskripsi: '',
     bukti: ''
@@ -218,10 +219,10 @@ export default function QuickActionModal({
                   <select
                     value={incomeForm.kategori}
                     onChange={(e) => setIncomeForm({ ...incomeForm, kategori: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm bg-white"
                   >
-                    {state.categories.filter(c => c.tipe === 'Income').map((c, i) => (
-                      <option key={i} value={c.nama}>{c.nama}</option>
+                    {getIncomeCategories(state.categories).map((catName, i) => (
+                      <option key={i} value={catName}>{catName}</option>
                     ))}
                   </select>
                 </div>
@@ -282,10 +283,10 @@ export default function QuickActionModal({
                   <select
                     value={expenseForm.kategori}
                     onChange={(e) => setExpenseForm({ ...expenseForm, kategori: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-sm"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-sm bg-white"
                   >
-                    {state.categories.filter(c => c.tipe === 'Expense').map((c, i) => (
-                      <option key={i} value={c.nama}>{c.nama}</option>
+                    {getExpenseCategories(state.categories).map((catName, i) => (
+                      <option key={i} value={catName}>{catName}</option>
                     ))}
                   </select>
                 </div>
