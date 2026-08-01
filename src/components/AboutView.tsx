@@ -31,7 +31,7 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
       label: 'Syarat & Ketentuan', 
       icon: FileText, 
       color: 'text-amber-600 bg-amber-50',
-      url: 'https://blog.kasmasjid.web.id/p/syarat-dan-ketentuan.html'
+      url: 'https://blog.kasmasjid.web.id/p/term-and-condition.html'
     },
     { 
       id: 'privacy', 
@@ -39,7 +39,7 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
       label: 'Kebijakan Privasi', 
       icon: Lock, 
       color: 'text-indigo-600 bg-indigo-50',
-      url: 'https://blog.kasmasjid.web.id/p/kebijakan-privasi.html'
+      url: 'https://blog.kasmasjid.web.id/p/privacy-policy.html'
     },
     { id: 'status', type: 'tab', label: 'Status Layanan', icon: Activity, color: 'text-teal-600 bg-teal-50' },
     { id: 'version', type: 'tab', label: 'Versi Aplikasi', icon: Code2, color: 'text-slate-600 bg-slate-100' },
@@ -241,7 +241,7 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
                 </h3>
                 <div className="grid sm:grid-cols-2 gap-3">
                   <a
-                    href="https://blog.kasmasjid.web.id/p/syarat-dan-ketentuan.html"
+                    href="https://blog.kasmasjid.web.id/p/term-and-condition.html"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-3 bg-white rounded-xl border border-slate-200 hover:border-emerald-300 flex items-center justify-between transition-all group"
@@ -254,7 +254,7 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
                   </a>
 
                   <a
-                    href="https://blog.kasmasjid.web.id/p/kebijakan-privasi.html"
+                    href="https://blog.kasmasjid.web.id/p/privacy-policy.html"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-3 bg-white rounded-xl border border-slate-200 hover:border-emerald-300 flex items-center justify-between transition-all group"
@@ -688,12 +688,12 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
         <p className="font-display font-black text-sm text-slate-800 tracking-tight">KasMasjid Basic</p>
         <p className="text-xs font-semibold text-slate-500">Versi 2.4.0</p>
         <div className="flex items-center justify-center gap-4 text-xs font-medium text-emerald-700 pt-1">
-          <a href="https://blog.kasmasjid.web.id/p/syarat-dan-ketentuan.html" target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+          <a href="https://blog.kasmasjid.web.id/p/term-and-condition.html" target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
             <FileText className="w-3 h-3" />
             <span>Syarat & Ketentuan</span>
           </a>
           <span>•</span>
-          <a href="https://blog.kasmasjid.web.id/p/kebijakan-privasi.html" target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+          <a href="https://blog.kasmasjid.web.id/p/privacy-policy.html" target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
             <Lock className="w-3 h-3" />
             <span>Kebijakan Privasi</span>
           </a>
