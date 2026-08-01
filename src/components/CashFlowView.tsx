@@ -90,14 +90,36 @@ export default function CashFlowView({
   // Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formField.tanggal) {
+      setError('Tanggal transaksi wajib diisi.');
+      return;
+    }
     if (!formField.kategori) {
-      setError('Kategori wajib diisi. Silakan tambahkan kategori terlebih dahulu jika belum ada.');
+      setError('Kategori transaksi wajib diisi. Silakan pilih atau tambahkan kategori terlebih dahulu.');
       return;
     }
-    if (!formField.nominal || Number(formField.nominal) <= 0) {
-      setError('Nominal harus lebih besar dari 0');
+    if (!formField.nominal) {
+      setError('Nominal transaksi wajib diisi.');
       return;
     }
+    const nominalNum = Number(formField.nominal);
+    if (isNaN(nominalNum)) {
+      setError('Nominal transaksi harus berupa angka yang valid.');
+      return;
+    }
+    if (nominalNum < 0) {
+      setError('Nominal transaksi tidak boleh bernilai negatif.');
+      return;
+    }
+    if (nominalNum === 0) {
+      setError('Nominal transaksi harus lebih besar dari 0.');
+      return;
+    }
+    if (!formField.deskripsi.trim()) {
+      setError('Deskripsi / rincian transaksi wajib diisi.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -105,8 +127,8 @@ export default function CashFlowView({
     const txData: Omit<CashTransaction, 'id'> = {
       tanggal: formField.tanggal,
       kategori: formField.kategori,
-      deskripsi: formField.deskripsi,
-      nominal: Number(formField.nominal),
+      deskripsi: formField.deskripsi.trim(),
+      nominal: nominalNum,
       bukti: formField.bukti,
     };
 
@@ -448,7 +470,9 @@ export default function CashFlowView({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Tanggal</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">
+                    Tanggal <span className="text-rose-500">*</span>
+                  </label>
                   <input 
                     type="date" 
                     required
@@ -460,7 +484,9 @@ export default function CashFlowView({
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Kategori</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">
+                    Kategori <span className="text-rose-500">*</span>
+                  </label>
                   <select
                     value={formField.kategori}
                     onChange={(e) => setFormField({ ...formField, kategori: e.target.value })}
@@ -476,13 +502,24 @@ export default function CashFlowView({
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Nominal (Rupiah)</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">
+                  Nominal (Rupiah) <span className="text-rose-500">*</span>
+                </label>
                 <input 
                   type="number" 
+                  min="1"
                   placeholder="Contoh: 1500000"
                   required
                   value={formField.nominal}
-                  onChange={(e) => setFormField({ ...formField, nominal: e.target.value })}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFormField({ ...formField, nominal: val });
+                    if (val !== '' && Number(val) < 0) {
+                      setError('Nominal transaksi tidak boleh bernilai negatif.');
+                    } else if (error === 'Nominal transaksi tidak boleh bernilai negatif.') {
+                      setError(null);
+                    }
+                  }}
                   className={`w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-1 text-sm font-mono font-bold ${
                     activeTab === 'income' ? 'focus:border-emerald-500 focus:ring-emerald-500 text-emerald-900' : 'focus:border-rose-500 focus:ring-rose-500 text-rose-900'
                   }`}
@@ -490,10 +527,13 @@ export default function CashFlowView({
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Deskripsi Transaksi</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">
+                  Deskripsi Transaksi <span className="text-rose-500">*</span>
+                </label>
                 <textarea 
                   placeholder="Ketik rincian atau catatan..."
                   rows={3}
+                  required
                   value={formField.deskripsi}
                   onChange={(e) => setFormField({ ...formField, deskripsi: e.target.value })}
                   className={`w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-1 text-sm ${
@@ -607,7 +647,14 @@ export default function CashFlowView({
         onClose={() => setDeleteId(null)}
         onConfirm={handleDeleteConfirm}
         title="Konfirmasi Hapus Transaksi"
-        message="Apakah Anda yakin ingin menghapus data transaksi ini secara permanen dari database Google Sheets Anda? Tindakan ini tidak dapat dibatalkan."
+        message={
+          (() => {
+            const item = deleteId ? (activeTab === 'income' ? state.incomes : state.expenses).find(t => t.id === deleteId) : null;
+            return item 
+              ? `Apakah Anda yakin ingin menghapus transaksi "${item.deskripsi}" (Rp ${item.nominal.toLocaleString('id-ID')}) secara permanen? Data akan dihapus dari database Google Sheets dan tidak dapat dikembalikan.`
+              : "Apakah Anda yakin ingin menghapus data transaksi ini secara permanen dari database Google Sheets Anda? Tindakan ini tidak dapat dibatalkan.";
+          })()
+        }
         confirmText="Ya, Hapus"
         cancelText="Batal"
         isLoading={loading}

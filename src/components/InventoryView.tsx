@@ -449,7 +449,14 @@ export default function InventoryView({
         onClose={() => setDeleteId(null)}
         onConfirm={handleDeleteConfirm}
         title="Konfirmasi Hapus Inventaris"
-        message="Apakah Anda yakin ingin menghapus barang inventaris ini secara permanen dari database Google Sheets? Tindakan ini tidak dapat dibatalkan."
+        message={
+          (() => {
+            const item = deleteId ? state.inventory.find(i => i.id === deleteId) : null;
+            return item 
+              ? `Apakah Anda yakin ingin menghapus barang inventaris "${item.namaBarang}" (${item.jumlah} unit) secara permanen? Data akan dihapus dari database Google Sheets dan tidak dapat dikembalikan.`
+              : "Apakah Anda yakin ingin menghapus barang inventaris ini secara permanen dari database Google Sheets? Tindakan ini tidak dapat dibatalkan.";
+          })()
+        }
         confirmText="Ya, Hapus"
         cancelText="Batal"
         isLoading={loading}

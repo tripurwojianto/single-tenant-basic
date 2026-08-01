@@ -443,17 +443,21 @@ export default function BottomNavbar({
 
               {/* Tentang & Sistem */}
               <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">ℹ️ Informasi & Legal</p>
                 <button
                   onClick={() => handleNavigateMenu('about')}
-                  className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 flex items-center justify-between transition-all cursor-pointer text-left group"
+                  className="w-full p-3.5 rounded-2xl bg-emerald-50/80 hover:bg-emerald-100/90 border border-emerald-200 flex items-center justify-between transition-all cursor-pointer text-left group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
                       <Info className="w-4 h-4" />
                     </div>
-                    <span className="font-bold text-xs text-slate-800">Panduan & Info Aplikasi</span>
+                    <div>
+                      <span className="font-bold text-xs text-emerald-950 block">Tentang Aplikasi</span>
+                      <span className="text-[10px] text-emerald-700/80 block">Kebijakan Privasi, Syarat & Ketentuan, Versi</span>
+                    </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                  <ChevronRight className="w-4 h-4 text-emerald-600" />
                 </button>
 
                 <button

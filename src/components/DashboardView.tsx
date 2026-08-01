@@ -187,8 +187,33 @@ export default function DashboardView({
   // Handlers
   const handleIncomeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!incomeForm.nominal || Number(incomeForm.nominal) <= 0) {
-      setError('Nominal harus lebih besar dari 0');
+    if (!incomeForm.tanggal) {
+      setError('Tanggal transaksi wajib diisi');
+      return;
+    }
+    if (!incomeForm.kategori) {
+      setError('Kategori transaksi wajib dipilih');
+      return;
+    }
+    if (!incomeForm.nominal) {
+      setError('Nominal transaksi wajib diisi');
+      return;
+    }
+    const nominalNum = Number(incomeForm.nominal);
+    if (isNaN(nominalNum)) {
+      setError('Nominal transaksi harus berupa angka yang valid');
+      return;
+    }
+    if (nominalNum < 0) {
+      setError('Nominal transaksi tidak boleh bernilai negatif');
+      return;
+    }
+    if (nominalNum === 0) {
+      setError('Nominal transaksi harus lebih besar dari 0');
+      return;
+    }
+    if (!incomeForm.deskripsi.trim()) {
+      setError('Deskripsi / rincian transaksi wajib diisi');
       return;
     }
     setLoading(true);
@@ -197,8 +222,8 @@ export default function DashboardView({
       await onAddIncome({
         tanggal: incomeForm.tanggal,
         kategori: incomeForm.kategori,
-        deskripsi: incomeForm.deskripsi,
-        nominal: Number(incomeForm.nominal),
+        deskripsi: incomeForm.deskripsi.trim(),
+        nominal: nominalNum,
         bukti: incomeForm.bukti,
       });
       setActiveModal(null);
@@ -218,8 +243,33 @@ export default function DashboardView({
 
   const handleExpenseSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!expenseForm.nominal || Number(expenseForm.nominal) <= 0) {
-      setError('Nominal harus lebih besar dari 0');
+    if (!expenseForm.tanggal) {
+      setError('Tanggal transaksi wajib diisi');
+      return;
+    }
+    if (!expenseForm.kategori) {
+      setError('Kategori transaksi wajib dipilih');
+      return;
+    }
+    if (!expenseForm.nominal) {
+      setError('Nominal transaksi wajib diisi');
+      return;
+    }
+    const nominalNum = Number(expenseForm.nominal);
+    if (isNaN(nominalNum)) {
+      setError('Nominal transaksi harus berupa angka yang valid');
+      return;
+    }
+    if (nominalNum < 0) {
+      setError('Nominal transaksi tidak boleh bernilai negatif');
+      return;
+    }
+    if (nominalNum === 0) {
+      setError('Nominal transaksi harus lebih besar dari 0');
+      return;
+    }
+    if (!expenseForm.deskripsi.trim()) {
+      setError('Deskripsi / rincian transaksi wajib diisi');
       return;
     }
     setLoading(true);
@@ -228,8 +278,8 @@ export default function DashboardView({
       await onAddExpense({
         tanggal: expenseForm.tanggal,
         kategori: expenseForm.kategori,
-        deskripsi: expenseForm.deskripsi,
-        nominal: Number(expenseForm.nominal),
+        deskripsi: expenseForm.deskripsi.trim(),
+        nominal: nominalNum,
         bukti: expenseForm.bukti,
       });
       setActiveModal(null);
@@ -923,7 +973,9 @@ export default function DashboardView({
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Tanggal</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+                        Tanggal <span className="text-rose-500">*</span>
+                      </label>
                       <input 
                         type="date" 
                         required
@@ -933,7 +985,9 @@ export default function DashboardView({
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Kategori</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+                        Kategori <span className="text-rose-500">*</span>
+                      </label>
                       <select
                         value={incomeForm.kategori}
                         onChange={(e) => setIncomeForm({ ...incomeForm, kategori: e.target.value })}
@@ -947,22 +1001,36 @@ export default function DashboardView({
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Nominal (Rupiah)</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+                      Nominal (Rupiah) <span className="text-rose-500">*</span>
+                    </label>
                     <input 
                       type="number" 
+                      min="1"
                       placeholder="Contoh: 1500000"
                       required
                       value={incomeForm.nominal}
-                      onChange={(e) => setIncomeForm({ ...incomeForm, nominal: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setIncomeForm({ ...incomeForm, nominal: val });
+                        if (val !== '' && Number(val) < 0) {
+                          setError('Nominal transaksi tidak boleh bernilai negatif');
+                        } else if (error === 'Nominal transaksi tidak boleh bernilai negatif') {
+                          setError(null);
+                        }
+                      }}
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm font-mono font-bold"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Deskripsi Transaksi</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+                      Deskripsi Transaksi <span className="text-rose-500">*</span>
+                    </label>
                     <textarea 
                       placeholder="Tulis rincian atau asal muasal dana..."
                       rows={3}
+                      required
                       value={incomeForm.deskripsi}
                       onChange={(e) => setIncomeForm({ ...incomeForm, deskripsi: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm"
@@ -987,7 +1055,9 @@ export default function DashboardView({
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Tanggal</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+                        Tanggal <span className="text-rose-500">*</span>
+                      </label>
                       <input 
                         type="date" 
                         required
@@ -997,7 +1067,9 @@ export default function DashboardView({
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Kategori</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+                        Kategori <span className="text-rose-500">*</span>
+                      </label>
                       <select
                         value={expenseForm.kategori}
                         onChange={(e) => setExpenseForm({ ...expenseForm, kategori: e.target.value })}
@@ -1011,22 +1083,36 @@ export default function DashboardView({
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Nominal (Rupiah)</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+                      Nominal (Rupiah) <span className="text-rose-500">*</span>
+                    </label>
                     <input 
                       type="number" 
+                      min="1"
                       placeholder="Contoh: 850000"
                       required
                       value={expenseForm.nominal}
-                      onChange={(e) => setExpenseForm({ ...expenseForm, nominal: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setExpenseForm({ ...expenseForm, nominal: val });
+                        if (val !== '' && Number(val) < 0) {
+                          setError('Nominal transaksi tidak boleh bernilai negatif');
+                        } else if (error === 'Nominal transaksi tidak boleh bernilai negatif') {
+                          setError(null);
+                        }
+                      }}
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-sm font-mono font-bold text-rose-700"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Deskripsi Pengeluaran</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+                      Deskripsi Pengeluaran <span className="text-rose-500">*</span>
+                    </label>
                     <textarea 
                       placeholder="Rincian pembayaran, penerima, atau kepentingan..."
                       rows={3}
+                      required
                       value={expenseForm.deskripsi}
                       onChange={(e) => setExpenseForm({ ...expenseForm, deskripsi: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-sm"

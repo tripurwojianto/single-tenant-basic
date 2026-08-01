@@ -57,7 +57,7 @@ import { ToastContainer, ToastMessage } from './components/Toast';
 import { 
   LayoutGrid, Building, TrendingUp, Box, Megaphone, FileText, 
   MessageSquare, LogOut, Menu, X, User as UserIcon, Loader2,
-  FileSpreadsheet, AlertCircle, Info, Sparkles, ArrowLeft,
+  FileSpreadsheet, AlertCircle, AlertTriangle, Info, Sparkles, ArrowLeft,
   Users, Smartphone, Receipt, Globe, HeartHandshake, QrCode,
   BookOpen, CheckCircle2, ShieldCheck
 } from 'lucide-react';
@@ -1211,9 +1211,9 @@ export default function App() {
       ],
     },
     {
-      groupTitle: 'ℹ️ Panduan & Informasi',
+      groupTitle: 'ℹ️ Informasi & Legal',
       items: [
-        { key: 'about', label: 'Panduan & FAQ Portal', icon: Info, tier: 'BASIC', isPlaceholder: true },
+        { key: 'about', label: 'Tentang Aplikasi', icon: Info, tier: 'BASIC' },
       ],
     },
   ];
@@ -1387,6 +1387,11 @@ export default function App() {
                 <p className="text-xs font-bold text-white leading-tight truncate">
                   {isDemoMode ? 'Bendahara Demo' : (user?.displayName || 'Pengurus Masjid')}
                 </p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 bg-emerald-800 text-emerald-200 border border-emerald-700 rounded leading-none">
+                    Administrator DKM
+                  </span>
+                </div>
                 <p className="text-[10px] text-emerald-300 mt-1 truncate leading-tight">
                   {isDemoMode ? 'demo@kasmasjid.web.id' : (user?.email || 'admin@masjid.id')}
                 </p>
@@ -1419,66 +1424,82 @@ export default function App() {
       {/* Main Content Pane */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         
-        {/* Top Navbar */}
-        <header className="h-20 border-b border-slate-200 bg-white flex items-center justify-between px-6 sm:px-8 shrink-0 no-print">
-          <div className="flex items-center gap-4">
+        {/* Top Navbar Header */}
+        <header className="h-16 sm:h-20 border-b border-slate-200/80 bg-white flex items-center justify-between px-3 sm:px-6 md:px-8 shrink-0 no-print">
+          {/* Left Group: Menu Hamburger -> Logo Masjid -> Nama Masjid & Subtitle */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 mr-2 sm:mr-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-600 lg:hidden cursor-pointer"
+              className="p-1.5 sm:p-2 -ml-1 rounded-xl hover:bg-slate-100 text-slate-600 lg:hidden cursor-pointer shrink-0 transition-colors"
+              aria-label="Buka Menu Sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-3 min-w-0">
+
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
               {state.info.logo ? (
                 <img 
                   src={state.info.logo} 
                   alt={state.info.namaMasjid || 'Logo Masjid'} 
-                  className="w-10 h-10 rounded-xl object-cover border border-slate-200/80 shadow-xs shrink-0"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover border border-slate-200/80 shadow-2xs shrink-0"
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-display font-black text-sm shrink-0 shadow-xs">
-                  {state.info.namaMasjid ? state.info.namaMasjid.charAt(0).toUpperCase() : <Building className="w-5 h-5" />}
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-display font-black text-xs sm:text-sm shrink-0 shadow-2xs">
+                  {state.info.namaMasjid ? state.info.namaMasjid.charAt(0).toUpperCase() : <Building className="w-4 h-4 sm:w-5 sm:h-5" />}
                 </div>
               )}
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h2 className="font-display font-black text-base sm:text-lg text-slate-900 tracking-tight truncate max-w-[180px] sm:max-w-xs md:max-w-md">
-                    {state.info.namaMasjid || 'Masjid Al-Ikhlas'}
-                  </h2>
-                  <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md shrink-0">
-                    Administrator
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 font-medium truncate max-w-[200px] sm:max-w-md">
-                  {state.info.alamat ? `${state.info.alamat}${state.info.kota ? ', ' + state.info.kota : ''}` : (state.info.tagline || 'Website Resmi & Portal Keuangan DKM')}
+              <div className="min-w-0 flex-1">
+                <h2 className="font-display font-black text-xs sm:text-base md:text-lg text-slate-900 tracking-tight truncate leading-tight">
+                  {state.info.namaMasjid || 'Masjid Al-Ikhlas'}
+                </h2>
+                <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate block mt-0.5">
+                  {state.info.alamat ? `${state.info.alamat}${state.info.kota ? ', ' + state.info.kota : ''}` : (state.info.tagline || 'Website Resmi Masjid')}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Header Status Indicator */}
-          <div className="flex items-center gap-3">
+          {/* Right Group: Tombol Google Sheets Status */}
+          <div className="flex items-center shrink-0">
             {isDemoMode ? (
-              <div className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
-                <Info className="w-3.5 h-3.5 text-amber-600" />
-                Mode Demo
+              <div className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/80 text-[10px] sm:text-xs font-extrabold text-amber-800 flex items-center gap-1.5 shrink-0 shadow-2xs">
+                <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse shrink-0"></span>
+                <span className="whitespace-nowrap">Mode Demo</span>
+              </div>
+            ) : sheetLoadingError || connectionStatus === 'error' ? (
+              <button 
+                onClick={() => handleSpreadsheetSync(token || '')}
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-[10px] sm:text-xs font-extrabold text-rose-700 hover:bg-rose-100 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 shadow-2xs"
+                title={sheetLoadingError || "Google Sheets Tidak Dapat Diakses - Klik untuk mencoba menghubungkan kembali"}
+              >
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                <span className="whitespace-nowrap">
+                  <span className="hidden xs:inline">Google </span>Sheets Tidak Dapat Diakses
+                </span>
+              </button>
+            ) : isInitializingSheet || connectionStatus === 'pending' || syncQueue.length > 0 ? (
+              <div className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-sky-50 border border-sky-200 text-[10px] sm:text-xs font-extrabold text-sky-700 flex items-center gap-1.5 shrink-0 shadow-2xs">
+                <Loader2 className="w-3.5 h-3.5 text-sky-600 animate-spin shrink-0" />
+                <span className="whitespace-nowrap">Menunggu Sinkronisasi</span>
               </div>
             ) : spreadsheetId ? (
               <a 
                 href={`https://docs.google.com/spreadsheets/d/${spreadsheetId}`}
                 target="_blank" 
                 rel="noreferrer"
-                className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="Buka Berkas Google Sheets Databasenya"
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200/90 text-[10px] sm:text-xs font-extrabold text-emerald-700 hover:bg-emerald-100 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 shadow-2xs"
+                title="Buka Berkas Google Sheets Database Masjid"
               >
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                <span>Google Sheets</span>
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shrink-0"></span>
+                <span className="whitespace-nowrap">
+                  <span className="hidden xs:inline">Google </span>Sheets Terhubung
+                </span>
               </a>
             ) : (
-              <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-500 flex items-center gap-1.5">
-                <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
-                <span>Lokal</span>
+              <div className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-[10px] sm:text-xs font-extrabold text-slate-600 flex items-center gap-1.5 shrink-0 shadow-2xs">
+                <span className="w-2 h-2 bg-slate-400 rounded-full shrink-0"></span>
+                <span className="whitespace-nowrap">Mode Lokal</span>
               </div>
             )}
           </div>
@@ -1690,13 +1711,10 @@ export default function App() {
             )}
           </div>
 
-          {/* Simplified Dashboard Footer */}
+          {/* Mosque Identity Dashboard Footer */}
           <footer className="mt-12 pt-6 border-t border-slate-200/60 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 no-print">
             <div className="text-center sm:text-left leading-relaxed">
-              <span className="font-semibold text-slate-700">© 2026 {state.info.namaMasjid || 'Masjid Al-Ikhlas'}</span> — Portal Informasi & Transparansi Keuangan DKM
-            </div>
-            <div className="text-center sm:text-right font-medium text-[11px] text-slate-400">
-              Dibangun menggunakan <span className="font-bold text-emerald-600">KasMasjid</span>
+              <span className="font-semibold text-slate-700">{state.info.namaMasjid || 'Masjid Al-Ikhlas'}</span> — Portal Informasi & Transparansi Keuangan DKM
             </div>
           </footer>
         </main>
