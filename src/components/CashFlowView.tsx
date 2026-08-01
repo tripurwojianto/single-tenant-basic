@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { CashTransaction, Category, MosqueState } from '../types';
-import { getIncomeCategories, getExpenseCategories } from '../constants/transactionCategories';
+import { getIncomeCategories, getExpenseCategories, getGroupedIncomeCategories, getGroupedExpenseCategories } from '../constants/transactionCategories';
 import { 
   TrendingUp, TrendingDown, Plus, Edit, Trash, Search, Filter, 
   Calendar, Check, X, Eye, ExternalLink, AlertTriangle, FileText, Loader2 
@@ -191,6 +191,7 @@ export default function CashFlowView({
   // Filter lists
   const currentList = activeTab === 'income' ? state.incomes : state.expenses;
   const availableCategories = activeTab === 'income' ? getIncomeCategories(state.categories) : getExpenseCategories(state.categories);
+  const groupedCategories = activeTab === 'income' ? getGroupedIncomeCategories(state.categories) : getGroupedExpenseCategories(state.categories);
 
   const filteredList = currentList.filter((item) => {
     const matchesSearch = 
@@ -309,8 +310,12 @@ export default function CashFlowView({
             className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm text-slate-700 bg-white"
           >
             <option value="Semua">Semua Kategori</option>
-            {availableCategories.map((catName, i) => (
-              <option key={i} value={catName}>{catName}</option>
+            {groupedCategories.map((group) => (
+              <optgroup key={group.groupName} label={group.groupName}>
+                {group.categories.map((catName) => (
+                  <option key={catName} value={catName}>{catName}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </div>
@@ -494,8 +499,12 @@ export default function CashFlowView({
                       activeTab === 'income' ? 'focus:border-emerald-500 focus:ring-emerald-500' : 'focus:border-rose-500 focus:ring-rose-500'
                     }`}
                   >
-                    {availableCategories.map((catName, i) => (
-                      <option key={i} value={catName}>{catName}</option>
+                    {groupedCategories.map((group) => (
+                      <optgroup key={group.groupName} label={group.groupName}>
+                        {group.categories.map((catName) => (
+                          <option key={catName} value={catName}>{catName}</option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </div>

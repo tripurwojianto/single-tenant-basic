@@ -729,10 +729,9 @@ export default function App() {
     });
   };
 
-  // Add category
-  const handleAddCategory = async (category: Category) => {
+  // Add or update categories
+  const handleSaveCategories = async (updatedCategories: Category[]) => {
     return handleMutation(async () => {
-      const updatedCategories = [...state.categories, category];
       if (isDemoMode) {
         setState(prev => ({ ...prev, categories: updatedCategories }));
         return;
@@ -741,6 +740,11 @@ export default function App() {
       await saveCategories(token, spreadsheetId, updatedCategories);
       setState(prev => ({ ...prev, categories: updatedCategories }));
     });
+  };
+
+  const handleAddCategory = async (category: Category) => {
+    const updatedCategories = [...state.categories, category];
+    return handleSaveCategories(updatedCategories);
   };
 
   // Add Cash Transaction
@@ -1340,7 +1344,7 @@ export default function App() {
                             PRO
                           </span>
                         )}
-                        {item.isPlaceholder && (
+                        {(item as any).isPlaceholder && (
                           <span className="px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase shrink-0 bg-emerald-950 text-emerald-300 border border-emerald-700/50">
                             INFO
                           </span>
@@ -1640,7 +1644,9 @@ export default function App() {
                 {activeMenu === 'mosque-info' && (
                   <MosqueInfoView 
                     info={state.info} 
+                    categories={state.categories}
                     onSave={handleSaveMosqueInfo} 
+                    onSaveCategories={handleSaveCategories}
                   />
                 )}
 

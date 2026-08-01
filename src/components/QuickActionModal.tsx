@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MosqueState, CashTransaction, InventoryItem, Announcement } from '../types';
 import { X, AlertTriangle, Plus, Loader2 } from 'lucide-react';
-import { getIncomeCategories, getExpenseCategories } from '../constants/transactionCategories';
+import { getIncomeCategories, getExpenseCategories, getGroupedIncomeCategories, getGroupedExpenseCategories } from '../constants/transactionCategories';
 
 interface QuickActionModalProps {
   activeModal: 'income' | 'expense' | 'inventory' | 'announcement' | null;
@@ -35,7 +35,7 @@ export default function QuickActionModal({
 
   const [expenseForm, setExpenseForm] = useState({
     tanggal: new Date().toISOString().split('T')[0],
-    kategori: getExpenseCategories(state.categories)[0] || 'Air & Listrik',
+    kategori: getExpenseCategories(state.categories)[0] || 'Air',
     nominal: '',
     deskripsi: '',
     bukti: ''
@@ -275,8 +275,12 @@ export default function QuickActionModal({
                     onChange={(e) => setIncomeForm({ ...incomeForm, kategori: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm bg-white"
                   >
-                    {getIncomeCategories(state.categories).map((catName, i) => (
-                      <option key={i} value={catName}>{catName}</option>
+                    {getGroupedIncomeCategories(state.categories).map((group) => (
+                      <optgroup key={group.groupName} label={group.groupName}>
+                        {group.categories.map((catName) => (
+                          <option key={catName} value={catName}>{catName}</option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </div>
@@ -357,8 +361,12 @@ export default function QuickActionModal({
                     onChange={(e) => setExpenseForm({ ...expenseForm, kategori: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-sm bg-white"
                   >
-                    {getExpenseCategories(state.categories).map((catName, i) => (
-                      <option key={i} value={catName}>{catName}</option>
+                    {getGroupedExpenseCategories(state.categories).map((group) => (
+                      <optgroup key={group.groupName} label={group.groupName}>
+                        {group.categories.map((catName) => (
+                          <option key={catName} value={catName}>{catName}</option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </div>
