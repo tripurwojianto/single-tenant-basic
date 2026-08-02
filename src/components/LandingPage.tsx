@@ -337,19 +337,20 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
             transition={{ duration: 0.6 }}
             className="space-y-6"
           >
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold bg-[#DFF6EA] text-[#16A34A] uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />
-              SaaS Administrasi Masjid Berbasis Kepercayaan
-            </span>
-            <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-slate-900 tracking-tight leading-[1.15] max-w-3xl mx-auto">
-              Digitalisasi Administrasi Masjid <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#22C55E]">
-                yang sederhana, transparan, dan siap digunakan.
-              </span>
+            <h1 className="font-display font-black text-5xl sm:text-6xl lg:text-7xl text-slate-900 tracking-tight leading-[1.1] max-w-3xl mx-auto">
+              KasMasjid
             </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed font-sans font-medium">
-              Kelola arus kas, inventaris, pengumuman, dan informasi masjid dalam satu aplikasi berbasis Google Sheets. Data aman, transparan, dan 100% terkendali di Drive Anda sendiri.
-            </p>
+            <h2 className="font-display font-extrabold text-2xl sm:text-3xl lg:text-4xl text-[#16A34A] tracking-tight max-w-3xl mx-auto">
+              Aplikasi Administrasi Keuangan & Operasional Masjid
+            </h2>
+            <div className="text-sm sm:text-base lg:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-sans font-medium space-y-3">
+              <p>
+                KasMasjid membantu Bendahara dan Pengurus DKM mengelola kas, inventaris, pengumuman, serta portal informasi masjid secara transparan menggunakan Google Sheets milik masjid sendiri.
+              </p>
+              <p>
+                Data tetap berada di Google Drive milik masjid sehingga mudah diakses, aman, dan sepenuhnya berada dalam kendali pengurus.
+              </p>
+            </div>
           </motion.div>
 
           {/* CTA Buttons */}
@@ -377,16 +378,58 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
         </div>
       </section>
 
+      {/* Target Users Section */}
+      <section className="py-16 bg-emerald-50/40 border-b border-slate-200/60">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center">
+          <div className="space-y-3">
+            <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900 tracking-tight">
+              Siapa yang Menggunakan KasMasjid?
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 font-medium max-w-2xl mx-auto">
+              KasMasjid dirancang khusus untuk mendukung operasional administrasi masjid di Indonesia.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs max-w-2xl mx-auto text-left space-y-4">
+            <p className="font-bold text-xs sm:text-sm text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+              Cocok digunakan oleh:
+            </p>
+            <ul className="grid sm:grid-cols-2 gap-3 text-xs sm:text-sm font-semibold text-slate-700">
+              <li className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">✓</span>
+                <span>Bendahara Masjid</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">✓</span>
+                <span>Ketua DKM</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">✓</span>
+                <span>Sekretaris</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">✓</span>
+                <span>Pengurus Masjid</span>
+              </li>
+              <li className="flex items-center gap-2.5 sm:col-span-2">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">✓</span>
+                <span>Jamaah (Portal Informasi Publik)</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* Feature Grid Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <h2 className="font-display font-black text-3xl text-slate-950 tracking-tight">
-              Fitur Lengkap untuk Kemandirian Masjid
+              Semua Kebutuhan Administrasi Masjid dalam Satu Aplikasi
             </h2>
             <p className="text-sm text-slate-500 font-sans font-medium">
-              Didesain khusus untuk menyajikan kemudahan operasional harian bagi Bendahara dan jajaran DKM di Indonesia.
+              KasMasjid membantu pengurus mengelola administrasi harian dengan lebih rapi, transparan, dan mudah dipelajari.
             </p>
           </div>
 
@@ -429,10 +472,10 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
           
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <h2 className="font-display font-black text-3xl text-slate-950 tracking-tight">
-              Eksplorasi Antarmuka KasMasjid
+              Lihat Tampilan KasMasjid
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 font-medium">
-              Klik tab di bawah ini untuk mensimulasikan sekilas tampilan antarmuka digital yang bersih, modern, dan sangat mudah digunakan.
+              Berikut contoh antarmuka KasMasjid yang digunakan bendahara dan pengurus DKM untuk mengelola administrasi masjid.
             </p>
           </div>
 
@@ -653,10 +696,10 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
           
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <h2 className="font-display font-black text-3xl text-slate-950 tracking-tight">
-              Model Produk & Pilihan Upgrade
+              Pilih Cara Menggunakan KasMasjid
             </h2>
             <p className="text-sm text-slate-500 font-medium">
-              Gunakan edisi Basic secara gratis selamanya atau kembangkan sistem digital DKM Anda dengan fitur Pro terintegrasi.
+              Mulailah dengan KasMasjid Basic secara gratis atau tingkatkan ke KasMasjid Pro untuk kolaborasi seluruh pengurus.
             </p>
           </div>
 
@@ -732,10 +775,10 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
           
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <h2 className="font-display font-black text-3xl text-slate-950 tracking-tight">
-              Tiga Langkah Implementasi Mudah
+              Cara Memulai Menggunakan KasMasjid
             </h2>
             <p className="text-sm text-slate-500 font-medium">
-              Bagaimana KasMasjid dipasang dan mulai dikelola oleh pengurus DKM Anda.
+              KasMasjid dapat digunakan dengan tiga pilihan implementasi sesuai kebutuhan masjid.
             </p>
           </div>
 
@@ -762,6 +805,23 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Tentang KasMasjid Section */}
+      <section className="py-16 bg-white border-t border-slate-200/50">
+        <div className="max-w-3xl mx-auto px-4 text-center space-y-4">
+          <h2 className="font-display font-black text-3xl text-slate-950 tracking-tight">
+            Tentang KasMasjid
+          </h2>
+          <div className="bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200/80 space-y-3 text-slate-600 text-xs sm:text-sm font-medium leading-relaxed text-center sm:text-left">
+            <p>
+              KasMasjid adalah aplikasi administrasi masjid berbasis web yang membantu pengurus mengelola keuangan, inventaris, pengumuman, dan portal informasi masjid.
+            </p>
+            <p>
+              KasMasjid menggunakan Google Workspace sehingga data tetap tersimpan di Google Drive milik masjid dan tidak bergantung pada server KasMasjid.
+            </p>
           </div>
         </div>
       </section>
