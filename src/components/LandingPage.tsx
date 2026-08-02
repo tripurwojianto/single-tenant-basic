@@ -947,7 +947,17 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
 
           <div className="pt-6 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left text-xs text-slate-500">
             <p className="font-semibold">&copy; 2026 KasMasjid</p>
-            <p className="text-slate-400">Dikembangkan oleh <span className="font-bold text-slate-600">BukuKasSekolah</span></p>
+            <p className="text-slate-400">
+              Dikembangkan oleh{' '}
+              <a 
+                href="https://www.kukas.biz.id" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="font-bold text-slate-600 hover:text-emerald-600 transition-colors underline decoration-slate-300 underline-offset-2"
+              >
+                KUKAS Digital Architecture
+              </a>
+            </p>
           </div>
 
         </div>
