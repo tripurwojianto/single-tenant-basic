@@ -146,7 +146,7 @@ export default function OnboardingWizard({
         <div className="flex items-center gap-3">
           <KasMasjidLogo className="w-9 h-9" />
           <div>
-            <span className="font-display font-black text-sm text-slate-900 leading-none block">KasMasjid Basic</span>
+            <span className="font-display font-black text-sm text-slate-900 leading-none block">KasMasjid</span>
             <span className="text-[10px] text-slate-400 font-bold block mt-0.5">Wizard Onboarding</span>
           </div>
         </div>

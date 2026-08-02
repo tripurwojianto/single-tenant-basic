@@ -49,15 +49,15 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
   const faqs = [
     {
       question: 'Mengapa hanya HP Bendahara yang bisa melihat data?',
-      answer: 'Keamanan dan privasi data kas masjid adalah prioritas utama. Pada edisi KasMasjid Basic, data transaksi disimpan secara lokal di perangkat HP Bendahara dan dienkripsi ke spreadsheet Google Drive akun pribadi masjid/Bendahara. Pendekatan ini memastikan data keuangan tidak dapat diubah atau diakses pihak tak berwenang.'
+      answer: 'Keamanan dan privasi data kas masjid adalah prioritas utama. Pada KasMasjid, data transaksi disimpan secara lokal di perangkat HP Bendahara dan dienkripsi ke spreadsheet Google Drive akun pribadi masjid/Bendahara. Pendekatan ini memastikan data keuangan tidak dapat diubah atau diakses pihak tak berwenang.'
     },
     {
       question: 'Apakah data kas masjid saya aman jika HP Bendahara hilang?',
       answer: 'Sangat aman! Selama Anda telah mengaktifkan fitur Sinkronisasi Google Sheets, seluruh rekaman arus kas, catatan inventaris, dan pengumuman tersimpan secara berkala di akun Google Drive DKM. Anda hanya perlu login kembali menggunakan akun Google tersebut di HP baru.'
     },
     {
-      question: 'Apakah aplikasi KasMasjid Basic benar-benar gratis selamanya?',
-      answer: 'Ya, KasMasjid Basic dirancang sebagai kontribusi sosial (infaq teknologi) untuk seluruh DKM tempat ibadah di Indonesia, 100% gratis selamanya tanpa biaya tersembunyi.'
+      question: 'Apakah aplikasi KasMasjid benar-benar gratis selamanya?',
+      answer: 'Ya, KasMasjid dirancang sebagai kontribusi sosial (infaq teknologi) untuk seluruh DKM tempat ibadah di Indonesia, 100% gratis selamanya tanpa biaya tersembunyi.'
     },
     {
       question: 'Bagaimana jika masjid kami tidak memiliki koneksi internet stabil?',
@@ -65,7 +65,7 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
     },
     {
       question: 'Bagaimana cara membagikan laporan keuangan kepada jamaah?',
-      answer: 'Anda dapat mengunduh laporan bulanan/mingguan dalam bentuk PDF dari menu Laporan, lalu mencetaknya untuk diletakkan di mading masjid. Jika menggunakan KasMasjid Pro, laporan dapat otomatis tampil di Portal Publik Jamaah & Mading Digital.'
+      answer: 'Anda dapat mengunduh laporan bulanan/mingguan dalam bentuk PDF dari menu Laporan, lalu mencetaknya untuk diletakkan di mading masjid atau membagikannya secara digital.'
     }
   ];
 
@@ -96,7 +96,7 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
           <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 shrink-0">
             <KasMasjidLogo className="w-10 h-10" />
             <div className="text-left">
-              <div className="text-xs font-bold text-white">KasMasjid Basic</div>
+              <div className="text-xs font-bold text-white">KasMasjid</div>
               <div className="text-[10px] text-emerald-300 font-medium">Versi 2.4.0</div>
             </div>
           </div>
@@ -276,7 +276,7 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">
                     <span className="px-2 py-0.5 rounded text-[9px] font-black bg-emerald-100 text-emerald-800 uppercase">
-                      KasMasjid Basic
+                      KasMasjid
                     </span>
                     <h4 className="font-bold text-xs text-slate-800 pt-1">Penggunaan Standar DKM</h4>
                     <p className="text-[11px] text-slate-500 font-sans">
@@ -284,8 +284,8 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
                     </p>
                   </div>
                   <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">
-                    <span className="px-2 py-0.5 rounded text-[9px] font-black bg-indigo-100 text-indigo-800 uppercase">
-                      KasMasjid Pro
+                    <span className="px-2 py-0.5 rounded text-[9px] font-black bg-emerald-100 text-emerald-800 uppercase">
+                      KasMasjid Cloud
                     </span>
                     <h4 className="font-bold text-xs text-slate-800 pt-1">Fitur Lanjutan & Ekosistem</h4>
                     <p className="text-[11px] text-slate-500 font-sans">
@@ -329,7 +329,7 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span><strong>Penyelarasan Edisi:</strong> Penjelasan transparan perbedaan skema KasMasjid Basic & KasMasjid Pro.</span>
+                      <span><strong>Penyelarasan Fitur:</strong> Penjelasan transparan fitur dan skema penggunaan KasMasjid.</span>
                     </li>
                   </ul>
                 </div>
@@ -587,14 +587,14 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
             <div className="space-y-6 animate-fade-in">
               <div className="border-b border-slate-100 pb-4 space-y-1">
                 <h2 className="font-display font-black text-xl text-slate-900">Versi Aplikasi</h2>
-                <p className="text-xs text-slate-500">Spesifikasi sistem dan informasi lisensi KasMasjid Basic</p>
+                <p className="text-xs text-slate-500">Spesifikasi sistem dan informasi lisensi KasMasjid</p>
               </div>
 
               <div className="p-5 bg-slate-900 text-white rounded-2xl space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <div>
-                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Edisi Aktif</span>
-                    <h3 className="font-display font-bold text-base text-white">KasMasjid Basic</h3>
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Aplikasi Aktif</span>
+                    <h3 className="font-display font-bold text-base text-white">KasMasjid</h3>
                   </div>
                   <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold rounded-full">
                     v2.4.0
@@ -685,7 +685,7 @@ export default function AboutView({ onNavigate }: AboutViewProps) {
 
       {/* Footer Resmi */}
       <footer className="pt-8 pb-4 text-center space-y-1.5 border-t border-slate-200/80 mt-8">
-        <p className="font-display font-black text-sm text-slate-800 tracking-tight">KasMasjid Basic</p>
+        <p className="font-display font-black text-sm text-slate-800 tracking-tight">KasMasjid</p>
         <p className="text-xs font-semibold text-slate-500">Versi 2.4.0</p>
         <div className="flex items-center justify-center gap-4 text-xs font-medium text-emerald-700 pt-1">
           <a href="https://blog.kasmasjid.web.id/p/term-and-condition.html" target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">

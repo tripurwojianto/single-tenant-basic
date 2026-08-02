@@ -60,7 +60,7 @@ export default function FeedbackView({ onSendFeedback }: FeedbackViewProps) {
             Hubungi Pengembang (Feedback)
           </h2>
           <p className="text-slate-500 text-sm mt-1.5">
-            KasMasjid Basic adalah proyek administrasi nirlaba. Masukan, temuan bug, pertanyaan, atau usulan fitur dari Anda sangat berharga untuk pengembangan edisi Pro & Membership berikutnya.
+            KasMasjid adalah proyek administrasi nirlaba. Masukan, temuan bug, pertanyaan, atau usulan fitur dari Anda sangat berharga untuk pengembangan platform ini.
           </p>
         </div>
       </div>

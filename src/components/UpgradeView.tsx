@@ -97,7 +97,7 @@ export default function UpgradeView({ mosqueName = 'Masjid Anda', onNavigateToDe
 
             <div>
               <h2 className="font-display font-black text-2xl text-slate-900 tracking-tight">
-                KasMasjid Basic
+                KasMasjid (Google Sheets)
               </h2>
               <p className="text-xs text-slate-500 font-medium mt-1">
                 Solusi Pembukuan Internal Bendahara
@@ -310,7 +310,7 @@ export default function UpgradeView({ mosqueName = 'Masjid Anda', onNavigateToDe
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/80 text-slate-700 font-display font-extrabold uppercase tracking-wider text-[10px]">
                 <th className="py-3.5 px-4 w-1/3">Fitur / Kapabilitas</th>
-                <th className="py-3.5 px-4 text-center w-1/5">KasMasjid Basic</th>
+                <th className="py-3.5 px-4 text-center w-1/5">KasMasjid</th>
                 <th className="py-3.5 px-4 text-center w-1/5 text-emerald-800 bg-emerald-50/50">KasMasjid Portal</th>
                 <th className="py-3.5 px-4 text-center w-1/5 text-teal-900 bg-teal-50/50">KasMasjid Membership</th>
               </tr>

@@ -22,12 +22,12 @@ export default function ProServiceModal({ isOpen, onClose, featureTitle }: ProSe
       badge: 'Sekali Bayar',
       desc: 'Pengurus DKM menerima hak akses penuh / source code, panduan deployment mandiri ke Vercel/Cloud, serta kontrol database mandiri tanpa iuran bulanan.',
       features: [
-        'Akses penuh aplikasi KasMasjid Pro',
+        'Akses penuh aplikasi KasMasjid Cloud',
         'Panduan instalasi & konfigurasi mandiri',
         'Tanpa biaya langganan bulanan',
         'Database sepenuhnya milik DKM'
       ],
-      waMessage: 'Halo Admin KasMasjid, saya berminat dengan KasMasjid Pro skema Implementasi Mandiri.'
+      waMessage: 'Halo Admin KasMasjid, saya berminat dengan KasMasjid skema Implementasi Mandiri.'
     },
     {
       id: 'PENDAMPINGAN',
@@ -36,14 +36,14 @@ export default function ProServiceModal({ isOpen, onClose, featureTitle }: ProSe
       icon: Users,
       iconBg: 'bg-indigo-100 text-indigo-800',
       badge: 'Sekali Bayar',
-      desc: 'Tim teknis KasMasjid akan memandu dan membantu proses instalasi, integrasi Google API, hingga sistem KasMasjid Pro berjalan lancar 100%.',
+      desc: 'Tim teknis KasMasjid akan memandu dan membantu proses instalasi, integrasi Google API, hingga sistem KasMasjid berjalan lancar 100%.',
       features: [
         'Pendampingan langsung oleh tim teknis',
         'Bantuan setup database & otentikasi',
         'Bimbingan penggunaan untuk pengurus DKM',
         'Aplikasi langsung aktif & siap pakai'
       ],
-      waMessage: 'Halo Admin KasMasjid, saya berminat dengan KasMasjid Pro skema Pendampingan Implementasi.'
+      waMessage: 'Halo Admin KasMasjid, saya berminat dengan KasMasjid skema Pendampingan Implementasi.'
     },
     {
       id: 'PENGELOLAAN',
@@ -59,7 +59,7 @@ export default function ProServiceModal({ isOpen, onClose, featureTitle }: ProSe
         'Domain khusus / kustom masjid',
         'Dukungan teknis & konsultasi prioritas 24/7'
       ],
-      waMessage: 'Halo Admin KasMasjid, saya berminat dengan KasMasjid Pro skema Layanan Pengelolaan.'
+      waMessage: 'Halo Admin KasMasjid, saya berminat dengan KasMasjid skema Layanan Pengelolaan.'
     }
   ];
 
@@ -85,13 +85,13 @@ export default function ProServiceModal({ isOpen, onClose, featureTitle }: ProSe
         <div className="space-y-2 text-left pr-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-[10px] font-bold text-indigo-700 uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
-            Pilihan Model Layanan KasMasjid Pro
+            Pilihan Model Layanan KasMasjid
           </div>
           <h2 className="font-display font-black text-xl sm:text-2xl text-slate-900 tracking-tight">
-            Model Layanan KasMasjid Pro
+            Model Layanan KasMasjid
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-            Produk <strong>KasMasjid Pro</strong> dapat diimplementasikan sesuai kebutuhan dan kapabilitas teknis DKM Anda. Pilih skema layanan yang diinginkan:
+            Layanan <strong>KasMasjid</strong> dapat diimplementasikan sesuai kebutuhan dan kapabilitas teknis DKM Anda. Pilih skema layanan yang diinginkan:
           </p>
         </div>
 
@@ -167,7 +167,7 @@ export default function ProServiceModal({ isOpen, onClose, featureTitle }: ProSe
             💡 Masih ragu memilih? Konsultasikan dulu dengan tim teknis KasMasjid tanpa komitmen.
           </span>
           <button
-            onClick={() => handleConsult('Halo Admin KasMasjid, saya ingin berkonsultasi mengenai pilihan layanan KasMasjid Pro.')}
+            onClick={() => handleConsult('Halo Admin KasMasjid, saya ingin berkonsultasi mengenai pilihan layanan KasMasjid.')}
             className="text-xs font-bold text-indigo-600 hover:text-indigo-700 underline shrink-0 cursor-pointer"
           >
             Konsultasi Gratis via WA →

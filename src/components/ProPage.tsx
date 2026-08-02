@@ -99,7 +99,7 @@ export default function ProPage({ onNavigate }: ProPageProps) {
               Sistem Kolaborasi Keuangan & Notifikasi Pintar Jamaah
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-sans font-medium">
-              Tingkatkan standar akuntabilitas tempat ibadah Anda ke level berikutnya. KasMasjid Pro dirancang untuk mendukung kolaborasi multi-admin dengan database cloud berkinerja tinggi, tanpa melupakan kemudahan integrasi dengan WhatsApp jamaah secara langsung.
+              Tingkatkan standar akuntabilitas tempat ibadah Anda ke level berikutnya. KasMasjid Cloud dirancang untuk mendukung kolaborasi multi-admin dengan database cloud berkinerja tinggi, tanpa melupakan kemudahan integrasi dengan WhatsApp jamaah secara langsung.
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
@@ -151,7 +151,7 @@ export default function ProPage({ onNavigate }: ProPageProps) {
         <div className="space-y-6">
           <div className="text-center space-y-2">
             <h2 className="font-display font-black text-2xl text-slate-950 tracking-tight">
-              Sorotan Kapabilitas KasMasjid Pro
+              Sorotan Kapabilitas KasMasjid Cloud
             </h2>
             <p className="text-xs text-slate-500 font-medium">
               Sempurnakan operasional dan singkirkan kesalahan koordinasi pengurus dengan sistem otomatisasi terbaik.
@@ -191,7 +191,7 @@ export default function ProPage({ onNavigate }: ProPageProps) {
               Status Pengembangan: <span className="bg-indigo-100 text-indigo-800 text-[10px] font-black uppercase px-2 py-0.5 rounded-md">TAHAP PRE-RELEASE</span>
             </h4>
             <p className="text-xs text-slate-500 leading-relaxed font-medium">
-              KasMasjid Pro sedang menyelesaikan audit keamanan data dan finalisasi infrastruktur cloud multi-tenant kami. Fitur kolaboratif ini direncanakan meluncur pada Q3 2026. Anda dapat mendaftarkan masjid Anda sekarang untuk mendapatkan antrean uji coba eksklusif tanpa dipungut biaya apa pun selama fase pre-release.
+              KasMasjid Cloud sedang menyelesaikan audit keamanan data dan finalisasi infrastruktur cloud multi-tenant kami. Fitur kolaboratif ini direncanakan meluncur pada Q3 2026. Anda dapat mendaftarkan masjid Anda sekarang untuk mendapatkan antrean uji coba eksklusif tanpa dipungut biaya apa pun selama fase pre-release.
             </p>
           </div>
         </div>
@@ -226,7 +226,7 @@ export default function ProPage({ onNavigate }: ProPageProps) {
                     <h3 className="font-display font-black text-xl text-slate-900">Permintaan Dikirim!</h3>
                     <p className="text-xs text-[#16A34A] font-semibold">Tim DKM Success akan menghubungi Anda segera.</p>
                     <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto pt-2">
-                      Terima kasih atas minat Anda pada edisi KasMasjid Pro. Kami telah mencatat email Anda dan akan mengirimkan penawaran integrasi WhatsApp khusus untuk masjid Anda dalam waktu 1x24 jam.
+                      Terima kasih atas minat Anda pada layanan KasMasjid Cloud. Kami telah mencatat email Anda dan akan mengirimkan penawaran integrasi WhatsApp khusus untuk masjid Anda dalam waktu 1x24 jam.
                     </p>
                   </div>
                 </div>

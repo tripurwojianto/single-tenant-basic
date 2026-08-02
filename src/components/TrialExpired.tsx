@@ -81,7 +81,7 @@ export default function TrialExpired({ brand = getActiveBrand(), onLogout, orgNa
                     Deployment Mandiri
                   </h3>
                   <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                    Deploy aplikasi ke akun Vercel Anda sendiri menggunakan panduan resmi repository KasMasjid Basic secara gratis selamanya.
+                    Deploy aplikasi ke akun Vercel Anda sendiri menggunakan panduan resmi repository KasMasjid secara gratis selamanya.
                   </p>
                 </div>
               </div>

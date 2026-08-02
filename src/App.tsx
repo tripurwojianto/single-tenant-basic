@@ -1339,11 +1339,6 @@ export default function App() {
                       >
                         <IconComponent className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-emerald-300' : 'text-emerald-400'}`} />
                         <span className="truncate text-left flex-1">{item.label}</span>
-                        {item.tier && item.tier !== 'BASIC' && (
-                          <span className="px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider shrink-0 border bg-indigo-500/20 text-indigo-200 border-indigo-400/30">
-                            PRO
-                          </span>
-                        )}
                         {(item as any).isPlaceholder && (
                           <span className="px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase shrink-0 bg-emerald-950 text-emerald-300 border border-emerald-700/50">
                             INFO

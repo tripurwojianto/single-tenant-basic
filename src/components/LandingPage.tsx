@@ -38,7 +38,7 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
       category: 'Tutorial',
       readTime: '5 Menit Membaca',
       content: [
-        'Langkah 1: Hubungkan akun GitHub Anda ke platform Vercel. Platform ini menawarkan hosting awan gratis yang sangat cocok untuk aplikasi satu halaman seperti KasMasjid Basic.',
+        'Langkah 1: Hubungkan akun GitHub Anda ke platform Vercel. Platform ini menawarkan hosting awan gratis yang sangat cocok untuk aplikasi satu halaman seperti KasMasjid.',
         'Langkah 2: Import repository proyek KasMasjid Anda. Vercel akan otomatis mengenali struktur aplikasi React + Vite dan menyiapkan pengaturan build yang sesuai.',
         'Langkah 3: Atur variabel lingkungan (Environment Variables) jika diperlukan. Pastikan semua variabel diletakkan dengan aman agar kunci rahasia tidak bocor ke browser.',
         'Langkah 4: Klik tombol "Deploy". Proses kompilasi akan berlangsung kurang dari satu menit, dan masjid Anda akan segera memiliki domain web gratis (misalnya masjid-alikhlas.vercel.app) yang bisa langsung diakses oleh jamaah.'
@@ -51,17 +51,17 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
       content: [
         'Mempersiapkan Sekretariat Digital: Mulailah dengan mendaftarkan satu akun Gmail khusus untuk DKM Masjid Anda (contoh: dkm.alikhlas@gmail.com). Gunakan akun ini secara khusus untuk mengelola folder Google Drive dan file Google Sheets KasMasjid Database.',
         'Pelatihan Bendahara: Kenalkan pengurus dengan konsep pembukuan ledger digital. Berikan pelatihan singkat cara menambahkan transaksi kas masuk dan keluar secara real-time langsung melalui portal admin KasMasjid.',
-        'Konfigurasi Printer Termal: Untuk mencetak bukti donasi langsung di sekretariat, siapkan printer termal bluetooth/USB murah berukuran 58mm atau 80mm. Sistem KasMasjid Pro dapat mengirim sinyal cetak dengan layout dinamis yang rapi bagi para donatur.'
+        'Konfigurasi Printer Termal: Untuk mencetak bukti donasi langsung di sekretariat, siapkan printer termal bluetooth/USB murah berukuran 58mm atau 80mm. Sistem KasMasjid dapat mengirim sinyal cetak dengan layout dinamis yang rapi bagi para donatur.'
       ]
     },
-    'Perbedaan Basic dan Pro': {
-      title: 'Perbedaan KasMasjid Edisi Basic vs Pro',
+    'Pilihan Mode Operasional': {
+      title: 'Pilihan Mode Operasional KasMasjid',
       category: 'Studi Produk',
       readTime: '4 Menit Membaca',
       content: [
-        'KasMasjid Basic (Community Edition): Sepenuhnya gratis selamanya. Menggunakan database Google Sheets pribadi Anda yang disimpan langsung di Drive Anda sendiri. Ideal untuk masjid dengan jumlah pengurus 1-2 orang dan membutuhkan laporan keuangan sederhana namun tepercaya.',
-        'KasMasjid Pro (Multi-Admin & Cloud DB): Menggunakan server cloud terdedikasi PostgreSQL untuk mendukung banyak admin sekaligus dengan hak akses teratur. Dilengkapi dengan log audit pengurus, backup harian otomatis, kunci tutup buku akuntansi, dan pengiriman notifikasi/struk via WhatsApp otomatis ke donatur.',
-        'Kapan Harus Upgrade? Jika masjid Anda menerima lebih dari 100 transaksi per minggu, memiliki tim kepengurusan DKM yang besar, atau membutuhkan pengiriman tanda terima infaq digital instan ke nomor seluler donatur untuk transparansi mutlak.'
+        'KasMasjid (Google Sheets): Gratis selamanya untuk satu masjid. Menggunakan database Google Sheets pribadi Anda yang disimpan langsung di Drive Anda sendiri. Ideal untuk masjid dengan pengurus yang membutuhkan laporan keuangan sederhana namun tepercaya.',
+        'KasMasjid (Cloud Multi-Admin): Menggunakan server cloud terdedikasi untuk mendukung banyak admin sekaligus dengan hak akses teratur. Dilengkapi dengan log audit pengurus, backup harian otomatis, dan pengiriman notifikasi/struk via WhatsApp otomatis ke donatur.',
+        'Kapan Harus Menggunakan Cloud? Jika masjid Anda menerima banyak transaksi per minggu, memiliki tim kepengurusan DKM yang besar, atau membutuhkan pengiriman tanda terima infaq digital instan ke nomor seluler donatur untuk transparansi mutlak.'
       ]
     }
   };
@@ -119,12 +119,12 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
 
   const pricingCards = [
     {
-      title: 'KasMasjid Basic',
-      subtitle: 'Single Admin & Sheets',
+      title: 'KasMasjid',
+      subtitle: 'Penggunaan Gratis (Google Sheets)',
       deployment: 'Self-Hosted / Google Sheets',
       storage: 'Google Drive Pribadi',
       price: 'Gratis Selamanya',
-      cta: 'Mulai Gunakan Basic',
+      cta: 'Mulai Gunakan',
       path: '/onboarding',
       isPrimary: true,
       perks: [
@@ -137,15 +137,14 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
       ]
     },
     {
-      title: 'KasMasjid Pro',
-      subtitle: 'Fitur Lengkap & Kolaborasi',
+      title: 'KasMasjid',
+      subtitle: 'Layanan Terkelola & Cloud',
       deployment: 'Cloud Database / Multi-Admin',
       storage: 'Ecosystem Suite',
-      price: 'Pelajari KasMasjid Pro',
-      cta: 'Pelajari KasMasjid Pro',
+      price: 'Pelajari Fitur Lanjutan',
+      cta: 'Pelajari Selengkapnya',
       path: '/pro',
       isPrimary: false,
-      badge: 'PRO',
       perks: [
         'Multi-Admin & Akses Berlevel',
         'Notifikasi WhatsApp Otomatis',
@@ -177,8 +176,8 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
 
   const faqs = [
     {
-      q: 'Apakah KasMasjid Basic benar-benar gratis?',
-      a: 'Ya. Aplikasi ini gratis digunakan selamanya untuk takmir masjid setelah di-deploy ke akun Vercel gratis milik Anda.'
+      q: 'Apakah KasMasjid benar-benar gratis?',
+      a: 'Ya. Aplikasi ini gratis digunakan selamanya untuk pengurus masjid setelah di-deploy ke akun Vercel gratis milik Anda.'
     },
     {
       q: 'Mengapa ada Uji Coba Gratis?',
@@ -194,7 +193,7 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
     },
     {
       q: 'Apakah ada biaya berlangganan?',
-      a: 'Tidak ada biaya berlangganan untuk KasMasjid Basic. Biaya hanya dikenakan jika Anda memilih layanan pendampingan implementasi.'
+      a: 'Tidak ada biaya berlangganan untuk versi gratis KasMasjid. Biaya hanya dikenakan jika Anda memilih layanan pendampingan atau pengelolaan.'
     },
     {
       q: 'Data disimpan di mana?',
@@ -209,8 +208,8 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
       a: 'Tentu saja. Dari menu "Ringkasan Laporan" di KasMasjid, Anda dapat mencetak langsung atau menyimpannya sebagai file PDF rapi yang didesain khusus sebagai kop surat resmi masjid Anda.'
     },
     {
-      q: 'Apakah bisa upgrade ke Pro?',
-      a: 'Sangat bisa. Kami mendesain skema data KasMasjid Basic sangat teratur. Kapan pun DKM Anda siap melakukan upgrade ke versi Pro (untuk kolaborasi multi-admin atau integrasi notifikasi WhatsApp), data dari Google Sheets lama Anda dapat dipindahkan dengan mudah.'
+      q: 'Apakah bisa menambah fitur kolaborasi multi-admin?',
+      a: 'Sangat bisa. Skema data KasMasjid didesain sangat teratur sehingga kapan pun DKM Anda siap menambah fitur kolaborasi multi-admin atau integrasi notifikasi WhatsApp, data dari Google Sheets dapat dipindahkan dengan mudah.'
     }
   ];
 
@@ -228,10 +227,10 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
       desc: 'Tips mempersiapkan sekretariat digital masjid, melatih bendahara, serta cara mengintegrasikan printer termal fisik untuk struk zakat.'
     },
     {
-      title: 'Perbedaan Basic dan Pro',
+      title: 'Pilihan Mode Operasional',
       category: 'Studi Produk',
       readTime: '4 Menit Membaca',
-      desc: 'Pelajari kapan masjid Anda harus tetap menggunakan edisi gratis Sheets, dan kapan saatnya bermigrasi ke database Pro untuk kolaborasi.'
+      desc: 'Pelajari kapan masjid Anda cukup menggunakan integrasi Google Sheets, dan kapan saatnya menggunakan layanan cloud terkelola.'
     }
   ];
 
@@ -283,11 +282,8 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
           >
             <KasMasjidLogo className="w-11 h-11" />
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-display font-black text-base sm:text-lg tracking-tight text-slate-900 leading-none group-hover:text-emerald-600 transition-colors">KasMasjid</span>
-                <span className="text-[10px] font-black uppercase px-2 py-0.5 bg-emerald-100 text-[#16A34A] border border-emerald-200 rounded-md">Basic</span>
-              </div>
-              <span className="text-[10px] font-semibold text-slate-400 block mt-0.5">Sistem Administrasi & Transparansi Keuangan Masjid</span>
+              <span className="font-display font-black text-base sm:text-lg tracking-tight text-slate-900 leading-none group-hover:text-emerald-600 transition-colors block">KasMasjid</span>
+              <span className="text-[10px] font-semibold text-slate-400 block mt-0.5">Aplikasi Administrasi Keuangan & Operasional Masjid</span>
             </div>
           </button>
 
@@ -340,15 +336,15 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
             <h1 className="font-display font-black text-5xl sm:text-6xl lg:text-7xl text-slate-900 tracking-tight leading-[1.1] max-w-3xl mx-auto">
               KasMasjid
             </h1>
-            <h2 className="font-display font-extrabold text-2xl sm:text-3xl lg:text-4xl text-[#16A34A] tracking-tight max-w-3xl mx-auto">
-              Aplikasi Administrasi Keuangan & Operasional Masjid
-            </h2>
+            <h3 className="font-display font-extrabold text-2xl sm:text-3xl lg:text-4xl text-[#16A34A] tracking-tight max-w-3xl mx-auto">
+              Aplikasi Administrasi Keuangan dan Operasional Masjid
+            </h3>
             <div className="text-sm sm:text-base lg:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-sans font-medium space-y-3">
               <p>
-                KasMasjid membantu Bendahara dan Pengurus DKM mengelola kas, inventaris, pengumuman, serta portal informasi masjid secara transparan menggunakan Google Sheets milik masjid sendiri.
+                KasMasjid adalah aplikasi berbasis web yang membantu Bendahara dan Pengurus DKM mengelola administrasi keuangan, kas, inventaris, pengumuman, serta informasi masjid menggunakan Google Sheets milik masjid sendiri.
               </p>
               <p>
-                Data tetap berada di Google Drive milik masjid sehingga mudah diakses, aman, dan sepenuhnya berada dalam kendali pengurus.
+                KasMasjid digunakan untuk mencatat pemasukan, pengeluaran, inventaris, membuat laporan keuangan, dan membantu pengelolaan administrasi masjid secara transparan dan aman.
               </p>
             </div>
           </motion.div>
@@ -363,18 +359,67 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
             <button
               onClick={() => onNavigate('/onboarding')}
               disabled={isLoggingIn}
-              className="w-full sm:w-auto px-8 py-4 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto px-8 py-4 text-sm font-bold text-white bg-[#16A34A] hover:bg-[#159242] rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              Mulai Gunakan Sekarang
-              <ArrowRight className="w-4 h-4 text-slate-400" />
+              Mulai Gunakan
+              <ArrowRight className="w-4 h-4 text-white/80" />
             </button>
             <button
-              onClick={() => onNavigate('/demo')}
+              onClick={onStartDemo}
               className="w-full sm:w-auto px-8 py-4 text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              Eksplorasi Mode Demo
+              Coba Demo
             </button>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Apa itu KasMasjid Section */}
+      <section className="py-16 bg-white border-b border-slate-200/60">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center">
+          <div className="space-y-4">
+            <h2 className="font-display font-black text-3xl sm:text-4xl text-slate-900 tracking-tight">
+              Apa itu KasMasjid?
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 font-medium max-w-3xl mx-auto leading-relaxed">
+              KasMasjid merupakan aplikasi administrasi masjid berbasis web yang dirancang untuk membantu Bendahara dan Pengurus DKM mengelola kegiatan administrasi sehari-hari.
+            </p>
+          </div>
+
+          <div className="bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200/80 max-w-2xl mx-auto text-left space-y-4">
+            <p className="font-bold text-xs sm:text-sm text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-2">
+              Fitur utama meliputi:
+            </p>
+            <ul className="grid sm:grid-cols-2 gap-3 text-xs sm:text-sm font-semibold text-slate-700">
+              <li className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">✓</span>
+                <span>pencatatan pemasukan dan pengeluaran</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">✓</span>
+                <span>pengelolaan kas</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">✓</span>
+                <span>inventaris masjid</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">✓</span>
+                <span>laporan keuangan</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">✓</span>
+                <span>pengumuman</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">✓</span>
+                <span>informasi masjid</span>
+              </li>
+            </ul>
+            <p className="text-xs sm:text-sm text-slate-600 font-medium pt-3 border-t border-slate-200 leading-relaxed">
+              Seluruh data disimpan pada Google Sheets milik masjid sehingga pengurus tetap memiliki kendali penuh atas data administrasi.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -510,7 +555,7 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
                 <span className="w-3 h-3 rounded-full bg-amber-400 block"></span>
                 <span className="w-3 h-3 rounded-full bg-emerald-400 block"></span>
               </div>
-              <span className="text-[10px] font-mono font-bold text-slate-400">kasmasjid-basic-applet.local</span>
+              <span className="text-[10px] font-mono font-bold text-slate-400">kasmasjid.local</span>
               <div className="w-12"></div>
             </div>
 
@@ -699,7 +744,7 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
               Pilih Cara Menggunakan KasMasjid
             </h2>
             <p className="text-sm text-slate-500 font-medium">
-              Mulailah dengan KasMasjid Basic secara gratis atau tingkatkan ke KasMasjid Pro untuk kolaborasi seluruh pengurus.
+              Gunakan versi gratis dengan Google Sheets atau tingkatkan ke layanan terkelola cloud untuk kolaborasi seluruh pengurus.
             </p>
           </div>
 
@@ -713,18 +758,6 @@ export default function LandingPage({ onStartDemo, onLogin, isLoggingIn, onNavig
                     : 'bg-white border-slate-200'
                 }`}
               >
-                {card.badge && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-                      card.badge === 'PRO' 
-                        ? 'bg-indigo-50 border-indigo-200 text-indigo-700' 
-                        : 'bg-amber-50 border-amber-200 text-amber-700'
-                    }`}>
-                      EDISI {card.badge}
-                    </span>
-                  </div>
-                )}
-                
                 <div className="space-y-6">
                   <div className="space-y-1 text-center">
                     <h3 className="font-display font-black text-lg text-slate-900 leading-none">

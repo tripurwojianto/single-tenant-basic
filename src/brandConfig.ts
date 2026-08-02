@@ -32,24 +32,24 @@ export interface BrandConfig {
 export const BRANDS: Record<string, BrandConfig> = {
   masjid: {
     id: 'masjid',
-    appName: 'MasjidHub Basic',
-    subTitle: 'KasMasjid Basic',
+    appName: 'KasMasjid',
+    subTitle: 'KasMasjid',
     accentColorHex: '#16A34A',
     accentBgClass: 'bg-[#16A34A]',
     accentTextClass: 'text-[#16A34A]',
     accentBorderClass: 'border-[#16A34A]',
     accentRingClass: 'focus:ring-emerald-500/20',
     accentBadgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-100',
-    heroTitle: 'Digitalisasi Administrasi & Kas Masjid',
+    heroTitle: 'Aplikasi Administrasi Keuangan & Operasional Masjid',
     heroDescription: 'Kelola keuangan, inventaris, dan pengumuman masjid secara transparan berbasis Google Sheets milik DKM.',
     databaseName: 'KasMasjid Database',
-    masterRegistryName: 'MasjidHub Master Registry',
+    masterRegistryName: 'KasMasjid Master Registry',
     orgLabel: 'Nama Masjid',
     orgPlaceholder: 'Contoh: Masjid Al-Ikhlas',
     ownerLabel: 'Humas / Takmir',
     ownerPlaceholder: 'Contoh: Ketua DKM / Bendahara',
     userLabel: 'Takmir Masjid',
-    onboardingIntro: 'Tentukan bagaimana Anda ingin mengoperasikan KasMasjid Basic untuk tempat ibadah Anda. Semua model mendukung integrasi penuh Google Sheets.'
+    onboardingIntro: 'Tentukan bagaimana Anda ingin mengoperasikan KasMasjid untuk tempat ibadah Anda. Semua model mendukung integrasi penuh Google Sheets.'
   },
   sekolah: {
     id: 'sekolah',

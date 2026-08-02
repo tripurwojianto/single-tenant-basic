@@ -15,7 +15,7 @@ interface FeaturePreviewViewProps {
 export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgradeClick }: FeaturePreviewViewProps) {
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
 
-  // Define details for locked features (All non-basic features are KasMasjid Pro)
+  // Define details for locked features (All non-basic features are KasMasjid Cloud)
   const featureDetails: {
     [key: string]: {
       title: string;
@@ -90,7 +90,7 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
       iconBg: 'bg-indigo-50 text-indigo-600',
       iconColor: 'text-indigo-600',
       tagline: 'Kelola kas bersama Ketua, Sekretaris, dan Bendahara dalam satu sistem terpadu',
-      description: 'Berbeda dengan KasMasjid Basic yang berbasis single-user Google Sheets, edisi Pro menggunakan cloud database utama berkinerja tinggi yang memungkinkan banyak pengurus masuk dan mencatat keuangan secara bersamaan tanpa resiko data tertimpa.',
+      description: 'Berbeda dengan versi standar Google Sheets, layanan cloud terkelola KasMasjid menggunakan database cloud utama berkinerja tinggi yang memungkinkan banyak pengurus masuk dan mencatat keuangan secara bersamaan tanpa resiko data tertimpa.',
       highlights: [
         'Multi-level hak akses: Ketua (Viewer/Approval), Bendahara (Editor), Sekretaris (Inventory Editor).',
         'Sistem log aktivitas pengurus: ketahui siapa yang menginput atau mengubah setiap baris data.',
@@ -189,14 +189,14 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
   };
 
   const feature = featureDetails[featureKey] || {
-    title: 'Fitur KasMasjid Pro',
+    title: 'Fitur Lanjutan KasMasjid',
     tier: 'PRO',
     icon: Sparkles,
     badgeColor: 'bg-indigo-50 border-indigo-200 text-indigo-700',
     iconBg: 'bg-indigo-50 text-indigo-600',
     iconColor: 'text-indigo-600',
     tagline: 'Kembangkan pengelolaan administrasi masjid Anda ke tingkat berikutnya',
-    description: 'Fitur ini tersedia dalam produk KasMasjid Pro untuk mendukung ekosistem pengelolaan operasional masjid yang lebih maju.',
+    description: 'Fitur ini tersedia dalam layanan cloud KasMasjid untuk mendukung ekosistem pengelolaan operasional masjid yang lebih maju.',
     highlights: ['Manajemen canggih', 'Transparansi optimal', 'Integrasi andal'],
     useCases: []
   };
@@ -215,7 +215,7 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
           Kembali ke Fitur Demo
         </button>
         <div className={`px-3 py-1 rounded-full border text-[10px] font-extrabold uppercase tracking-widest ${feature.badgeColor}`}>
-          Produk KasMasjid Pro
+          Layanan Cloud KasMasjid
         </div>
       </div>
 
@@ -288,10 +288,10 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
         <div className="space-y-1.5 text-left">
           <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block">Skema Implementasi</span>
           <h3 className="font-display font-black text-lg text-slate-900">
-            3 Pilihan Model Layanan KasMasjid Pro
+            3 Pilihan Model Layanan KasMasjid Cloud
           </h3>
           <p className="text-xs text-slate-500">
-            Fitur ini tersedia dalam produk KasMasjid Pro. Pilih skema layanan yang paling sesuai dengan kebutuhan DKM Anda:
+            Fitur ini tersedia dalam layanan KasMasjid Cloud. Pilih skema layanan yang paling sesuai dengan kebutuhan DKM Anda:
           </p>
         </div>
 
@@ -344,10 +344,10 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
           <div className="space-y-3 text-center md:text-left">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" />
-              KasMasjid Pro
+              KasMasjid Cloud
             </div>
             <h3 className="font-display font-bold text-xl sm:text-2xl text-white tracking-tight">
-              Aktivasi KasMasjid Pro untuk DKM Anda
+              Aktivasi KasMasjid Cloud untuk DKM Anda
             </h3>
             <p className="text-xs sm:text-sm text-slate-400 max-w-lg leading-relaxed">
               Pelajari 3 pilihan model layanan (Mandiri, Pendampingan, atau Pengelolaan) dan sesuaikan dengan kebutuhan tempat ibadah Anda.
@@ -358,7 +358,7 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
               onClick={() => setIsServiceModalOpen(true)}
               className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-sm text-center cursor-pointer hover:scale-[1.02] active:scale-95"
             >
-              Lihat Pilihan Model Layanan Pro
+              Lihat Pilihan Model Layanan Cloud
             </button>
             <button
               onClick={() => setIsServiceModalOpen(true)}
@@ -376,7 +376,7 @@ export default function FeaturePreviewView({ featureKey, onBackToDemo, onUpgrade
           onClick={onBackToDemo}
           className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline underline-offset-4 cursor-pointer"
         >
-          ← Kembali ke Dashboard Demo (Gunakan Fitur KasMasjid Basic)
+          ← Kembali ke Dashboard Demo (Gunakan Fitur KasMasjid)
         </button>
       </div>
 

@@ -380,63 +380,57 @@ export default function BottomNavbar({
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => handleNavigateMenu('whatsapp-notif')}
-                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 flex items-center justify-between transition-all cursor-pointer text-left"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <Smartphone className="w-4 h-4 text-indigo-600 shrink-0" />
-                      <span className="text-[11px] font-bold text-indigo-950 truncate">WA Notif</span>
+                      <Smartphone className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-slate-800 truncate">WA Notif</span>
                     </div>
-                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
                   </button>
                   <button
                     onClick={() => handleNavigateMenu('multi-admin')}
-                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 flex items-center justify-between transition-all cursor-pointer text-left"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <Users className="w-4 h-4 text-indigo-600 shrink-0" />
-                      <span className="text-[11px] font-bold text-indigo-950 truncate">Multi Admin</span>
+                      <Users className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-slate-800 truncate">Multi Admin</span>
                     </div>
-                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
                   </button>
                   <button
                     onClick={() => handleNavigateMenu('portal-jamaah')}
-                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 flex items-center justify-between transition-all cursor-pointer text-left"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <Globe className="w-4 h-4 text-indigo-600 shrink-0" />
-                      <span className="text-[11px] font-bold text-indigo-950 truncate">Portal Jamaah</span>
+                      <Globe className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-slate-800 truncate">Portal Jamaah</span>
                     </div>
-                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
                   </button>
                   <button
                     onClick={() => handleNavigateMenu('zakat-digital')}
-                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 flex items-center justify-between transition-all cursor-pointer text-left"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <HeartHandshake className="w-4 h-4 text-indigo-600 shrink-0" />
-                      <span className="text-[11px] font-bold text-indigo-950 truncate">Zakat Digital</span>
+                      <HeartHandshake className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-slate-800 truncate">Zakat Digital</span>
                     </div>
-                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
                   </button>
                   <button
                     onClick={() => handleNavigateMenu('infaq-qris')}
-                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 flex items-center justify-between transition-all cursor-pointer text-left"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <QrCode className="w-4 h-4 text-indigo-600 shrink-0" />
-                      <span className="text-[11px] font-bold text-indigo-950 truncate">Infaq QRIS</span>
+                      <QrCode className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-slate-800 truncate">Infaq QRIS</span>
                     </div>
-                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
                   </button>
                   <button
                     onClick={() => handleNavigateMenu('thermal-print')}
-                    className="p-2.5 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-100 flex items-center justify-between transition-all cursor-pointer text-left"
+                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 flex items-center justify-between transition-all cursor-pointer text-left"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <Receipt className="w-4 h-4 text-indigo-600 shrink-0" />
-                      <span className="text-[11px] font-bold text-indigo-950 truncate">Cetak Struk</span>
+                      <Receipt className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-slate-800 truncate">Cetak Struk</span>
                     </div>
-                    <span className="px-1 py-0.2 rounded text-[8px] font-black bg-indigo-200 text-indigo-800 shrink-0">PRO</span>
                   </button>
                 </div>
               </div>
